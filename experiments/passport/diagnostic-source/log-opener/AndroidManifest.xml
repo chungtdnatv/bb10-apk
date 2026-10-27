@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.bb10.logopener" android:versionCode="1" android:versionName="1.0">
+ <uses-sdk android:minSdkVersion="15" android:targetSdkVersion="18"/>
+ <application android:label="FB Lite Logs" android:theme="@android:style/Theme.Holo.Light" android:allowBackup="false">
+  <activity android:name="com.bb10.logopener.MainActivity" android:exported="true">
+   <intent-filter>
+    <action android:name="android.intent.action.MAIN"/>
+    <category android:name="android.intent.category.LAUNCHER"/>
+   </intent-filter>
+  </activity>
+ </application>
+</manifest>
