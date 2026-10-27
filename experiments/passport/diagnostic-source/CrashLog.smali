@@ -39,19 +39,19 @@
 
 .method public static dexEnter()V
     .locals 1
-    const-string v0, "diag1 secondaryDex.enter"
+    const-string v0, "diag2 secondaryDex.enter"
     invoke-static {v0}, Lcom/bb10/diagnostic/CrashLog;->mark(Ljava/lang/String;)V
     return-void
 .end method
 
 .method public static dexExit()V
     .locals 1
-    const-string v0, "diag1 secondaryDex.exit"
+    const-string v0, "diag2 secondaryDex.exit"
     invoke-static {v0}, Lcom/bb10/diagnostic/CrashLog;->mark(Ljava/lang/String;)V
     return-void
 .end method
 
-.method public static synchronized write(Ljava/lang/String;Ljava/lang/Throwable;)V
+.method public static write(Ljava/lang/String;Ljava/lang/Throwable;)V
     .locals 6
     const/4 v5, 0x0
     :try_start
@@ -107,7 +107,7 @@
 
 .method public uncaughtException(Ljava/lang/Thread;Ljava/lang/Throwable;)V
     .locals 2
-    const-string v0, "diag1 uncaught"
+    const-string v0, "diag2 uncaught"
     invoke-static {v0, p2}, Lcom/bb10/diagnostic/CrashLog;->write(Ljava/lang/String;Ljava/lang/Throwable;)V
     iget-object v0, p0, Lcom/bb10/diagnostic/CrashLog;->previous:Ljava/lang/Thread$UncaughtExceptionHandler;
     if-eqz v0, :terminate

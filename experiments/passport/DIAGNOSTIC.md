@@ -1,10 +1,10 @@
-# Passport diagnostic APK 1
+# Passport diagnostic APK 2
 
-This is a diagnostic build, not a confirmed fix. Based on Facebook Lite 438.0.0.13.102 with target SDK 29, same package/version and same debug signing certificate as the previous target29 experiment. Try installing over that debug experiment without uninstalling or clearing app data. Installation/update behavior on Passport remains to be tested.
+This is a diagnostic build, not a confirmed fix. Based on Facebook Lite 438.0.0.13.102 with target SDK 29, same package, incremented versionCode 507201340 and same debug signing certificate as the previous target29 experiment. Try installing over that debug experiment without uninstalling or clearing app data. Installation/update behavior on Passport remains to be tested.
 
 ## Collect a result
 
-1. Download facebook-lite-diagnostic1.apk and install over the debug target29 APK.
+1. Download facebook-lite-diagnostic2.apk and install over the debug target29 APK.
 2. With Wi-Fi enabled, open the app and reproduce the close/black screen. Note the time and wait about 30 seconds if black.
 3. Turn Wi-Fi/mobile data off and reopen once. Note the result.
 4. In Passport File Manager search for bb10-facebook-diagnostic.txt in Android shared storage, the Download folder. Android path is /sdcard/Download/bb10-facebook-diagnostic.txt; the BlackBerry File Manager presentation of Android storage may differ. Copy the file to PC and provide it for analysis.
@@ -30,3 +30,9 @@ Native fatal signals, process termination, caught application errors, per-thread
 ## Rebuild sources
 
 Sources are in diagnostic-source/. The prepare script uses /workspace/bb10-investigation/diagnostic as its generated tree and expects a fresh, full decode of original-apps/facebook-lite-(Communications).apk using bundled Apktool 2.9.3. Run prepare-diagnostic.py once on that generated tree, copy CrashLog.smali into smali/com/bb10/diagnostic/, build, then sign with the same bundled uber-apk-signer debug key. Keep generated files outside the original checkout and never run prepare on tracked work/ files. The preparation script asserts the original target SDK/attribute so unintended repeated application fails rather than silently stacking patches.
+
+## Diagnostic 1 installation failure and correction
+
+The first diagnostic build was rejected on the device while updating the installed target29 APK. Inspection found a newly added non-native logging method with ACC_SYNCHRONIZED (0x20), which is not valid for a non-native DEX method. This defect is corrected in diagnostic2 by removing the flag; logging is best-effort and concurrent lines may interleave. The exact device installer error code remains unavailable, so this is a confirmed artifact defect and a plausible cause, not a device-confirmed diagnosis. VersionCode also advances from 507201339 to 507201340 to make the update distinct.
+
+The fixed APK passed a scan of every method access flag for this issue, signature/alignment verification, and a full re-decode check of logger hooks and versionCode. These checks do not replace device installation and runtime testing. Do not download diagnostic1; its artifact has been removed from this branch.
