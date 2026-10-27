@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="blackBackgroundTheme" parent="@android:style/Theme.DeviceDefault.Light.NoActionBar">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:statusBarColor">@android:color/black</item>
+    </style>
+    <style name="dialogWithUnrecommendedAction" parent="@android:style/Theme.DeviceDefault.Light.Dialog">
+        <item name="android:textColorPrimary">@color/gray_70</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:colorAccent">@color/blue_60</item>
+    </style>
+    <style name="splashScreenTheme" parent="@android:style/Theme.DeviceDefault.Light.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+        <item name="android:statusBarColor">@android:color/white</item>
+    </style>
+    <style name="whiteBackgroundTheme" parent="@android:style/Theme.DeviceDefault.Light.NoActionBar">
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:statusBarColor">@android:color/white</item>
+    </style>
+</resources>

@@ -1,0 +1,50 @@
+.class public final LX/0Og;
+.super Ljava/lang/Object;
+.source ""
+
+
+# direct methods
+.method public constructor <init>()V
+    .locals 0
+
+    .line 0
+    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
+
+    .line 1
+    .line 2
+    .line 3
+    return-void
+.end method
+
+.method public static A00(II)Z
+    .locals 2
+
+    const/16 v1, 0x7d0
+
+    if-ge p1, p0, :cond_0
+
+    sub-int v0, p0, p1
+
+    if-le v0, v1, :cond_1
+
+    :cond_0
+    if-le p1, p0, :cond_2
+
+    const v0, 0xf230
+
+    add-int/2addr p0, v0
+
+    sub-int/2addr p0, p1
+
+    if-gt p0, v1, :cond_2
+
+    :cond_1
+    const/4 v0, 0x1
+
+    return v0
+
+    :cond_2
+    const/4 v0, 0x0
+
+    return v0
+.end method

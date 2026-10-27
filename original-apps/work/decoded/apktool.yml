@@ -1,0 +1,26 @@
+version: 2.9.3
+apkFileName: v3.1_ProjectBerry.apk
+isFrameworkApk: false
+usesFramework:
+  ids:
+  - 1
+  tag: null
+sdkInfo:
+  minSdkVersion: 15
+  targetSdkVersion: 29
+packageInfo:
+  forcedPackageId: 127
+  renameManifestPackage: null
+versionInfo:
+  versionCode: 254149858
+  versionName: 223.0.0.11.121
+resourcesAreCompressed: false
+sharedLibrary: false
+sparseResources: false
+unknownFiles:
+  build-data.properties: 8
+  jsr305_annotations/Jsr305_annotations.gwt.xml: 8
+doNotCompress:
+- assets/secondary-program-dex-jars/metadata.txt
+- png
+- res/raw-xxhdpi/ig_from_fb.png

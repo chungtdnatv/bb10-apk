@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#ff000000</color>
+    <color name="blue">#ff3366cc</color>
+    <color name="blue_30">#ffaac9ff</color>
+    <color name="blue_60">#ff3578e5</color>
+    <color name="button_bg_color">#ff4a515c</color>
+    <color name="camera_icon_bg_color">#ff2c333a</color>
+    <color name="dark_blue">#ff2b4288</color>
+    <color name="darker_blue">#ff0e2d5f</color>
+    <color name="disabled_multipicker_item_overlay_color">#80000000</color>
+    <color name="empty_image_border">#ffdde4ee</color>
+    <color name="empty_image_fill">#fff0f1f2</color>
+    <color name="facebook_blue">#ff4267b2</color>
+    <color name="fb_blue_60">#ff1877f2</color>
+    <color name="fblite_gray_45">#ff8d949e</color>
+    <color name="gallery_video_item_overlay_bg">#88000000</color>
+    <color name="gray_10">#ffebedf0</color>
+    <color name="gray_30">#ffbec3c9</color>
+    <color name="gray_70">#ff606770</color>
+    <color name="gray_alpha_touch_feedback">#22000000</color>
+    <color name="light_gray">#ffd3d3d3</color>
+    <color name="light_grayish_blue">#ffe2e6f0</color>
+    <color name="mention_highlight">#ff65729a</color>
+    <color name="storage_primary_action_highlight">@color/fb_blue_60</color>
+    <color name="storage_primary_action_highlight_disabled">#4c1877f2</color>
+    <color name="storage_primary_action_text">@color/white</color>
+    <color name="storage_primary_text">#ff262626</color>
+    <color name="storage_secondary_action_highlight">#ffdbdbdb</color>
+    <color name="storage_secondary_text">#ff999999</color>
+    <color name="storage_title_background">#fffafafa</color>
+    <color name="storage_top_separator">#ffc7c7c7</color>
+    <color name="swipe_refresh_color">#ff4267b2</color>
+    <color name="title_text_color">#ffb8bcc6</color>
+    <color name="white">#ffffffff</color>
+</resources>

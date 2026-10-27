@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="alpha" format="float" />
+    <attr name="fastScrollEnabled" format="boolean" />
+    <attr name="fastScrollHorizontalThumbDrawable" format="reference" />
+    <attr name="fastScrollHorizontalTrackDrawable" format="reference" />
+    <attr name="fastScrollVerticalThumbDrawable" format="reference" />
+    <attr name="fastScrollVerticalTrackDrawable" format="reference" />
+    <attr name="flex" format="float" />
+    <attr name="flex_direction">
+        <enum name="column" value="0" />
+        <enum name="columnReverse" value="1" />
+        <enum name="row" value="2" />
+        <enum name="rowReverse" value="3" />
+    </attr>
+    <attr name="flex_wrap">
+        <enum name="nowrap" value="0" />
+        <enum name="wrap" value="1" />
+    </attr>
+    <attr name="font" format="reference" />
+    <attr name="fontStyle">
+        <enum name="italic" value="1" />
+        <enum name="normal" value="0" />
+    </attr>
+    <attr name="layoutManager" format="string" />
+    <attr name="loadingBarBackgroundColor" format="color" />
+    <attr name="loopVideo" format="boolean" />
+    <attr name="recyclerViewStyle" format="reference" />
+    <attr name="reverseLayout" format="boolean" />
+    <attr name="showLoadingText" format="boolean" />
+    <attr name="showVideoControls" format="boolean" />
+    <attr name="spanCount" format="integer" />
+    <attr name="stackFromEnd" format="boolean" />
+    <attr name="swipeRefreshLayoutProgressSpinnerBackgroundColor" format="color" />
+    <attr name="videoBackgroundColor" format="color" />
+</resources>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="carbon_tag_item_size">44.0dip</dimen>
+    <dimen name="compat_notification_large_icon_max_height">320.0dip</dimen>
+    <dimen name="compat_notification_large_icon_max_width">320.0dip</dimen>
+    <dimen name="config_minScalingSpan">27.0mm</dimen>
+    <dimen name="config_minScalingTouchMajor">48.0dip</dimen>
+    <dimen name="custom_keyboard_layout_default_height">180.0dip</dimen>
+    <dimen name="fastscroll_default_thickness">8.0dip</dimen>
+    <dimen name="fastscroll_margin">0.0dip</dimen>
+    <dimen name="fastscroll_minimum_range">50.0dip</dimen>
+    <dimen name="gallery_video_item_overlay_padding">5.0dip</dimen>
+    <dimen name="multipicker_bar_height">48.0dip</dimen>
+    <dimen name="multipicker_button_margin">8.0dip</dimen>
+    <dimen name="multipicker_button_text_size">18.0sp</dimen>
+    <dimen name="multipicker_grid_spacing">4.5dip</dimen>
+    <dimen name="multipicker_progress_bar_height">3.0dip</dimen>
+    <dimen name="multipicker_thumbnail_size">100.0dip</dimen>
+    <dimen name="selected_order_text_height">23.329987dip</dimen>
+    <dimen name="selected_order_text_width">23.0dip</dimen>
+    <dimen name="soft_input_detection_min_height_dp">60.0dip</dimen>
+    <dimen name="tag_item_size">40.0dip</dimen>
+    <dimen name="textbox_edit_text_horizontal_padding">8.0dip</dimen>
+    <dimen name="textbox_edit_text_vertical_padding">4.0dip</dimen>
+    <dimen name="toolbar_button_height">34.0dip</dimen>
+    <dimen name="verified_badge_drawable_margin">4.0dip</dimen>
+    <dimen name="video_duration_text_size">16.0sp</dimen>
+</resources>

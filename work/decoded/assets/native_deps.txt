@@ -1,0 +1,19 @@
+18
+log
+jnigraphics
+z
+m
+dl
+c
+stdc++
+android
+_shared_rsysmergedlatest_rsysmergedstable 5
+memalign16 5
+_everything_merged_1 5
+breakpad_cpp_helper 6 5 4
+c++_shared 9 4
+superpack-jni 9 7 4 0
+_everything_merged 12 8 3 2 1 0
+fb_mboost-lite 12 0
+linkerutils 12 10 3 0
+breakpad 14 10

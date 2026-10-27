@@ -1,0 +1,3 @@
+.superpack_files 1
+.superpack_extension spo
+secondary-1.dex efc8b337e8c2836ba3ea311cfe6618b435bad8a5 secondary.dex01.Canary

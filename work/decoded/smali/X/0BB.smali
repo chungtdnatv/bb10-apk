@@ -1,0 +1,127 @@
+.class public final LX/0BB;
+.super Ljava/lang/Object;
+.source ""
+
+# interfaces
+.implements LX/07X;
+
+
+# instance fields
+.field public final synthetic A00:LX/08V;
+
+.field public final synthetic A01:LX/0C6;
+
+
+# direct methods
+.method public constructor <init>(LX/08V;LX/0C6;)V
+    .locals 0
+
+    .line 0
+    iput-object p2, p0, LX/0BB;->A01:LX/0C6;
+
+    .line 1
+    .line 2
+    iput-object p1, p0, LX/0BB;->A00:LX/08V;
+
+    .line 3
+    .line 4
+    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
+
+    .line 5
+    .line 6
+    .line 7
+    return-void
+.end method
+
+
+# virtual methods
+.method public final AKY(Ljava/lang/Throwable;)V
+    .locals 8
+
+    .line 0
+    iget-object v1, p0, LX/0BB;->A00:LX/08V;
+
+    .line 1
+    .line 2
+    iget-object v0, v1, LX/08V;->A0U:LX/06O;
+
+    .line 3
+    .line 4
+    invoke-interface {v0}, LX/06O;->get()Ljava/lang/Object;
+
+    .line 5
+    .line 6
+    .line 7
+    move-result-object v2
+
+    .line 8
+    check-cast v2, Ljava/lang/String;
+
+    .line 9
+    .line 10
+    iget-object v0, v1, LX/08V;->A0L:LX/06O;
+
+    .line 11
+    .line 12
+    invoke-interface {v0}, LX/06O;->get()Ljava/lang/Object;
+
+    .line 13
+    .line 14
+    .line 15
+    move-result-object v3
+
+    .line 16
+    check-cast v3, Ljava/lang/String;
+
+    .line 17
+    .line 18
+    iget-object v0, v1, LX/08V;->A0K:LX/06O;
+
+    .line 19
+    .line 20
+    invoke-interface {v0}, LX/06O;->get()Ljava/lang/Object;
+
+    .line 21
+    .line 22
+    .line 23
+    move-result-object v4
+
+    .line 24
+    check-cast v4, Ljava/lang/String;
+
+    .line 25
+    .line 26
+    iget-object v0, v1, LX/08V;->A0S:LX/06O;
+
+    .line 27
+    .line 28
+    invoke-interface {v0}, LX/06O;->get()Ljava/lang/Object;
+
+    .line 29
+    .line 30
+    .line 31
+    move-result-object v5
+
+    .line 32
+    check-cast v5, Ljava/lang/String;
+
+    .line 33
+    .line 34
+    invoke-static {}, LX/000;->A0D()Ljava/util/HashMap;
+
+    .line 35
+    .line 36
+    .line 37
+    move-result-object v7
+
+    .line 38
+    move-object v6, p1
+
+    .line 39
+    invoke-static/range {v2 .. v7}, Lcom/facebook/errorreporting/lacrima/common/check/DirectReports;->A00(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;Ljava/util/Map;)V
+
+    .line 40
+    .line 41
+    .line 42
+    return-void
+.end method

@@ -1,0 +1,6 @@
+# Python dependencies for bb10-apk-fixer.py
+# No external dependencies required - uses only standard library
+# Python 3.6+ required
+
+# Optional: for enhanced features in future versions
+# requests>=2.28.0
