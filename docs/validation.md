@@ -201,3 +201,34 @@ and 3 package tests. Final BAR has 807 validated assets and syntax-linted QML;
 binary inspection confirms the custom cover is absent and the loop marker exists.
 Native 11 still requires on-device launch/minimize/sync testing. Recovery 10 is
 retained; no success on Passport is inferred from these cloud checks.
+
+## 1.5.0.12: history identity/metadata/media and Profile navigation
+
+User feedback after the prior cover workaround: synced archive text is readable,
+but no chat mapping, missing identity/time and Android content:// image locators.
+Native 12 remembers account-scoped contact/group metadata, preserves large backup
+IDs as strings, retains client IDs, and normalizes/migrates timestamps. Reconciliation
+requires a unique global-ID overlap or client-ID + text + time overlap with a known
+contact of the same kind. Explicit user-confirmed pairing is available otherwise;
+unknown senders remain unknown, with an explicit self-identification action.
+Supported, valid real-ID/time rows are imported without overriding existing messages
+or deleted/cleared history; unsupported rows remain archived. This is not a claim
+that arbitrary short phone IDs can be decoded automatically.
+
+Archive views use native date strings and known names/local avatar paths. Android
+content locators are identified and never requested as HTTP/image sources. Live
+HTTPS image URLs on an allowlisted Zalo/CDN hostname can use the existing downloader; alternatively the user can choose the
+actual transferred local file and store an account/message-scoped JPEG preview.
+This does not fetch bytes absent from the backup, upload images or change server
+attachments. Native image selection bounds path scope/file size/pixel count; real
+phone FilePicker, image decoding and associations still need testing.
+
+Per-item nav backgrounds were removed (outer capsule retained), equal-width items
+are explicit, and Profile replaces Cá nhân. Custom ActiveFrameCover remains absent.
+40 toolkit/flow/storage tests pass, including actual native SQL migration, repair,
+isolation, unique/ambiguous overlap, idempotent import, deletion/clear boundaries
+and UI confirmation/cancel/failure. Existing JS checks and 3 package tests pass.
+Native SDK checks resolve 725 UI imports across 104 SDK libraries, 630 headless
+imports across 60 libraries; 808 BAR assets validate. Exact shipped QML passes
+syntax lint. Device data matching, time display, new picker and bar geometry remain
+unverified in cloud. See docs/zalo12-history-vi.md for workflow and limitations.

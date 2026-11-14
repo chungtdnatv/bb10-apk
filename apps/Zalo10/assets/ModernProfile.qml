@@ -12,7 +12,7 @@ Page {
     background: Color.create("#142936")
     horizontalAlignment: HorizontalAlignment.Fill
     verticalAlignment: VerticalAlignment.Fill
-    ModernHeader { heading: "Cá nhân"; onMenuRequested: { if (profile.appShell) profile.appShell.openModernMenu(); } }
+    ModernHeader { heading: "Profile"; onMenuRequested: { if (profile.appShell) profile.appShell.openModernMenu(); } }
     ScrollView {
         layoutProperties: StackLayoutProperties { spaceQuota: 1 }
         horizontalAlignment: HorizontalAlignment.Fill

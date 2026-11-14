@@ -6,17 +6,12 @@ Container {
     property string caption: ""
     property string icon: "chat"
     signal chosen()
+    minWidth: 0
+    preferredWidth: 0
     layout: DockLayout {}
     layoutProperties: StackLayoutProperties { spaceQuota: 1 }
     horizontalAlignment: HorizontalAlignment.Fill
     verticalAlignment: VerticalAlignment.Fill
-    ImageView {
-        visible: item.selected
-        imageSource: "asset:///images/modern/dark-selected.png"
-        horizontalAlignment: HorizontalAlignment.Fill
-        verticalAlignment: VerticalAlignment.Fill
-        scalingMethod: ScalingMethod.Fill
-    }
     Container {
         horizontalAlignment: HorizontalAlignment.Center
         verticalAlignment: VerticalAlignment.Center

@@ -147,13 +147,34 @@ class ZaloFeatureFlows(unittest.TestCase):
         self.assertNotIn('groupsTab',main)
         self.assertIn('id: profileTab',main)
         self.assertIn('supportsArchive: false',main)
-        self.assertIn('caption: "Cá nhân"',nav)
+        self.assertIn('caption: "Profile"',nav)
         self.assertNotIn('caption: "Nhóm"',nav)
         self.assertIn('accountName: root.selfName',main)
         self.assertIn('onActionRequested: { modernMenu.selected(action); }',main)
         for action in ('invites','phoneSync','refresh','settings','feedback','about'):
             self.assertIn('profile.actionRequested("'+action+'")',profile)
             self.assertIn('action === "'+action+'"',main)
+
+    def test_manual_history_pairing_requires_confirmation_and_success(self):
+        text=(ROOT/'apps/Zalo10/assets/PhoneArchivePicker.qml').read_text()
+        a,b=block(text,text.index('onFinished:'))
+        handler=text[a:b];body=handler[handler.index('{')+1:-1]
+        self.node('''const assert=require('node:assert/strict');
+          let result=0,calls=0,pops=0,reloads=0,allow=false;
+          const SystemUiResult={ConfirmButtonSelection:1};
+          const picker={shortId:'phone-id',isGroup:false,selected:{id:'web-id',name:'Recipient'},
+            receiverPage:{bound:false,reload:()=>reloads++},navPane:{pop:()=>pops++}};
+          const error={text:''};
+          const zService={phoneArchiveBind:(short,group,id)=>{
+            calls++;assert.equal(short,'phone-id');assert.equal(group,false);assert.equal(id,'web-id');
+            return {ok:allow,error:'not paired'};
+          }};
+          function finish(){'''+body+'''}
+          finish();assert.equal(calls,0);assert.equal(pops,0);
+          result=1;finish();assert.equal(calls,1);assert.equal(pops,0);assert.equal(picker.receiverPage.bound,false);
+          allow=true;finish();assert.equal(pops,1);assert.equal(reloads,1);
+          assert.equal(picker.receiverPage.bound,true);assert.equal(picker.receiverPage.threadName,'Recipient');
+        ''')
 
 
 if __name__ == '__main__':

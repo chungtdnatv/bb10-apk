@@ -61,7 +61,7 @@ Container {
                 layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
                 ModernNavItem { caption: "Tin nhắn"; icon: "chat"; selected: navigation.selectedIndex === 0; onChosen: navigation.sectionSelected(0) }
                 ModernNavItem { caption: "Danh bạ"; icon: "contacts"; selected: navigation.selectedIndex === 1; onChosen: navigation.sectionSelected(1) }
-                ModernNavItem { caption: "Cá nhân"; icon: "contacts"; selected: navigation.selectedIndex === 2; onChosen: navigation.sectionSelected(2) }
+                ModernNavItem { caption: "Profile"; icon: "contacts"; selected: navigation.selectedIndex === 2; onChosen: navigation.sectionSelected(2) }
             }
         }
     }

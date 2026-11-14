@@ -157,6 +157,13 @@ public:
     Q_INVOKABLE void fetchPinConversations();
     Q_INVOKABLE void startHistorySync();
     Q_INVOKABLE bool isHistorySyncing() const { return m_sync.active || m_sync.groupActive; }
+    void rememberPhoneContacts(const QVariantList &threads,bool groups);
+    Q_INVOKABLE QVariantList phoneArchiveCandidates(bool isGroup);
+    Q_INVOKABLE QVariantMap phoneArchiveBind(const QString &shortId,bool isGroup,const QString &targetId);
+    Q_INVOKABLE QVariantMap phoneArchiveAutoMatch();
+    Q_INVOKABLE bool phoneArchiveSetSelf(const QString &shortSender);
+    Q_INVOKABLE QString phoneArchiveAttachImage(const QString &shortId,bool isGroup,const QString &key,const QString &path);
+    Q_INVOKABLE void phoneArchiveRequestImage(const QString &shortId,bool isGroup,const QString &key);
     Q_INVOKABLE QVariantList phoneArchiveThreads();
     Q_INVOKABLE QVariantList phoneArchiveMessages(const QString &shortId, bool isGroup, int offset);
     Q_INVOKABLE void startPhoneSync();

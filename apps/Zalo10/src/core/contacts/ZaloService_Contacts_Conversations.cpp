@@ -214,8 +214,10 @@ void ZaloService::onGroupDetailsDone()
         }
     }
 
-    if (!threads.isEmpty())
+    if (!threads.isEmpty()) {
+        rememberPhoneContacts(threads,true);
         emit conversationsReady(threads);
+    }
     m_isFetchingConversations = false;
     if (!threads.isEmpty())
         startGroupSync();

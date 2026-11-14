@@ -4,6 +4,7 @@
 #include "core/ZaloService.hpp"
 #include "utils/ZaloServiceUtils.hpp"
 #include "core/PhoneSyncCore.hpp"
+#include "core/phonesync/PhoneHistorySql.hpp"
 
 #include <QThread>
 #include <QTimer>
@@ -30,7 +31,7 @@
 // 5. ZDB4.0 -> XZ -> SQLite files (own thread, see PhoneSyncCore.cpp)
 // 6. map short phone ids <-> long Zalo10 ids by matching message ids (cached in phone_sync_alias),
 //    then import into `messages` in small time slices to keep the UI responsive.
-// Conversations with no received message can't be mapped yet; the next sync imports them.
+// Unresolved rows stay in the archive. Reconcile by verified message/CLI overlap or explicit user pairing.
 
 namespace {
 
@@ -108,11 +109,18 @@ protected:
                 if (sqlite3_prepare_v2(db, sql, -1, &st, 0) == SQLITE_OK) {
                     while (sqlite3_step(st) == SQLITE_ROW) {
                         PsRow r;
-                        r.sender  = QString::number((qlonglong)sqlite3_column_int64(st, 0));
-                        r.cli     = QString::number((qlonglong)sqlite3_column_int64(st, 1));
-                        r.glb     = QString::number((qlonglong)sqlite3_column_int64(st, 2));
+                        r.sender = QString::fromUtf8((const char *)sqlite3_column_text(st,0));
+                        r.cli = QString::fromUtf8((const char *)sqlite3_column_text(st,1));
+                        r.glb = QString::fromUtf8((const char *)sqlite3_column_text(st,2));
+                        if(r.glb.isEmpty()) r.glb="0";
+                        if(r.cli.isEmpty()) r.cli="0";
                         r.type    = sqlite3_column_int(st, 3);
-                        r.ts      = (qint64)sqlite3_column_int64(st, 4);
+                        QString rawTime=QString::fromUtf8((const char *)sqlite3_column_text(st,4));
+                        r.ts=PhoneHistorySql::millis(rawTime.toLongLong());
+                        if(!r.ts) {
+                            QDateTime date=QDateTime::fromString(rawTime,Qt::ISODate);
+                            if(date.isValid()) r.ts=PhoneHistorySql::millis(date.toMSecsSinceEpoch());
+                        }
                         const unsigned char *c = sqlite3_column_text(st, 5);
                         r.content = c ? QString::fromUtf8((const char *)c) : QString();
                         part.rows.append(r);

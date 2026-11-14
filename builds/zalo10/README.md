@@ -1,5 +1,13 @@
 # Zalo10 test builds
 
+**Latest: 1.5.0.12 history-linking/Profile native build.**
+Adds verified overlap reconciliation and explicit contact/group pairing; account
+metadata, native timestamps, image URL loading or user-supplied local preview.
+Android content:// locators alone cannot recover missing image bytes. Removes
+per-tab pill backgrounds overlapping the outer bar; renames Profile. Keeps the
+no-custom-cover fix from 11. See `docs/zalo12-history-vi.md`; device testing pending.
+
+
 **Latest native test: 1.5.0.11, custom active-frame cover removed.**
 Two supplied version-9 runs log SIGSEGV after scene set and before cover ready.
 Version 11 excludes that component from startup, MOC and linked binary, adds

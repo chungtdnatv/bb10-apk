@@ -6,7 +6,7 @@ def profile_main(text,native=False):
     a,b=block(text,text.rfind('Tab {',0,idx))
     tab='''Tab {
         id: profileTab
-        title: "Cá nhân"
+        title: "Profile"
         imageSource: "asset:///images/ic_contact.png"
         ModernProfile {
             id: profileTabContent

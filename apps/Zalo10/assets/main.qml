@@ -126,7 +126,7 @@ TabbedPane {
 
     Tab {
         id: profileTab
-        title: "Cá nhân"
+        title: "Profile"
         imageSource: "asset:///images/ic_contact.png"
         ModernProfile {
             id: profileTabContent

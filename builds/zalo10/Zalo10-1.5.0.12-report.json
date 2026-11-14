@@ -1,0 +1,45 @@
+{
+  "assets": 808,
+  "entry_points": [
+    "Zalo10",
+    "Zalo10Headless"
+  ],
+  "arm_binaries": 2,
+  "signature_files_present": false,
+  "version": "1.5.0.12",
+  "sha256": "4b22199680a78bd16b8d5067219fca258eedbd78fbb56ff8ec827eb44bf9cc6b",
+  "native_checks": [
+    {
+      "binary": "build/modern/arm/o.le-v7/Zalo10.so",
+      "sdk_libraries": 104,
+      "strong_imports_resolved": 725,
+      "orphan_unwind_sections": 0
+    },
+    {
+      "binary": "build/modern/headless/arm/Zalo10Headless",
+      "sdk_libraries": 60,
+      "strong_imports_resolved": 630,
+      "orphan_unwind_sections": 0
+    }
+  ],
+  "changes": [
+    "verified global/client-message overlap matching",
+    "explicit contact/group pairing and self identification",
+    "native archive metadata/date rendering",
+    "Android locator placeholder; image URL download and explicit local preview association",
+    "Profile label; no per-item nav pill",
+    "custom active cover still excluded"
+  ],
+  "tests": {
+    "toolkit_flow_storage": 40,
+    "package": 3,
+    "js_dates_and_filter": "passed",
+    "qml_syntax": "passed",
+    "device_validation": "pending"
+  },
+  "limits": [
+    "No guaranteed mapping without an overlap or user-confirmed candidate",
+    "Android content URI is not image bytes; local file or live URL required",
+    "Unsupported/missing global ID, timestamp or message types stay in archive"
+  ]
+}

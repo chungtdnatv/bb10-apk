@@ -82,6 +82,13 @@ Người dùng đã xác nhận **BAR 1.5 gốc mở được trên cùng Passpo
 Cả UI engine và headless giữ nguyên SHA-256 của BAR gốc; chỉ đổi QML/ảnh và tắt
 prewarm tự tạo/hủy ChatView lúc startup. Bản 1.5.0.4 đã mở và chạy tốt trên Passport.
 
+Bản cập nhật [1.5.0.12 — ghép lịch sử, ảnh và Profile](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.12-history-linking-profile-unsigned.bar).
+Thêm ghép theo tin trùng và chọn đúng liên lạc/nhóm khi chưa tự ghép được; lấy tên/avatar
+và hiển thị thời gian bằng native. Ảnh có URL Zalo/CDN hỗ trợ có thể tải; ảnh chỉ có `content://`
+cần chép tệp thật sang BB10 rồi chọn trong kho. Bỏ viền nền riêng của từng nút bottom
+bar, đổi Cá nhân thành **Profile**, giữ bản sửa bỏ custom cover của 11.
+Xem [cách dùng và giới hạn](docs/zalo12-history-vi.md). Cần thử trên dữ liệu/máy thực.
+
 Bản thử native mới sau khi nhận log: [1.5.0.11 — bỏ custom active-frame cover](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.11-native-no-active-cover-unsigned.bar).
 Hai lần chạy bản 9 đều SIGSEGV sau `scene set`, trước `active frame ready`.
 Bản 11 loại custom cover khỏi startup và binary, giữ kho lịch sử đồng bộ và giao diện

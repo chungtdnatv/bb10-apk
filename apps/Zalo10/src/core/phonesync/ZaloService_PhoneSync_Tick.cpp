@@ -173,13 +173,13 @@ void ZaloService::onPhoneSyncTick()
                 bool added=false;
                 if (!PhoneSyncArchive::insert(m_db,m_uid.toUtf8().constData(),p.isGroup?1:0,
                     p.shortId.toUtf8().constData(),archiveKey.toUtf8().constData(),
-                    r.sender.toUtf8().constData(),archiveTs,r.type,r.content.toUtf8().constData(),added)) {
+                    r.sender.toUtf8().constData(),archiveTs,r.type,r.content.toUtf8().constData(),added,r.cli.toUtf8().constData())) {
                     sqlite3_exec(m_db,"ROLLBACK",0,0,0);
                     phoneSyncFail(QString::fromUtf8("Không lưu được lịch sử đồng bộ; hãy kiểm tra dung lượng trống.")); return;
                 }
                 if (added) rt->archived++;
                 // Yield also for unresolved/unsupported rows; these used to be discarded.
-                if (p.threadLong.isEmpty() || r.type != 0 || r.glb == "0" || r.content.isEmpty()) {
+                if (p.threadLong.isEmpty() || r.type != 0 || r.glb == "0" || r.content.isEmpty() || r.ts <= 0) {
                     if (clock.elapsed() >= PS_SLICE_MS) break;
                     continue;
                 }
@@ -191,7 +191,7 @@ void ZaloService::onPhoneSyncTick()
                 bool isMine = (rt->senderLong.value(r.sender) == m_uid);
                 QString sid = rt->senderLong.value(r.sender);
                 QString sname = rt->senderName.value(r.sender);
-                if (sid.isEmpty()) { sid = r.sender; sname = QString::fromUtf8("Member ") + r.sender; }
+                if (sid.isEmpty()) { sname = QString::fromUtf8("Người gửi ") + r.sender; }
                 int outType = 0;
                 if (r.content.startsWith(QChar('{')) && (r.content.contains("\"normalUrl\"") || r.content.contains("\"thumbUrl\"") || r.content.contains("\"hdUrl\"")))
                     outType = 2;
@@ -246,6 +246,11 @@ void ZaloService::onPhoneSyncTick()
     rt->tick->deleteLater();
     delete rt;
     m_psh.p = 0;
+
+    QVariantMap automatic=phoneArchiveAutoMatch();
+    imported+=automatic.value("imported").toInt();
+    threads+=automatic.value("importedThreads").toInt();
+    unmatched=qMax(0,unmatched-automatic.value("matched").toInt());
 
     QString msg = QString::fromUtf8("Đã lưu %1 tin mới vào kho lịch sử; ghép %2 tin vào %3 cuộc trò chuyện.").arg(archived).arg(imported).arg(threads);
     if (unmatched > 0)

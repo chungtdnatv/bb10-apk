@@ -8,7 +8,7 @@ from that exact BAR and changes the home-screen QML/assets and the existing mess
 python3 bb10.py build-zalo-ui /path/to/Zalo1.5.bar
 ```
 
-Output: `dist/Zalo10-1.5.0.10-ui-only-original-engine-unsigned.bar` and a JSON report.
+Output: `dist/Zalo10-1.5.0.12-ui-only-original-engine-unsigned.bar` and a JSON report.
 No Docker, SDK or compiler is required for this compatibility path. It is not a
 native build from source; the ordinary `build Zalo10` workflow remains separate.
 
@@ -55,3 +55,6 @@ Version 1.5.0.10 is the recovery release after the user reported native 9 exits
 immediately. It is version-8 UI payload with original-engine bytes; device retest
 is still needed. Native phone archive APIs are not exposed or supplied in this
 build. No native startup fix is claimed without the failing version-9 log.
+
+The shared UI now labels the third tab Profile and omits per-item borders. Native
+12 provides the new history matching/media methods; the UI-only build does not.

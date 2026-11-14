@@ -265,6 +265,7 @@ void ZaloService::onAvatarDownloaded()
             m_pendingFriends.clear();
             m_pendingFriendAvatarCount = 0;
             m_loadedFriendAvatarCount  = 0;
+            rememberPhoneContacts(finalList,false);
             emit friendsReady(finalList);
         }
     }

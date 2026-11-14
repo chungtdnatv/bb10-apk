@@ -114,6 +114,7 @@ void ZaloService::onFetchFriendsDone()
             m_pendingFriendAvatarCount = needDownload;
             m_loadedFriendAvatarCount  = 0;
         }
+        rememberPhoneContacts(threads,false);
         emit friendsReady(threads);
     }
     m_isFetchingFriends = false;
