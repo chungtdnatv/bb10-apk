@@ -1,0 +1,16 @@
+{
+  "Zalo10": {
+    "url": "https://github.com/BBerryLife/Zalo10",
+    "base_commit": "47c2da2af4bd6e8cdeb01a4ca0324402768514d3",
+    "local_changes": "Modern QML UI, CMake, multi-entry BAR builder, main ELF entry point fix and native QML error page"
+  },
+  "Zalo10Headless": {
+    "url": "https://github.com/BBerryLife/Zalo10Headless",
+    "commit": "3635cd78242d26f174a3a64199573044ae689aa7"
+  },
+  "bb10-cxx20": {
+    "url": "https://github.com/zsavajji/bb10-cxx20",
+    "commit": "11c6d2a1e56e266dfcb7faeaca855a8627031e30"
+  },
+  "toolchain_image": "ghcr.io/zsavajji/bb10-cxx20@sha256:60ddcfc3acb0c0215611c353780f196c3b7928ae266292f7f45038df358574ba"
+}

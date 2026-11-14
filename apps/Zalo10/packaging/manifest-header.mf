@@ -1,0 +1,59 @@
+Archive-Manifest-Version: 1.5
+Archive-Created-By: Zalo10 source BAR builder 1.0
+
+Package-Type: application
+Package-Author: BerryLife
+Package-Author-Id: testQmVycnlMaWZlICAgICAgICA
+Package-Name: com.BerryLife.Zalo10
+Package-Id: testRel_Life_Zalo108ff545d2
+Package-Version: 1.5.0.0
+Package-Version-Id: testMS41LjAuMCAgICAgICAgICA
+Package-Architecture: armle-v7
+
+Application-Name: Zalo10
+Application-Id: testRel_Life_Zalo108ff545d2
+Application-Description: The Zalo10 application for BB10
+Application-Version: 1.5.0.0
+Application-Version-Id: testMS41LjAuMCAgICAgICAgICA
+Application-Requires-System: BlackBerry 10/10.3.1.0
+Application-Development-Mode: false
+
+Entry-Point-Name: Zalo10
+Entry-Point-Key: Zalo10
+Entry-Point: LD_LIBRARY_PATH=app/native/lib:/usr/lib/qt4/lib CASCADES_THEME=default app/native/Zalo10.so
+Entry-Point-Type: Qnx/Cascades
+Entry-Point-Icon: {86x86}native/icon86.png:{90x90}native/icon90.png:{96x96}native/icon96.png:{144x144}native/icon.png:{110x110}native/icon110.png
+Entry-Point-Splash-Screen: {1440x1440}native/splash.png:{720x1280}native/splash720x1280.png:{768x1280}native/splash768x1280.png:{720x720}native/splash720.png:{1024x600}native/splash1024x600.png:{1280x720}native/splash1280x720.png:{1280x768}native/splash1280x768.png:{600x1024}native/splas
+ h600x1024.png
+Entry-Point-Orientation: auto
+Entry-Point-User-Actions: access_internet,access_location_services,post_notification,access_notify_settings_control,run_when_backgrounded,access_pimdomain_messages,access_wifi_public,access_shared,access_pimdomain_calendars,use_camera,access_pimdomain_contacts,record_audio,read_personall
+ y_identifiable_information,access_phone,read_phonecall_details,control_phone,access_pimdomain_calllogs,read_device_identifying_information
+Entry-Point-System-Actions: run_native,_sys_run_headless,_sys_headless_nostop,_sys_access_pim_unified,_sys_inject_voice
+
+Entry-Point-Name: Zalo10 Service
+Entry-Point-Key: Zalo10Headless
+Entry-Point: LD_LIBRARY_PATH=app/native/lib:/usr/lib/qt4/lib CASCADES_THEME=default app/native/Zalo10Headless
+Entry-Point-Type: Qnx/Elf
+Entry-Point-Icon: {86x86}native/icon86.png:{90x90}native/icon90.png:{96x96}native/icon96.png:{144x144}native/icon.png:{110x110}native/icon110.png
+Entry-Point-Splash-Screen: {1440x1440}native/splash.png:{720x1280}native/splash720x1280.png:{768x1280}native/splash768x1280.png:{720x720}native/splash720.png:{1024x600}native/splash1024x600.png:{1280x720}native/splash1280x720.png:{1280x768}native/splash1280x768.png:{600x1024}native/splas
+ h600x1024.png
+Entry-Point-Orientation: auto
+Entry-Point-User-Actions: access_internet,access_location_services,post_notification,access_notify_settings_control,run_when_backgrounded,access_pimdomain_messages,access_wifi_public,access_shared,access_pimdomain_calendars,use_camera,access_pimdomain_contacts,record_audio,read_personall
+ y_identifiable_information,access_phone,read_phonecall_details,control_phone,access_pimdomain_calllogs,read_device_identifying_information
+Entry-Point-System-Actions: _sys_run_headless,_sys_headless_nostop,run_native,_sys_access_pim_unified,_sys_inject_voice
+
+Invoke-Target-Key: com.BerryLife.Zalo10.service
+Invoke-Target-Label: Zalo10 Service
+Invoke-Target-Entry-Point-Ref: Zalo10Headless
+Invoke-Target-Type: application.headless
+Invoke-Target-Filter: actions=bb.action.system.STARTED;types=application/vnd.blackberry.system.event.STARTED;uris=data://local;
+Invoke-Target-Filter: actions=com.BerryLife.Zalo10.service.UI_OPENED,com.BerryLife.Zalo10.service.UI_CLOSED;types=*;uris=headless:;
+Invoke-Target-Filter: actions=bb.action.OPEN,bb.action.VIEW,bb.action.MARKREAD,bb.action.MARKUNREAD,bb.action.DELETE;types=application/vnd.zalo10.hub.chat;uris=pim:application/vnd.zalo10.hub.chat;
+
+Invoke-Target-Key: com.BerryLife.Zalo10.invoke
+Invoke-Target-Label: Zalo10
+Invoke-Target-Icon: {144x144}native/icon.png
+Invoke-Target-Entry-Point-Ref: Zalo10
+Invoke-Target-Type: application
+Invoke-Target-Filter: actions=bb.action.OPEN,bb.action.VIEW;types=application/vnd.zalo10.hub.chat;uris=pim:application/vnd.zalo10.hub.chat;
+

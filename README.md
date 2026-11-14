@@ -1,172 +1,98 @@
-# BB10 APK Fixer
+# BB10 BAR Toolkit
 
-Tool để fix và rebuild ứng dụng APK để cài và chạy ổn định trên BlackBerry OS 10 (BlackBerry Passport, version 10.3.3.3213216).
+Tạo app native C++/QML, build ARMv7 và xuất `.bar` cho BlackBerry 10.
+Repo có source **Zalo10**, dịch vụ nền **Zalo10Headless**, giao diện mới,
+app mẫu **Hello10**, template tạo app và source/config của hai toolchain liên quan.
 
-## Vấn đề
+## Build nhanh
 
-Ứng dụng APK hiện tại:
-- ✅ Cài được lần đầu
-- ✅ Chạy được lần đầu
-- ❌ Close app và mở lại sẽ bị crash
-- ❌ Sau đó không mở được nữa
-- ❌ **Bị báo "không thể cài đặt"** sau khi rebuild
+Cần **Python 3.10+**, Docker đang chạy và Internet để tải SDK image lần đầu.
+Host hỗ trợ: Linux, macOS hoặc Windows qua WSL2 với Docker integration.
+Không cần cài Momentics trên host. Node.js chỉ cần cho unit test JavaScript của Zalo.
 
-## Nguyên nhân
-
-### Vấn đề 1: Crash khi restart
-1. **Storage permissions thiếu** - BB10 cần quyền truy cập storage rõ ràng
-2. **Target SDK quá cao** - BB10 Android runtime chỉ hỗ trợ đến API 22
-3. **Memory management** - Thiếu largeHeap flag
-4. **Database handling** - SQLite không xử lý lỗi tốt trên BB10
-5. **Application lifecycle** - onCreate() không có try-catch khi restart
-
-### Vấn đề 2: Không thể cài đặt sau rebuild (QUAN TRỌNG!)
-- **APK không được sign** - BB10 Android runtime YÊU CẦU APK phải được sign
-- **compileSdkVersion quá cao** - v3.1 hoạt động với SDK 30, APK mới dùng SDK 35
-- **Unsupported attributes** - Một số attributes mới không hỗ trợ trên BB10
-
-## Công cụ
-
-3 script được cung cấp:
-
-### 1. `fix-apk.bat` (Windows Batch)
-Script đơn giản cho Windows, tự động tải apktool và fix APK.
-
-```cmd
-fix-apk.bat
+```sh
+git clone --branch bb10-bar-toolkit https://github.com/chungtdnatv/bb10-apk.git
+cd bb10-apk
+python3 bb10.py doctor
+python3 bb10.py list
+python3 bb10.py build Hello10
+python3 bb10.py build Zalo10
 ```
 
-### 2. `fix-apk.ps1` (PowerShell)
-Script PowerShell với tính năng nâng cao, nhiều fix hơn.
+File xuất hiện trong `dist/Hello10-unsigned.bar` và `dist/Zalo10-modern-unsigned.bar`.
+`build Zalo10` biên dịch cả UI lẫn headless, kiểm tra symbol SDK/bảng unwind/entry point,
+strip binary, đóng gói và xác minh CRC + SHA-512 của toàn bộ asset.
+Có thể đặt `--jobs 2` nếu cần giới hạn số compiler chạy đồng thời.
 
-```powershell
-.\fix-apk.ps1
-# Hoặc chỉ định APK cụ thể
-.\fix-apk.ps1 -ApkPath "path\to\app.apk"
+Image được ghim theo SHA-256 trong `toolchains/image.txt`. Repo không chứa SDK 4 GB
+hoặc cache build; `toolchains/` chứa source và revision để tái tạo/mở rộng toolchain.
+
+## Tạo app mới
+
+```sh
+python3 bb10.py create MyApp --id com.example.MyApp --name "App của tôi" --author "Tên tác giả"
+python3 bb10.py build MyApp
+python3 bb10.py verify dist/MyApp-unsigned.bar
 ```
 
-### 3. `bb10-apk-fixer.py` (Python)
-Script Python với đầy đủ tính năng, có thể tùy chỉnh.
+Sửa `apps/MyApp/assets/main.qml` và `apps/MyApp/src/main.cpp` để viết giao diện và logic.
+Sửa `bar-descriptor.xml` để đổi phiên bản, permission và asset; `bb10.json` khai báo
+script build, file đầu ra và test của app. `create` từ chối ghi đè thư mục đã tồn tại.
+Template tạo một UI Cascades; dự án có headless tham khảo Zalo10 và builder riêng
+của nó, không dùng packager một entry point của template.
 
-```bash
-python bb10-apk-fixer.py app.apk
+Qt/Cascades phải dùng **`bb10-c++` và ABI của SDK**. Không link trực tiếp UI với
+libc++20 của `bb10-clang++`; phần C++20 riêng cần giao tiếp qua C API hoặc process.
+Source `bb10-cxx20` cung cấp image và hỗ trợ `__dso_handle`/unwind có giấy phép đi kèm.
+
+## Kiểm tra và CI
+
+```sh
+python3 bb10.py test
+python3 bb10.py test Zalo10     # cần build Zalo10 trước và có node
+python3 bb10.py verify dist/Zalo10-modern-unsigned.bar
 ```
 
-## Yêu cầu
+`verify` kiểm tra nội dung BAR và entry point ARM; không xác thực chữ ký phát hành.
+GitHub Actions chạy test, build Hello10 + Zalo10 và tải `dist/*.bar` lên artifact
+**bb10-unsigned-test-bars**. Có thể chạy Actions → Build BB10 BARs → Run workflow
+sau khi workflow có trên default branch. CI đã cấu hình; kết quả chạy CI phải xem
+ở Actions, không suy ra từ kết quả build cục bộ.
 
-- **Java JDK 8 hoặc cao hơn** (để chạy apktool)
-- **Windows** (PowerShell hoặc Python 3)
+## Cài thử và trạng thái Passport
 
-## Các fix được áp dụng
+BAR hiện tại **chưa ký**, dành cho BB10 đã root hỗ trợ unsigned apps. Dùng
+Sachesi / DBBT / BAR Installer với Development Mode theo hướng dẫn dự án gốc.
+Repo không tạo debug token, không giả chữ ký và không bảo đảm cài được trên máy chưa root.
 
-### AndroidManifest.xml
-1. ✅ Set `compileSdkVersion="30"` (BB10 compatible - giống v3.1 ProjectBerry)
-2. ✅ Set `platformBuildVersionCode="30"` (BB10 compatible)
-3. ✅ Thêm `android:largeHeap="true"` (quản lý memory tốt hơn)
-4. ✅ Giữ `android:hardwareAccelerated="true"` (đã có sẵn)
-5. ✅ Thêm storage permissions nếu thiếu:
-   - `WRITE_EXTERNAL_STORAGE`
-   - `READ_EXTERNAL_STORAGE`
-6. ✅ Fix `configChanges` để handle orientation/keyboard properly
-7. ✅ Remove unsupported attributes:
-   - `android:allowCrossUidActivitySwitchFromBelow`
-   - `android:appComponentFactory`
-8. ✅ Simplify Application class từ `ClientApplicationSplittedShell` → `ClientApplicationShell` (ổn định hơn, giống v3.1)
+**1.5.0.1 đã bị báo crash lúc mở trên Passport; không dùng bản đó để test tiếp.**
+Binary có ELF entry point bằng 0. **1.5.0.2** đã sửa linker để entry point trỏ vào
+`main`, bổ sung kiểm tra chống tái diễn và màn hình native báo lỗi QML.
+Đây là lỗi build đã xác định và sửa; cần thử lại trên thiết bị để xác nhận crash đã hết.
 
-### APK Signing
-9. ✅ **APK được sign với debug keystore** (QUAN TRỌNG - BB10 yêu cầu signature)
-10. ✅ Zipalign để tối ưu hóa
-11. ✅ Signature v1, v2, v3 support
+[Tải BAR 1.5.0.2 để test](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.2-modern-unsigned.bar).
+Build, test và checksum không thay thế kiểm tra QR login, gửi/nhận tin, đóng/mở lại
+và thông báo nền trên điện thoại. Xem [cách lấy log](docs/troubleshooting.md).
 
-### Smali Code
-- ⚠️ Bỏ qua smali fixes để tránh lỗi syntax
-- Note: Manifest fixes + signing là đủ cho BB10 compatibility
+## Cấu trúc source
 
-## Cách sử dụng
-
-### Cách 1: Sử dụng Python script (ĐÃ TEST - HOẠT ĐỘNG TỐT) ✅
-
-1. Cài Python 3 nếu chưa có
-2. Chạy script:
-   ```bash
-   python bb10-apk-fixer.py facebook-lite-(Communications).apk
-   ```
-3. File APK đã fix sẽ có tên: `fixed-[tên-gốc].apk`
-
-**Lưu ý:** Cách này đã được test thành công với Facebook Lite APK.
-
-### Cách 2: Sử dụng PowerShell script
-
-1. Mở PowerShell trong thư mục này
-2. Chạy script:
-   ```powershell
-   .\fix-apk.ps1
-   ```
-3. Nếu có lỗi execution policy:
-   ```powershell
-   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-   ```
-4. File APK đã fix sẽ có tên: `fixed-[tên-gốc].apk`
-
-### Cách 3: Sử dụng Batch script
-
-1. Đặt file APK vào thư mục này (cùng với script)
-2. Chạy script:
-   ```cmd
-   fix-apk.bat
-   ```
-3. Chờ script hoàn thành
-4. File APK đã fix sẽ có tên: `fixed-[tên-gốc].apk`
-
-## Cài đặt lên BlackBerry Passport
-
-1. Copy file `fixed-[tên-gốc].apk` vào BlackBerry Passport
-2. Cài đặt APK như bình thường
-3. Mở ứng dụng và test
-4. Close app và mở lại để test fix
-
-## Troubleshooting
-
-### "Java not found"
-- Cài Java JDK từ: https://www.oracle.com/java/technologies/downloads/
-- Hoặc OpenJDK: https://adoptium.net/
-
-### "Failed to download apktool"
-- Tải thủ công từ: https://github.com/iBotPeaches/Apktool/releases
-- Đặt vào thư mục `tools/` với tên `apktool.jar`
-
-### APK vẫn crash sau khi fix
-- Kiểm tra logcat trên device (nếu có thể)
-- Thử giảm targetSdkVersion xuống 21 hoặc 19
-- Xóa data/app trước khi cài lại
-
-### PowerShell execution policy error
-```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```text
+bb10.py                       CLI tạo/build/test/verify
+bb10kit/                      validator BAR và hỗ trợ đóng gói
+templates/cascades/           template C++/QML
+apps/Hello10/                 app mẫu được tạo bằng CLI
+apps/Zalo10/                  UI + core + CMake + builder đa entry point
+apps/Zalo10Headless/          dịch vụ nền dùng chung core bên cạnh
+toolchains/bb10-cxx20/        source upstream có ghim revision
+toolchains/blackberry10-toolchain/  source SDK/Clang/Qt tools
+dist/                         BAR mới build, không commit
+builds/zalo10/                BAR test và ghi chú phiên bản
 ```
 
-## File tạo ra
+Source Zalo có thư viện decoder WebP `.a` và headers từ upstream; build mặc định
+dùng archive đó. SDK/Qt và compiler cũng là thành phần prebuilt trong image.
+Không tuyên bố toàn bộ SDK hay mọi dependency đều được biên dịch từ source mỗi lần.
+Nguồn, commit và giấy phép từng thành phần ở [SOURCES.md](SOURCES.md).
 
-- `tools/` - Chứa apktool.jar (tự tải)
-- `work/` - Thư mục làm việc tạm
-- `work/decoded/` - APK đã decode
-- `fixed-[tên-gốc].apk` - APK đã fix và sẵn sàng cài
-
-## Lưu ý
-
-- Script sẽ tạo backup trong thư mục `work/`
-- Có thể xóa thư mục `work/` sau khi đã có file APK fix
-- File APK gốc không bị thay đổi
-- APK fix được sign với debug key (tương thích BB10)
-
-## Support
-
-Nếu vẫn gặp vấn đề sau khi fix:
-1. Kiểm tra BlackBerry OS version (cần 10.3.3.x trở lên)
-2. Đảm bảo Android runtime đã cập nhật
-3. Thử clear cache của Android runtime trên device
-4. Reboot device trước khi cài APK fix
-
-## License
-
-MIT License - Free to use and modify
+Các script APK cũ vẫn được giữ. Hướng dẫn cũ ở [docs/apk-fixer.md](docs/apk-fixer.md);
+luồng APK đó độc lập với việc tạo app native BAR.

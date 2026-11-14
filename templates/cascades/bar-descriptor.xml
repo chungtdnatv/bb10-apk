@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<qnx xmlns="http://www.qnx.com/schemas/application/1.0">
+    <id>@ID@</id>
+    <name>@APP@</name>
+    <author>BB10 Developer</author>
+    <versionNumber>1.0.0</versionNumber>
+    <buildId>0</buildId>
+    <description>Native Cascades application</description>
+    <configuration id="release" name="Device-Release">
+        <entryPointType>Qnx/Cascades</entryPointType>
+        <platformArchitecture>armle-v7</platformArchitecture>
+        <asset path="build/native/arm/@APP@.so" entry="true" type="Qnx/Elf">@APP@.so</asset>
+    </configuration>
+    <icon><image>icon.png</image></icon>
+    <initialWindow><systemChrome>none</systemChrome><autoOrients>true</autoOrients></initialWindow>
+    <asset path="icon.png">icon.png</asset>
+    <asset path="assets">assets</asset>
+    <permission system="true">run_native</permission>
+    <env var="LD_LIBRARY_PATH" value="app/native/lib:/usr/lib/qt4/lib"/>
+</qnx>

@@ -1,0 +1,5 @@
+{
+  "build_script": "scripts/build.sh",
+  "output": "build/@APP@-unsigned.bar",
+  "tests": []
+}

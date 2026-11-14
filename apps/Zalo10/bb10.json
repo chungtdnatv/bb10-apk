@@ -1,0 +1,8 @@
+{
+  "build_script": "scripts/build-modern.sh",
+  "output": "build/Zalo10-modern-unsigned.bar",
+  "tests": [
+    ["node", "tests/modern-ui.test.cjs"],
+    ["python3", "tests/test_bar.py"]
+  ]
+}
