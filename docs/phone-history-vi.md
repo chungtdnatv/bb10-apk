@@ -1,5 +1,9 @@
 # Bản 1.5.0.8 / 1.5.0.9
 
+**Cập nhật:** người dùng đã báo native 9 đóng ngay khi mở. Không cài bản 9 để
+sử dụng; ưu tiên bản 1.5.0.10 engine gốc theo [hướng dẫn khôi phục](zalo10-recovery-vi.md).
+Các bước native 9 bên dưới chỉ còn là ghi chú thử nghiệm lịch sử, chưa được xác minh.
+
 ## Bottom bar và Tin nhắn
 
 Thanh dưới thu ngắn bằng padding ngang 8du mỗi bên (trước 2.4du), cao 17du

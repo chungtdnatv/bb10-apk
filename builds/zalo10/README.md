@@ -1,9 +1,16 @@
 # Zalo10 test builds
 
-Current: **1.5.0.9 native phone-history build**, not yet device-validated.
-Original-engine fallback: **1.5.0.8 UI-only**, same compact/taller bar and
-history-only mixed inbox, but no importer fix. See `docs/phone-history-vi.md`.
+Current recovery build: **1.5.0.10 UI-only with original native engine**.
+The user reported native **1.5.0.9 crashes immediately on launch on Passport**.
+Its exact failing phase is unknown; no version-9 startup log has been obtained.
+Do not describe native 9 as working or use it as the preferred device test.
 
+Version 10 preserves both known-working original binary hashes and exactly the
+version-8 UI payload, with a higher package version for an in-place update.
+It includes the account tab, history-only mixed inbox and compact/taller bottom
+bar; it does not contain native 9's phone-history archive/import additions.
+Keep application data when updating. The cloud checks do not prove launch on the
+phone. See `docs/zalo10-recovery-vi.md` for installation and logging.
 
 **Previous dark update: `Zalo10-1.5.0.7-ui-only-original-engine-unsigned.bar`.**
 Dark navy background, cyan icons, larger conversation rows/avatars/type, larger

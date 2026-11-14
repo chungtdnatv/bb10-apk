@@ -155,3 +155,25 @@ and 2 package/CA-store tests pass. SDK-checked dynamic dependencies are not proo
 that the actual phone's libcurl/TLS configuration negotiates with Microsoft.
 No Client ID/tenant registration was supplied; real device login, Microsoft Graph
 read/send and Passport launch remain untested. See Teams10 README/setup guide.
+
+## 1.5.0.10: recover original engine after native 9 launch failure
+
+Device feedback: native 1.5.0.9 immediately stops/exits on Passport. The user could
+not find its startup log, so the failing phase and root cause remain unknown.
+The UI binary has the same direct SDK dependency names as the original, which
+does not establish runtime ABI/initialization compatibility. Headless native 9
+additionally links QtDeclarative/QtSql/QtSvg/QtXmlPatterns; these observations alone
+are not proof of the crash cause.
+
+Recovery 10 is built from the pinned original BAR, preserving both native hashes
+and the complete version-8 UI payload. Only version-related packaging differs
+from 8. No phone-history native extension is included; the legacy importer still
+has the unresolved-ID limitation. Existing sandbox data is not part of packaging
+and is not touched by the build. Recommend an in-place update without uninstall.
+
+The actual BAR passes integrity/index/ARM/entry validation (775 assets), and its
+QML passes syntax lint. All 35 toolkit/flow/storage tests, existing JS UI tests and
+3 source-package checks pass. The package checks inspect the existing experimental
+native build separately; they do not turn its reported failure into a success.
+Version 10 needs device retest; binary identity links it to the working engine
+but is not a complete runtime test of the newer home UI.

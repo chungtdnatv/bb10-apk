@@ -285,7 +285,7 @@ def write_package(original,updates,infos,output,version):
     return report,data
 
 
-def build(input_bar,output,build_id=8):
+def build(input_bar,output,build_id=10):
     input_bar=Path(input_bar); output=Path(output)
     if input_bar.resolve()==output.resolve(): raise ValueError('Output must not overwrite the original BAR')
     if not 1<=build_id<=65535: raise ValueError('Invalid build id')

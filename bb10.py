@@ -126,7 +126,7 @@ def main(argv=None):
     p=sub.add_parser('build-zalo-ui',help='Patch the modern UI onto the supported original Zalo1.5.bar, retaining its native engine')
     p.add_argument('original',type=Path)
     p.add_argument('--output',type=Path)
-    p.add_argument('--build-id',type=int,default=8)
+    p.add_argument('--build-id',type=int,default=10)
     p=sub.add_parser('test',help='Run toolkit and application tests')
     p.add_argument('app',nargs='?')
     args=parser.parse_args(argv)
