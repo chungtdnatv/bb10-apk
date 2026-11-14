@@ -111,6 +111,50 @@ class ZaloFeatureFlows(unittest.TestCase):
         main = self.script('main.qml','function selectSection(')
         self.assertEqual(main.count('raiseBottomBar()'),3)
 
+    def test_inbox_excludes_no_history_and_includes_groups_and_unknown_threads(self):
+        function=self.script('ChatsTab.qml','function inboxCandidates(')
+        self.node("const assert=require('node:assert/strict');"+function+'''
+          const friends=[{uid:'a',name:'A'},{uid:'empty',name:'No history'}];
+          const groups=[{threadId:'g',name:'Group',isGroup:true},{threadId:'empty-group',isGroup:true}];
+          const out=inboxCandidates(friends,groups,{a:{ts:5},g:{ts:9},unknown:{ts:7}});
+          assert.deepEqual(out.map(x=>x.threadId),['a','g','unknown']);
+          assert.equal(out[1].isGroup,true);
+          assert.equal(out[2].isGroup,false);
+          assert.equal(friends.length,2); assert.equal(friends[0].threadId,undefined);
+          assert.deepEqual(inboxCandidates(friends,groups,{}),[]);
+        ''')
+
+    def test_inbox_sorts_by_time_even_when_older_chat_is_pinned(self):
+        functions=self.script('ChatsTab.qml','function inboxCandidates(')+'\n'+self.script('ChatsTab.qml','function buildFriends(')
+        self.node('''const assert=require('node:assert/strict');
+          const friendModel={values:[],size(){return this.values.length},value(i){return this.values[i]},clear(){this.values=[]},append(v){this.values.push(v)}};
+          const chatsLoading={}, chatsEmpty={};
+          const chatsNav={lastGroups:[{threadId:'group',name:'Group',isGroup:true}],recentMessages:{},formatTime:ts=>String(ts),msgSnippet:(mt,c)=>c,filterList:()=>{}};
+          const zService={pinnedThreadIds:()=>['old'],unreadThreadIds:()=>[],downloadAvatar:()=>{},getThreadLastMessages:()=>({
+            old:{ts:'1600000000000',content:'old'},fresh:{ts:'1700000000',content:'fresh'},group:{ts:'1750000000000',content:'group'}
+          })};
+        '''+functions+'''
+          buildFriends([{uid:'old',name:'Old'},{uid:'fresh',name:'Fresh'},{uid:'empty',name:'Empty'}],false);
+          assert.deepEqual(friendModel.values.map(x=>x.threadId),['group','fresh','old']);
+          assert.equal(friendModel.values[0].isGroup,true);
+          assert.equal(friendModel.values[2].isPinned,true);
+        ''')
+
+    def test_third_tab_is_profile_with_existing_settings_actions(self):
+        main=self.changed['native/assets/main.qml'].decode()
+        profile=self.changed['native/assets/ModernProfile.qml'].decode()
+        nav=self.changed['native/assets/ModernNavigation.qml'].decode()
+        self.assertNotIn('groupsTab',main)
+        self.assertIn('id: profileTab',main)
+        self.assertIn('supportsArchive: false',main)
+        self.assertIn('caption: "Cá nhân"',nav)
+        self.assertNotIn('caption: "Nhóm"',nav)
+        self.assertIn('accountName: root.selfName',main)
+        self.assertIn('onActionRequested: { modernMenu.selected(action); }',main)
+        for action in ('invites','phoneSync','refresh','settings','feedback','about'):
+            self.assertIn('profile.actionRequested("'+action+'")',profile)
+            self.assertIn('action === "'+action+'"',main)
+
 
 if __name__ == '__main__':
     unittest.main()

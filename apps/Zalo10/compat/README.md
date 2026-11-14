@@ -8,7 +8,7 @@ from that exact BAR and changes the home-screen QML/assets and the existing mess
 python3 bb10.py build-zalo-ui /path/to/Zalo1.5.bar
 ```
 
-Output: `dist/Zalo10-1.5.0.7-ui-only-original-engine-unsigned.bar` and a JSON report.
+Output: `dist/Zalo10-1.5.0.8-ui-only-original-engine-unsigned.bar` and a JSON report.
 No Docker, SDK or compiler is required for this compatibility path. It is not a
 native build from source; the ordinary `build Zalo10` workflow remains separate.
 
@@ -46,3 +46,7 @@ For these original-engine builds, use menu → Settings → Export Log, or the o
 
 Version 1.5.0.7 adds a dark navy/cyan home theme, larger rows/avatars/text and
 a larger rounded bottom bar with a visible border. Native code remains unchanged.
+
+Version 1.5.0.8 narrows/tallens the rounded bottom bar and makes the inbox
+history-only, including groups, ordered by latest timestamp rather than pin priority.
+It does not contain the native archive/import changes from version 1.5.0.9.

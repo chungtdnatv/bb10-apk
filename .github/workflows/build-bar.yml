@@ -21,6 +21,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
       - run: python3 bb10.py test
       - run: python3 bb10.py build Hello10
       - run: python3 bb10.py build Zalo10

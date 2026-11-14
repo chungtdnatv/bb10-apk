@@ -1,6 +1,11 @@
 # Zalo10 test builds
 
-**Current update to test: `Zalo10-1.5.0.7-ui-only-original-engine-unsigned.bar`.**
+Current: **1.5.0.9 native phone-history build**, not yet device-validated.
+Original-engine fallback: **1.5.0.8 UI-only**, same compact/taller bar and
+history-only mixed inbox, but no importer fix. See `docs/phone-history-vi.md`.
+
+
+**Previous dark update: `Zalo10-1.5.0.7-ui-only-original-engine-unsigned.bar`.**
 Dark navy background, cyan icons, larger conversation rows/avatars/type, larger
 rounded bottom bar with a visible border, following the latest reference photo.
 This retains the original native binaries and the features of 1.5.0.6. Device

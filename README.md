@@ -9,6 +9,8 @@ app mẫu **Hello10**, template tạo app và source/config của hai toolchain 
 Cần **Python 3.10+**, Docker đang chạy và Internet để tải SDK image lần đầu.
 Host hỗ trợ: Linux, macOS hoặc Windows qua WSL2 với Docker integration.
 Không cần cài Momentics trên host. Node.js chỉ cần cho unit test JavaScript của Zalo.
+Test lưu lịch sử native cần C++ compiler và SQLite development headers/library
+(trên Ubuntu: `sudo apt-get install g++ libsqlite3-dev`).
 
 ```sh
 git clone --branch bb10-bar-toolkit https://github.com/chungtdnatv/bb10-apk.git
@@ -64,6 +66,20 @@ sau khi workflow có trên default branch. CI đã cấu hình; kết quả ch�
 Người dùng đã xác nhận **BAR 1.5 gốc mở được trên cùng Passport**. Người dùng cũng đã xác nhận bản [1.5.0.4 — giao diện mới, giữ nguyên binary gốc](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.4-ui-only-original-engine-unsigned.bar).
 Cả UI engine và headless giữ nguyên SHA-256 của BAR gốc; chỉ đổi QML/ảnh và tắt
 prewarm tự tạo/hủy ChatView lúc startup. Bản 1.5.0.4 đã mở và chạy tốt trên Passport.
+
+Bản cập nhật [1.5.0.9 — native, lưu lịch sử đồng bộ](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.9-native-phone-history-unsigned.bar)
+thu ngắn/tăng chiều cao bottom bar, tăng độ bo tròn và viền. Tab Tin nhắn chỉ có
+hội thoại có lịch sử (gồm nhóm), xếp mới nhất trước; Danh bạ vẫn đầy đủ.
+Mục thứ ba đổi thành **Cá nhân**, có thông tin tài khoản và các mục lời mời,
+đồng bộ, làm mới, cài đặt, góp ý, giới thiệu.
+Engine mới giữ cả lịch sử chưa ghép được với liên lạc, đọc qua menu **Lịch sử từ điện thoại**.
+Các mục này chỉ đọc và mang mã điện thoại, chưa tự ghép đúng tên/ID gửi tin.
+**Bản native mới chưa được xác nhận chạy trên Passport.** Cài cập nhật, không xóa data.
+
+[Bản 1.5.0.8 — engine gốc](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.8-ui-only-original-engine-unsigned.bar)
+có cùng bottom bar và bộ lọc Tin nhắn, giữ nguyên binary của bản chạy được;
+không có sửa importer đồng bộ và không có kho lịch sử mới. Đây là lựa chọn quay
+lại nếu bản native 9 gặp lỗi mở app. Chi tiết: [ghi chú đồng bộ](docs/phone-history-vi.md).
 
 Bản giao diện tối [1.5.0.7](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.7-ui-only-original-engine-unsigned.bar)
 đổi nền xanh đen, chữ trắng/xanh nhạt, tăng kích thước avatar/hàng hội thoại/chữ,

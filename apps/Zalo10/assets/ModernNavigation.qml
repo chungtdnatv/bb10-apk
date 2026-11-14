@@ -4,12 +4,12 @@ Container {
     id: navigation
     property int selectedIndex: 0
     signal sectionSelected(int index)
-    preferredHeight: ui.du(14)
-    minHeight: ui.du(14)
+    preferredHeight: ui.du(17)
+    minHeight: ui.du(17)
     horizontalAlignment: HorizontalAlignment.Fill
     layout: DockLayout {}
-    leftPadding: ui.du(2.4)
-    rightPadding: ui.du(2.4)
+    leftPadding: ui.du(8)
+    rightPadding: ui.du(8)
     bottomPadding: ui.du(0.2)
 
     // Called after user navigation, never while the startup scene is being built.
@@ -61,7 +61,7 @@ Container {
                 layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
                 ModernNavItem { caption: "Tin nhắn"; icon: "chat"; selected: navigation.selectedIndex === 0; onChosen: navigation.sectionSelected(0) }
                 ModernNavItem { caption: "Danh bạ"; icon: "contacts"; selected: navigation.selectedIndex === 1; onChosen: navigation.sectionSelected(1) }
-                ModernNavItem { caption: "Nhóm"; icon: "groups"; selected: navigation.selectedIndex === 2; onChosen: navigation.sectionSelected(2) }
+                ModernNavItem { caption: "Cá nhân"; icon: "contacts"; selected: navigation.selectedIndex === 2; onChosen: navigation.sectionSelected(2) }
             }
         }
     }

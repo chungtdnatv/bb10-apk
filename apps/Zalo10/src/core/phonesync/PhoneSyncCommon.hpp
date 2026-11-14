@@ -195,6 +195,7 @@ struct PhoneSyncRuntime {
     sqlite3_stmt   *ins;
     sqlite3_stmt   *find;
     int             imported;
+    int             archived;
     QSet<QString>   importedThreads;
 
     QString         dlUrl;
@@ -205,7 +206,7 @@ struct PhoneSyncRuntime {
     PsRawHttpsThread *rawThread;
 
     PhoneSyncRuntime() : rsaThread(0), decodeThread(0), rsa(0), pullReply(0), dlReply(0), timer(0), tick(0),
-        stage(0), cancelled(false), phase(0), pi(0), ri(0), totalRows(0), doneRows(0), ins(0), find(0), imported(0),
+        stage(0), cancelled(false), phase(0), pi(0), ri(0), totalRows(0), doneRows(0), ins(0), find(0), imported(0), archived(0),
         dlVariant(0), dlRedirects(0), dlRound(0), rawTried(false), rawThread(0) {}
 };
 

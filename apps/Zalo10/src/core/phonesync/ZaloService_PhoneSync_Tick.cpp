@@ -1,4 +1,6 @@
 #include "core/phonesync/PhoneSyncCommon.hpp"
+#include "core/phonesync/PhoneSyncArchive.hpp"
+#include <QCryptographicHash>
 
 static QString psKey(const PsPart &p) { return QString(p.isGroup ? "g:" : "u:") + p.shortId; }
 
@@ -27,27 +29,25 @@ void ZaloService::onPhoneSyncTick()
     clock.start();
 
     if (rt->phase == 0) {
-        sqlite3_exec(m_db,
-            "CREATE TABLE IF NOT EXISTS phone_sync_alias ("
-            "kind TEXT NOT NULL, shortId TEXT NOT NULL, longId TEXT NOT NULL, name TEXT, "
-            "PRIMARY KEY(kind, shortId))", 0, 0, 0);
-
-        QMap<QString, int> cnt;
-        for (int i = 0; i < rt->parts.size(); ++i) {
-            QSet<QString> seen;
-            const QList<PsRow> &rows = rt->parts[i].rows;
-            for (int k = 0; k < rows.size(); ++k) seen.insert(rows[k].sender);
-            foreach (const QString &s, seen) cnt[s] += 1;
+        if (rt->totalRows == 0) {
+            phoneSyncFail(QString::fromUtf8("Gói đồng bộ không chứa tin nhắn đọc được. Chưa nhập dữ liệu.")); return;
         }
-        int best = 0;
-        for (QMap<QString,int>::const_iterator it = cnt.constBegin(); it != cnt.constEnd(); ++it)
-            if (it.value() > best) { best = it.value(); rt->meShort = it.key(); }
+        if (!PhoneSyncArchive::ensure(m_db)) {
+            phoneSyncFail(QString::fromUtf8("Không tạo được kho lịch sử đồng bộ.")); return;
+        }
+        sqlite3_exec(m_db,
+            "CREATE TABLE IF NOT EXISTS phone_sync_alias_v2 ("
+            "kind TEXT NOT NULL, shortId TEXT NOT NULL, longId TEXT NOT NULL, name TEXT, account TEXT NOT NULL, "
+            "PRIMARY KEY(account, kind, shortId))", 0, 0, 0);
+
+        // Infer self only from a verified overlapping message, never sender frequency.
         rt->myName = psQueryString(m_db, "SELECT dName FROM messages WHERE isMine=1 AND dName IS NOT NULL AND dName<>'' LIMIT 1", QString());
         if (rt->myName.isEmpty()) rt->myName = m_displayName;
         if (rt->myName.isEmpty()) rt->myName = QString::fromUtf8("Me");
 
         sqlite3_stmt *st = 0;
-        if (sqlite3_prepare_v2(m_db, "SELECT kind, shortId, longId, name FROM phone_sync_alias", -1, &st, 0) == SQLITE_OK) {
+        if (sqlite3_prepare_v2(m_db, "SELECT kind, shortId, longId, name FROM phone_sync_alias_v2 WHERE account=?", -1, &st, 0) == SQLITE_OK) {
+            sqlite3_bind_text(st,1,m_uid.toUtf8().constData(),-1,SQLITE_TRANSIENT);
             while (sqlite3_step(st) == SQLITE_ROW) {
                 QString kind = QString::fromUtf8((const char *)sqlite3_column_text(st, 0));
                 QString sh   = QString::fromUtf8((const char *)sqlite3_column_text(st, 1));
@@ -62,8 +62,6 @@ void ZaloService::onPhoneSyncTick()
             }
             sqlite3_finalize(st);
         }
-        rt->senderLong[rt->meShort] = m_uid;
-        rt->senderName[rt->meShort] = rt->myName;
 
         sqlite3_prepare_v2(m_db, "SELECT threadId, senderId, dName, isMine FROM messages WHERE msgId=?", -1, &rt->find, 0);
         rt->phase = 1; rt->pi = 0; rt->ri = 0;
@@ -84,8 +82,13 @@ void ZaloService::onPhoneSyncTick()
                         QString tid = QString::fromUtf8((const char *)sqlite3_column_text(rt->find, 0));
                         QString sid = QString::fromUtf8((const char *)sqlite3_column_text(rt->find, 1));
                         const unsigned char *dn = sqlite3_column_text(rt->find, 2);
+                        if (sqlite3_column_int(rt->find,3) == 1 || sid == m_uid) {
+                            rt->meShort=r.sender;
+                            rt->senderLong[r.sender]=m_uid;
+                            rt->senderName[r.sender]=rt->myName;
+                        }
                         if (!threadKnown && !tid.isEmpty()) rt->threadLong[tk] = tid;
-                        if (!senderKnown && !sid.isEmpty() && sid != "0") {
+                        if (!senderKnown && !sid.isEmpty() && sid != "0" && sqlite3_column_int(rt->find,3) != 1) {
                             rt->senderLong[r.sender] = sid;
                             if (dn && *dn) rt->senderName[r.sender] = QString::fromUtf8((const char *)dn);
                         }
@@ -111,7 +114,8 @@ void ZaloService::onPhoneSyncTick()
         }
         sqlite3_exec(m_db, "BEGIN", 0, 0, 0);
         sqlite3_stmt *st = 0;
-        if (sqlite3_prepare_v2(m_db, "INSERT OR REPLACE INTO phone_sync_alias (kind, shortId, longId, name) VALUES (?,?,?,?)", -1, &st, 0) == SQLITE_OK) {
+        if (sqlite3_prepare_v2(m_db, "INSERT OR REPLACE INTO phone_sync_alias_v2 (kind, shortId, longId, name, account) VALUES (?,?,?,?,?)", -1, &st, 0) == SQLITE_OK) {
+            sqlite3_bind_text(st,5,m_uid.toUtf8().constData(),-1,SQLITE_TRANSIENT);
             for (QMap<QString,QString>::const_iterator it = rt->threadLong.constBegin(); it != rt->threadLong.constEnd(); ++it) {
                 QString kind = it.key().left(1), sh = it.key().mid(2);
                 sqlite3_reset(st);
@@ -148,7 +152,7 @@ void ZaloService::onPhoneSyncTick()
         sqlite3_exec(m_db, "BEGIN", 0, 0, 0);
         while (rt->pi < rt->parts.size()) {
             PsPart &p = rt->parts[rt->pi];
-            if (p.threadLong.isEmpty()) { rt->doneRows += p.rows.size(); rt->pi++; rt->ri = 0; continue; }
+
             if (rt->ri == 0 && !rt->clearedAt.contains(p.threadLong)) {
                 rt->clearedAt[p.threadLong] = psQueryString(m_db, "SELECT clearedAt FROM cleared_threads WHERE threadId=?", p.threadLong).toLongLong();
             }
@@ -156,13 +160,35 @@ void ZaloService::onPhoneSyncTick()
             while (rt->ri < p.rows.size()) {
                 const PsRow &r = p.rows[rt->ri++];
                 rt->doneRows++;
-                if (r.type != 0 || r.glb == "0" || r.content.isEmpty()) continue;
+                qint64 archiveTs=r.ts;
+                if (archiveTs > 0 && archiveTs < 1000000000000LL) archiveTs *= 1000;
+                if (isMessageDeletedForMe(r.glb) ||
+                    (!p.threadLong.isEmpty() && cleared > 0 && archiveTs <= cleared)) continue;
+                QString archiveKey;
+                if (!r.glb.isEmpty() && r.glb != "0") archiveKey="g:"+r.glb;
+                else if (!r.cli.isEmpty() && r.cli != "0") archiveKey="c:"+r.sender+":"+r.cli;
+                else archiveKey="h:"+QString::fromLatin1(QCryptographicHash::hash(
+                    (r.sender+"|"+QString::number(r.ts)+"|"+QString::number(r.type)+"|"+r.content).toUtf8(),
+                    QCryptographicHash::Sha1).toHex());
+                bool added=false;
+                if (!PhoneSyncArchive::insert(m_db,m_uid.toUtf8().constData(),p.isGroup?1:0,
+                    p.shortId.toUtf8().constData(),archiveKey.toUtf8().constData(),
+                    r.sender.toUtf8().constData(),archiveTs,r.type,r.content.toUtf8().constData(),added)) {
+                    sqlite3_exec(m_db,"ROLLBACK",0,0,0);
+                    phoneSyncFail(QString::fromUtf8("Không lưu được lịch sử đồng bộ; hãy kiểm tra dung lượng trống.")); return;
+                }
+                if (added) rt->archived++;
+                // Yield also for unresolved/unsupported rows; these used to be discarded.
+                if (p.threadLong.isEmpty() || r.type != 0 || r.glb == "0" || r.content.isEmpty()) {
+                    if (clock.elapsed() >= PS_SLICE_MS) break;
+                    continue;
+                }
                 qint64 ts = r.ts;
                 if (ts > 0 && ts < 1000000000000LL) ts *= 1000;
                 if (cleared > 0 && ts <= cleared) continue;
                 if (isMessageDeletedForMe(r.glb)) continue;
 
-                bool isMine = (r.sender == rt->meShort);
+                bool isMine = (rt->senderLong.value(r.sender) == m_uid);
                 QString sid = rt->senderLong.value(r.sender);
                 QString sname = rt->senderName.value(r.sender);
                 if (sid.isEmpty()) { sid = r.sender; sname = QString::fromUtf8("Member ") + r.sender; }
@@ -181,7 +207,10 @@ void ZaloService::onPhoneSyncTick()
                 sqlite3_bind_int (rt->ins, 8, p.isGroup ? 1 : 0);
                 sqlite3_bind_int (rt->ins, 9, outType);
                 sqlite3_bind_text(rt->ins, 10, r.cli.toUtf8().constData(), -1, SQLITE_TRANSIENT);
-                sqlite3_step(rt->ins);
+                if (sqlite3_step(rt->ins) != SQLITE_DONE) {
+                    sqlite3_exec(m_db,"ROLLBACK",0,0,0);
+                    phoneSyncFail(QString::fromUtf8("Không nhập được tin nhắn vào cơ sở dữ liệu.")); return;
+                }
                 if (sqlite3_changes(m_db) > 0) { rt->imported++; rt->importedThreads.insert(p.threadLong); }
 
                 if ((rt->ri & 63) == 0 && clock.elapsed() >= PS_SLICE_MS) break;
@@ -189,7 +218,10 @@ void ZaloService::onPhoneSyncTick()
             if (rt->ri >= p.rows.size()) { rt->pi++; rt->ri = 0; }
             if (clock.elapsed() >= PS_SLICE_MS) break;
         }
-        sqlite3_exec(m_db, "COMMIT", 0, 0, 0);
+        if (sqlite3_exec(m_db, "COMMIT", 0, 0, 0) != SQLITE_OK) {
+            sqlite3_exec(m_db,"ROLLBACK",0,0,0);
+            phoneSyncFail(QString::fromUtf8("Không ghi được lịch sử đồng bộ vào bộ nhớ.")); return;
+        }
 
         if (rt->pi < rt->parts.size()) {
             int pct = 62 + (rt->totalRows > 0 ? (int)(36 * rt->doneRows / rt->totalRows) : 0);
@@ -203,6 +235,7 @@ void ZaloService::onPhoneSyncTick()
     int unmatched = 0;
     for (int i = 0; i < rt->parts.size(); ++i) if (rt->parts[i].threadLong.isEmpty()) unmatched++;
     int imported = rt->imported;
+    int archived = rt->archived;
     int threads = rt->importedThreads.size();
     int total = rt->parts.size();
     QSettings s("BerryLife", "Zalo10");
@@ -214,9 +247,9 @@ void ZaloService::onPhoneSyncTick()
     delete rt;
     m_psh.p = 0;
 
-    QString msg = QString::fromUtf8("Imported %1 older message(s) into %2 conversation(s).").arg(imported).arg(threads);
+    QString msg = QString::fromUtf8("Đã lưu %1 tin mới vào kho lịch sử; ghép %2 tin vào %3 cuộc trò chuyện.").arg(archived).arg(imported).arg(threads);
     if (unmatched > 0)
-        msg += QString::fromUtf8("\n%1 of %2 conversations could not be matched yet (Zalo10 has not received any message from them). Run the sync again after a few days.").arg(unmatched).arg(total);
+        msg += QString::fromUtf8("\n%1/%2 hội thoại chưa xác định được liên lạc. Vào menu → Lịch sử từ điện thoại để đọc; chưa thể gửi tin từ các mục này.").arg(unmatched).arg(total);
     qDebug() << "[PhoneSync] done:" << imported << "messages," << threads << "conversations," << unmatched << "of" << total << "not matched yet";
     emit phoneSyncProgress(100, QString::fromUtf8("Done"));
     if (imported > 0) emit historySynced(imported);

@@ -112,3 +112,27 @@ The compatibility BAR passes validation, all 31 toolkit/flow tests and existing
 JS checks pass, and generated QML passes syntax lint. Both original binary hashes
 are retained. No BB10 runtime or device visual check was available; the original
 chat, login and settings behavior is retained from the prior compatibility build.
+
+## 1.5.0.8 / 1.5.0.9: inbox, account page and phone history
+
+Both builds use a narrower/taller capsule navigation and a history-only mixed
+direct/group inbox, sorted by latest normalized timestamp regardless of pins.
+The third tab is now Profile (Cá nhân), exposing account name/ID and the requested
+settings actions. Group metadata is fetched by the inbox instead of a GroupsTab.
+The original-engine 8 preserves the working binaries and original ChatView/login;
+it cannot repair the native importer. Native 9 archives phone rows before trying
+ID resolution, exposes an account-scoped read-only paginated viewer, checks write
+failures, and retains verified message-overlap mapping for live chats. Unresolved
+phone IDs never become sending destinations. Mapping aliases are account-scoped;
+self identity no longer depends on sender frequency. This preserves otherwise
+discarded history, but does not automatically recover contact names/routing IDs.
+
+35 toolkit/native-storage/flow tests, existing JS tests and 3 native package tests
+pass. The storage test compiles the actual C++ archive writer against host SQLite;
+it needs SQLite development headers/library. In this cloud workspace the SDK's
+portable sqlite3.h and host libsqlite3.so.0 were supplied via ZALO_SQLITE_INCLUDE
+and ZALO_SQLITE_LIBRARY; CI explicitly installs libsqlite3-dev. The actual native
+9 build passes SDK startup/import/unwind checks and BAR validation (807 assets).
+Both final BAR QML sets pass syntax lint. No phone sync/session/UI runtime was
+available in cloud. Native 9 launch is unverified; original-engine 8 is the fallback.
+See phone-history-vi.md for limits and device test steps.

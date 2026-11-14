@@ -147,7 +147,7 @@ NavigationPane {
                     if (!page) return;
                     page.threadId   = item.threadId || item.uid || "";
                     page.threadName = item.name || "Chat";
-                    page.isGroup    = false;
+                    page.isGroup    = item.isGroup === true;
                     page.avatarUrl  = item.localAvatar || item.avatar || "";
                     page.selfName   = chatsNav.selfName;
                     chatsNav.markLocalRead(page.threadId);
@@ -289,6 +289,7 @@ NavigationPane {
         chatsLoading.visible = true;
         chatsEmpty.visible = false;
         zService.fetchFriends();
+        zService.fetchConversations();
     }
     function markAllRead() { markAllReadDialog.show(); }
 
@@ -296,6 +297,28 @@ NavigationPane {
     signal onUnreadMessage()
 
     property variant lastFriends: []
+    property variant lastGroups: []
+    property variant recentMessages: ({})
+    function inboxCandidates(friends, groups, lastMsgs) {
+        var byId = {}, result = [];
+        var all = [];
+        for (var f=0; f<(friends || []).length; ++f) all.push(friends[f]);
+        for (var g=0; g<(groups || []).length; ++g) all.push(groups[g]);
+        for (var i=0; i<all.length; ++i) {
+            var source=all[i], id=(source.threadId || source.uid || source.groupId || "").toString();
+            if (id.length) byId[id]=source;
+        }
+        for (var tid in lastMsgs) {
+            var original=byId[tid] || {}, item={};
+            for (var key in original) item[key]=original[key];
+            item.threadId=tid;
+            item.name=item.name || item.displayName || "Hội thoại " + tid;
+            item.isGroup=(item.isGroup === true || item.isGroup === 1 || item.isGroup === "true" || lastMsgs[tid].isGroup === true);
+            result.push(item);
+        }
+        return result;
+    }
+
 
     function buildFriends(friends, restoreAvatars) {
         chatsLoading.visible = false;
@@ -312,6 +335,11 @@ NavigationPane {
         for (var pn = 0; pn < pinnedIds.length; pn++) pinMap[pinnedIds[pn]] = true;
         friendModel.clear();
         var lastMsgs = zService.getThreadLastMessages();
+        for (var recentId in chatsNav.recentMessages) {
+            var recent=chatsNav.recentMessages[recentId], saved=lastMsgs[recentId];
+            if (!saved || Number(recent.ts || 0) >= Number(saved.ts || 0)) lastMsgs[recentId]=recent;
+        }
+        friends = inboxCandidates(friends, chatsNav.lastGroups, lastMsgs);
         var unreadIds = zService.unreadThreadIds();
         var unreadMap = {};
         for (var u = 0; u < unreadIds.length; u++) unreadMap[unreadIds[u]] = true;
@@ -358,15 +386,13 @@ NavigationPane {
             if (out.lastTime && out.lastTime !== "") {
                 var ts = parseInt(out.lastTime);
                 if (!isNaN(ts)) {
-                    out.sortTs = ts;
+                    out.sortTs = ts < 1000000000000 ? ts * 1000 : ts;
                     out.lastTime = chatsNav.formatTime(ts);
                 }
             }
             outArr.push(out);
         }
         outArr.sort(function(a, b) {
-            var pa = a.isPinned ? 1 : 0, pb = b.isPinned ? 1 : 0;
-            if (pa !== pb) return pb - pa;
             return (b.sortTs || 0) - (a.sortTs || 0);
         });
         for (var j = 0; j < outArr.length; j++) {

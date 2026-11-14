@@ -56,12 +56,14 @@ def calls(data):
 def patch_assets(original,style_root):
     """Return only UI asset changes. Original ChatView/Login and native business logic remain based on the BAR."""
     from .zalo_features import chat_contact_seed,contact_picker,sync_settings,SHELL_FUNCTIONS
+    from .zalo_threads import inbox
+    from .zalo_profile import profile_main
     changed={}
     for p in sorted(style_root.glob('Modern*.qml')):
         content=p.read_bytes()
         if p.name=='ModernMenu.qml':
             # The old engine doesn't implement the newer mark-all-read API.
-            content=b'\n'.join(l for l in content.split(b'\n') if b'choose("markRead")' not in l)
+            content=b'\n'.join(l for l in content.split(b'\n') if b'choose("markRead")' not in l and b'choose("phoneArchive")' not in l)
         changed['native/assets/'+p.name]=content
     changed['native/assets/ModernFormat.js']=(style_root/'ModernFormat.js').read_bytes()
     for p in sorted((style_root/'images/modern').glob('*.png')):
@@ -176,7 +178,7 @@ def patch_assets(original,style_root):
 
 '''+text[b:]
         refresh={
-            'chatsNav': 'if (refreshCooldown) return; refreshCooldown=true; chatsRefreshCooldownTimer.restart(); friendModel.clear(); chatsLoading.visible=true; zService.fetchFriends();',
+            'chatsNav': 'if (refreshCooldown) return; refreshCooldown=true; chatsRefreshCooldownTimer.restart(); friendModel.clear(); chatsLoading.visible=true; zService.fetchFriends(); zService.fetchConversations();',
             'contactsNav': 'if (refreshCooldown) return; refreshCooldown=true; refreshCooldownTimer.restart(); contactsPage.populated=false; contactModel.clear(); contactsLoading.visible=true; zService.fetchFriends();',
             'groupsNav': 'if (refreshCooldown) return; refreshCooldown=true; groupsRefreshCooldownTimer.restart(); groupModel.clear(); groupsLoading.visible=true; zService.fetchConversations();',
             'invitesNav': 'inviteModel.clear(); invitesLoading.visible=true; zService.fetchInvites();'}[nav]
@@ -191,7 +193,7 @@ def patch_assets(original,style_root):
             if marker in text:
                 text=once(text,marker,marker+'\n                textStyle { color: Color.create("#a4c9da") }')
         if filename=='ContactsTab.qml': text=contact_picker(text)
-        if filename=='ChatsTab.qml': text=chat_contact_seed(text)
+        if filename=='ChatsTab.qml': text=inbox(chat_contact_seed(text))
         changed['native/assets/'+filename]=text.encode('utf-8')
 
     main=original['native/assets/main.qml'].decode('utf-8')
@@ -218,7 +220,7 @@ def patch_assets(original,style_root):
                 else if (action === "feedback") app.invokeEmail("Berrylife2025@gmail.com", "Zalo10 Feedback");
             }
         },''')
-    changed['native/assets/main.qml']=main.encode('utf-8')
+    changed['native/assets/main.qml']=profile_main(main).encode('utf-8')
     if 'native/assets/SettingsSheet.qml' in original:
         changed['native/assets/SettingsSheet.qml']=sync_settings(original['native/assets/SettingsSheet.qml'].decode()).encode()
     if calls(changed)-calls(original):
@@ -283,7 +285,7 @@ def write_package(original,updates,infos,output,version):
     return report,data
 
 
-def build(input_bar,output,build_id=7):
+def build(input_bar,output,build_id=8):
     input_bar=Path(input_bar); output=Path(output)
     if input_bar.resolve()==output.resolve(): raise ValueError('Output must not overwrite the original BAR')
     if not 1<=build_id<=65535: raise ValueError('Invalid build id')

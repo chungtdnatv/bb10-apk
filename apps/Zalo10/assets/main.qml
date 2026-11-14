@@ -6,26 +6,20 @@ TabbedPane {
     id: root
     showTabsOnActionBar: false
     sidebarState: SidebarState.Hidden
-    
+
     property string selfName: "Me"
     property int chatsUnreadCount: 0
-    property int groupsUnreadCount: 0
-    
+
     onChatsUnreadCountChanged: {
         chatsTab.title = chatsUnreadCount > 0
         ? "Chats (" + chatsUnreadCount + ")"
         : "Chats";
     }
-    onGroupsUnreadCountChanged: {
-        groupsTab.title = groupsUnreadCount > 0
-        ? "Groups (" + groupsUnreadCount + ")"
-        : "Groups";
-    }
+
     onActiveTabChanged: {
         if (activeTab === chatsTab)  root.chatsUnreadCount  = 0;
-        if (activeTab === groupsTab) root.groupsUnreadCount = 0;
     }
-    
+
     Menu.definition: MenuDefinition {
         actions: [
             ActionItem {
@@ -45,7 +39,7 @@ TabbedPane {
             }
         ]
     }
-    
+
     function formatTime(timestamp) {
         if (!timestamp || timestamp === "") return "";
         var date = new Date(timestamp * 1);
@@ -62,13 +56,13 @@ TabbedPane {
         var mon = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][date.getMonth()];
         return mon + " " + date.getDate();
     }
-    
+
     function selectSection(index) {
         contactsTabContent.composeMode = false;
         contactsTabContent.composeOpening = false;
         if (index === 0) { root.activeTab = chatsTab; chatsTabContent.raiseBottomBar(); }
         else if (index === 1) { root.activeTab = contactsTab; contactsTabContent.raiseBottomBar(); }
-        else if (index === 2) { root.activeTab = groupsTab; groupsTabContent.raiseBottomBar(); }
+        else if (index === 2) { root.activeTab = profileTab; profileTabContent.raiseBottomBar(); }
     }
     function openComposer() {
         contactsTabContent.beginCompose();
@@ -103,7 +97,7 @@ TabbedPane {
             tosTimer.start();
         }
     }
-    
+
     Tab {
         id: chatsTab
         title: "Tin nhắn"
@@ -118,7 +112,7 @@ TabbedPane {
             }
         }
     }
-    
+
     Tab {
         id: contactsTab
         title: "Danh bạ"
@@ -129,22 +123,20 @@ TabbedPane {
             appShell: root
         }
     }
-    
+
     Tab {
-        id: groupsTab
-        title: "Nhóm"
-        description: "Group chats"
-        imageSource: "asset:///images/ic_groups_white.png"
-        GroupsTab {
-            id: groupsTabContent
+        id: profileTab
+        title: "Cá nhân"
+        imageSource: "asset:///images/ic_contact.png"
+        ModernProfile {
+            id: profileTabContent
             appShell: root
-            onOnUnreadMessage: {
-                if (root.activeTab !== groupsTab)
-                    root.groupsUnreadCount++;
-            }
+            accountName: root.selfName
+            supportsArchive: true
+            onActionRequested: { modernMenu.selected(action); }
         }
     }
-    
+
     Tab {
         id: invitesTab
         title: "Lời mời"
@@ -155,17 +147,18 @@ TabbedPane {
             appShell: root
         }
     }
-    
+
     attachedObjects: [
+        PhoneArchiveSheet { id: phoneArchiveSheet },
         ModernMenu {
             id: modernMenu
             onSelected: {
                 if (action === "refresh") {
-                    if (root.activeTab === groupsTab) zService.fetchConversations();
-                    else if (root.activeTab === invitesTab) zService.fetchInvites();
+                    if (root.activeTab === invitesTab) zService.fetchInvites();
                     else if (root.activeTab === contactsTab) zService.fetchFriends();
                     else chatsTabContent.refreshList();
                 } else if (action === "invites") root.activeTab = invitesTab;
+                else if (action === "phoneArchive") phoneArchiveSheet.open();
                 else if (action === "phoneSync") settingsSheet.startPhoneSyncFlow();
                 else if (action === "settings") settingsSheet.open();
                 else if (action === "about") aboutSheet.open();
@@ -186,10 +179,10 @@ TabbedPane {
                 onLoginSuccessful: { loginSheet.close(); }
             }
         },
-        
+
         SettingsSheet { id: settingsSheet },
         AboutSheet    { id: aboutSheet },
-        
+
         Connections {
             target: zService
             onSessionExpired: { loginSheet.needsQR = true; loginSheet.open(); }
@@ -198,7 +191,6 @@ TabbedPane {
                 if (typeof displayName !== "undefined" && displayName.length > 0) {
                     root.selfName = displayName;
                     chatsTabContent.selfName    = displayName;
-                    groupsTabContent.selfName   = displayName;
                     contactsTabContent.selfName = displayName;
                 }
             }
@@ -207,13 +199,8 @@ TabbedPane {
         Connections {
             target: app
             onOpenThreadRequested: {
-                if (isGroup) {
-                    root.activeTab = groupsTab;
-                    groupsTabContent.openThread(threadId, isGroup);
-                } else {
-                    root.activeTab = chatsTab;
-                    chatsTabContent.openThread(threadId, isGroup);
-                }
+                root.activeTab = chatsTab;
+                chatsTabContent.openThread(threadId,isGroup);
             }
             onEventCreated: {
                 eventResultDialog.body = success

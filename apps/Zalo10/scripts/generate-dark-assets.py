@@ -8,7 +8,7 @@ def save(name, size, paint):
  paint(d,3); im.resize(size,Image.Resampling.LANCZOS).save(ROOT/('dark-'+name+'.png'))
 def pill(name,size,fill,border,width=2):
  save(name,size,lambda d,s:d.rounded_rectangle((s,s,(size[0]-1)*s,(size[1]-1)*s),radius=(size[1]/2-1)*s,fill=fill,outline=border,width=width*s))
-pill('navigation',(1024,164),PANEL,BORDER)
+pill('navigation',(800,220),PANEL,'#6590a8',4)
 pill('search-bg',(1024,116),'#203947','#395565',1)
 pill('selected',(320,140),'#274c60','#3a7188',1)
 def mask(d,s):

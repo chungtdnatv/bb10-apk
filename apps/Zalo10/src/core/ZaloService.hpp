@@ -157,6 +157,8 @@ public:
     Q_INVOKABLE void fetchPinConversations();
     Q_INVOKABLE void startHistorySync();
     Q_INVOKABLE bool isHistorySyncing() const { return m_sync.active || m_sync.groupActive; }
+    Q_INVOKABLE QVariantList phoneArchiveThreads();
+    Q_INVOKABLE QVariantList phoneArchiveMessages(const QString &shortId, bool isGroup, int offset);
     Q_INVOKABLE void startPhoneSync();
     Q_INVOKABLE void cancelPhoneSync();
     Q_INVOKABLE bool isPhoneSyncing() const;

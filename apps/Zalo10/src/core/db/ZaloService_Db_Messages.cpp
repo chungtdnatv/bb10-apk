@@ -390,7 +390,7 @@ QVariantMap ZaloService::getThreadLastMessages() const
 
     const char *sql =
         "SELECT threadId, content, dName, isMine, msgType, recalledOriginalContent, "
-        "MAX(CAST(ts AS INTEGER)) AS maxTs, msgId "
+        "MAX(CASE WHEN CAST(ts AS INTEGER)<1000000000000 THEN CAST(ts AS INTEGER)*1000 ELSE CAST(ts AS INTEGER) END) AS maxTs, msgId, isGroup "
         "FROM messages GROUP BY threadId;";
     sqlite3_stmt *stmt = 0;
     if (sqlite3_prepare_v2(m_db, sql, -1, &stmt, 0) != SQLITE_OK) return result;
@@ -416,6 +416,7 @@ QVariantMap ZaloService::getThreadLastMessages() const
             }
         }
         m["state"] = state;
+        m["isGroup"] = sqlite3_column_int(stmt,8)==1;
         result[threadId] = m;
     }
     sqlite3_finalize(stmt);
