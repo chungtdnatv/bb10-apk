@@ -12,6 +12,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 from bb10kit.bar import verify
+from bb10kit.manifest import test_version_id as sdk_version_id
 from elf_fixtures import cascades_elf
 
 REPO=Path(__file__).resolve().parents[1]
@@ -20,12 +21,15 @@ cli=importlib.util.module_from_spec(spec)
 spec.loader.exec_module(cli)
 
 
-def fixture(path, entry=0x1000, tamper=False, missing_key=False):
+def fixture(path, entry=0x1000, tamper=False, missing_key=False, version_width=17):
     elf=cascades_elf(entry=entry)
     files={'native/Test.so':elf,'native/assets/main.qml':b'import bb.cascades 1.4\nPage {}\n',
            'native/assets/.assets.index':b'1\n1\nmain.qml\n'}
     header=['Archive-Manifest-Version: 1.5','','Entry-Point-Name: Test',
             'Entry-Point: app/native/Test.so','Entry-Point-Type: Qnx/Cascades']
+    encoded='test'+base64.urlsafe_b64encode(b'1.0.0.0'.ljust(version_width)).decode().rstrip('=')
+    header+=['Package-Version: 1.0.0.0','Package-Version-Id: '+encoded,
+             'Application-Version: 1.0.0.0','Application-Version-Id: '+encoded]
     if not missing_key: header+=['Entry-Point-Key: Test']
     header+=['']
     for name,content in files.items():
@@ -59,6 +63,13 @@ class BarTests(unittest.TestCase):
     def test_reject_missing_entry_key(self):
         fixture(self.bar,missing_key=True)
         with self.assertRaisesRegex(ValueError,'entry point keys'): verify(self.bar)
+
+    def test_rejects_wrong_sdk_version_id_width(self):
+        fixture(self.bar,version_width=16)
+        with self.assertRaisesRegex(ValueError,'must decode to 17 bytes'): verify(self.bar)
+
+    def test_version_id_matches_captured_sdk_packager_output(self):
+        self.assertEqual(sdk_version_id('1.0.0.0'),'testMS4wLjAuMCAgICAgICAgICA')
 
 
 class ScaffoldTests(unittest.TestCase):

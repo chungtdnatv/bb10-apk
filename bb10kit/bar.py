@@ -5,6 +5,7 @@ from pathlib import PurePosixPath
 import struct
 import zipfile
 from .elf import check_cascades
+from .manifest import validate_test_version_ids
 
 
 def logical_lines(data):
@@ -30,6 +31,7 @@ def verify(path):
             if p.is_absolute() or '..' in p.parts or '\\' in name:
                 raise ValueError('Unsafe BAR path: '+name)
         lines = logical_lines(archive.read('META-INF/MANIFEST.MF'))
+        validate_test_version_ids(lines)
         digests, binaries, entries, invokes = {}, [], [], []
         current = None
         for index, line in enumerate(lines):

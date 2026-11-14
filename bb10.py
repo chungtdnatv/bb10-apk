@@ -123,6 +123,10 @@ def main(argv=None):
     p.add_argument('app',nargs='?',default='Zalo10'); p.add_argument('--native',action='store_true')
     p.add_argument('--image',default=DEFAULT_IMAGE); p.add_argument('--jobs',type=int)
     p=sub.add_parser('verify',help='Verify an existing BAR without the SDK'); p.add_argument('bar',type=Path)
+    p=sub.add_parser('build-zalo-ui',help='Patch the modern UI onto the supported original Zalo1.5.bar, retaining its native engine')
+    p.add_argument('original',type=Path)
+    p.add_argument('--output',type=Path)
+    p.add_argument('--build-id',type=int,default=4)
     p=sub.add_parser('test',help='Run toolkit and application tests')
     p.add_argument('app',nargs='?')
     args=parser.parse_args(argv)
@@ -139,6 +143,10 @@ def main(argv=None):
         elif args.action=='create': create(args)
         elif args.action=='build': build(args)
         elif args.action=='verify': print(json.dumps(verify(args.bar),ensure_ascii=False))
+        elif args.action=='build-zalo-ui':
+            from bb10kit.zalo_ui import build as build_zalo_ui
+            output=args.output or ROOT/f'dist/Zalo10-1.5.0.{args.build_id}-ui-only-original-engine-unsigned.bar'
+            build_zalo_ui(args.original,output,args.build_id)
         elif args.action=='test':
             command([sys.executable,'-m','unittest','discover','-s','tests','-v'])
             if args.app:

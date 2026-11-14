@@ -1,5 +1,15 @@
 # Lấy log khi Zalo10 thoát ngay trên Passport
 
+**Cập nhật:** người dùng xác nhận BAR gốc mở được. Bản thử 1.5.0.4 dùng nguyên
+engine gốc với UI mới, không có POSIX startup logger của 1.5.0.3. Với bản 1.5.0.4,
+lấy `data/zalo10_runtime.log` hoặc menu → Cài đặt → Export Log. Không coi file
+`zalo10_startup.log` còn lại từ 1.5.0.3 là log của 1.5.0.4.
+Xem [chế độ UI-only](../apps/Zalo10/compat/README.md).
+
+Các BAR native 1.5.0.1–3 còn có lỗi ID phiên bản đệm 16 thay vì 17 byte; không nên
+cài lại chúng cho lần thử mới. Source native đã sửa và tăng lên 1.5.0.5. Phần hướng
+dẫn 1.5.0.3 dưới đây vẫn dùng để lấy log của lần chạy cũ, nếu bạn đã cài bản đó.
+
 ## Bản 1.5.0.3
 
 1.5.0.1 và 1.5.0.2 đều được người dùng báo thoát khi mở trên Passport.

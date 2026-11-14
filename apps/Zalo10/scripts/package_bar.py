@@ -10,10 +10,13 @@ import base64
 import hashlib
 from pathlib import Path
 import stat
+import sys
 import xml.etree.ElementTree as ET
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT.parents[1]))
+from bb10kit.manifest import test_version_id,validate_test_version_ids
 NS = {'q': 'http://www.qnx.com/schemas/application/1.0'}
 
 def encode(value):
@@ -65,7 +68,7 @@ def build(output):
         if line.startswith(('Package-Version: ', 'Application-Version: ')):
             lines[i] = line.split(':',1)[0] + ': ' + version
         elif line.startswith(('Package-Version-Id: ', 'Application-Version-Id: ')):
-            lines[i] = line.split(':',1)[0] + ': test' + encode(version.encode('ascii').ljust(16))
+            lines[i] = line.split(':',1)[0] + ': ' + test_version_id(version)
     while lines and not lines[-1]: lines.pop()
     lines += ['']
     for name, content in sorted(data.items()):
@@ -90,6 +93,7 @@ def verify(output):
         names = z.namelist()
         assert len(names) == len(set(names)), 'Duplicate ZIP entries'
         lines = logical_lines(z.read('META-INF/MANIFEST.MF').decode('ascii'))
+        validate_test_version_ids(lines)
         text = '\n'.join(lines)
         assert text.count('Entry-Point-Key: ') == 2
         assert 'Entry-Point-Key: Zalo10\n' in text

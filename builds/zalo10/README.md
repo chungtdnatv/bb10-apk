@@ -1,6 +1,21 @@
 # Zalo10 test builds
 
-**Use `Zalo10-1.5.0.3-modern-diagnostic-unsigned.bar` for the next device test.**
+**Preferred retest: `Zalo10-1.5.0.4-ui-only-original-engine-unsigned.bar`.**
+The user confirmed the original supplied BAR opens on the same Passport.
+1.5.0.4 retains both original native binaries byte-for-byte and applies the modern
+home UI to the original QML. It disables the unsafe parentless ChatView startup
+prewarm. The adjacent `.report.json` records baseline and binary hashes. Native
+code is reused here, not rebuilt. Device test of the resulting UI remains pending.
+
+1.5.0.3 remains available as a **historical source-built diagnostic**. Its POSIX
+startup logger is not present in the original engine used by 1.5.0.4. Use the
+original runtime log/Settings Export Log for the UI-only build.
+Comparison to the original and SDK packager also found 16-byte test version-ID
+padding in native 1.5.0.1–3 instead of the SDK's 17-byte format. Both builders now
+use 17 bytes and the validator rejects that mistake. Do not use those old BARs as
+the current build. Native source HEAD is 1.5.0.5, still awaiting phone validation.
+
+## Previous native builds
 The 1.5.0.1 source build was reported to crash on launch on a BlackBerry Passport.
 Inspection found that the Cascades shared ELF had `e_entry=0`, unlike the original
 BAR whose entry address points to `main`. Version 1.5.0.2 links with `-e main`,

@@ -43,3 +43,27 @@ Local checks: 16 toolkit tests, 3 package tests and the existing JavaScript test
 pass; both applications build with the updated startup metadata. Device behavior
 of 1.5.0.3 is not yet verified. The startup/runtime log and device OS version are
 needed before identifying the remaining Passport failure with confidence.
+
+## Original engine compatibility path (1.5.0.4)
+
+After the user confirmed the original BAR opens on the same Passport, a separate
+UI-only workflow was added. The real uploaded baseline is SHA-256 pinned. Its UI
+and headless executables are byte-identical in the output; original LoginView,
+ChatView, Settings and all non-UI payload are retained. The five home screens are
+migrated with the modern components/icons, without adding new native API calls.
+The Groups parentless-page prewarm is disabled in this path and the source UI.
+
+The actual output passes BAR validation (759 assets, 2 original ELF binaries and
+both entry points), and the changed QML passes qmllint. Unit tests cover preserving
+native/non-UI bytes and ZIP attributes, refusing an unsupported baseline, refusing
+native API additions and binary updates, keeping the input file, and disabling
+the unsafe warmup. No on-phone success is claimed for the completed UI-only BAR;
+the confirmed device result applies to its original engine/base BAR only.
+
+The comparison additionally exposed a packager error in native test builds 1.5.0.1–3:
+test version IDs decoded to 16 bytes, while the uploaded original and an SDK-created
+Hello10 BAR use 17 bytes. Encoding is now centralized, checked against the captured
+SDK output, and verified by both BAR validators. The UI-only 1.5.0.4 output uses the
+canonical 17-byte IDs; native source is bumped to 1.5.0.5 to avoid silently replacing
+the old diagnostic artifact. This is a confirmed format defect, not a device-confirmed
+explanation of every crash. The old BARs are retained only for provenance.

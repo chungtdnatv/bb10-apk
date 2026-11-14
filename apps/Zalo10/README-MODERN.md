@@ -1,5 +1,10 @@
 # Zalo10 modern UI
 
+Bản thử ưu tiên hiện tại: **1.5.0.4 UI-only dùng binary gốc**, xem `compat/README.md`.
+Source native hiện là **1.5.0.5**, đã sửa ID phiên bản theo định dạng SDK 17 byte;
+không còn xuất định dạng 16 byte sai ở các BAR native 1.5.0.1–3. Runtime vẫn cần
+kiểm tra trên điện thoại; phần ghi chú 1.5.0.3 bên dưới là lịch sử chẩn đoán.
+
 Source này được tích hợp trong BB10 BAR Toolkit, cạnh `../Zalo10Headless`.
 Từ root repo, chạy `python3 bb10.py build Zalo10` và `python3 bb10.py test Zalo10`.
 Trong SDK container đã mount toàn bộ repo, thêm `--native` vào lệnh build.

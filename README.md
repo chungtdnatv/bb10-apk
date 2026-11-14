@@ -61,6 +61,19 @@ sau khi workflow có trên default branch. CI đã cấu hình; kết quả ch�
 
 ## Cài thử và trạng thái Passport
 
+Người dùng đã xác nhận **BAR 1.5 gốc mở được trên cùng Passport**. Bản thử ưu tiên
+hiện tại là [1.5.0.4 — giao diện mới, giữ nguyên binary gốc](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.4-ui-only-original-engine-unsigned.bar).
+Cả UI engine và headless giữ nguyên SHA-256 của BAR gốc; chỉ đổi QML/ảnh và tắt
+prewarm tự tạo/hủy ChatView lúc startup. Bản 1.5.0.4 vẫn cần test trên máy.
+
+```sh
+python3 bb10.py build-zalo-ui Zalo1.5.bar
+```
+
+Đây là luồng cập nhật UI dùng engine gốc, **không phải biên dịch lại native code**.
+Input phải đúng BAR đã ghim hash; không cần Docker cho luồng này. Xem
+[chi tiết và cách lấy log riêng cho bản UI-only](apps/Zalo10/compat/README.md).
+
 BAR hiện tại **chưa ký**, dành cho BB10 đã root hỗ trợ unsigned apps. Dùng
 Sachesi / DBBT / BAR Installer với Development Mode theo hướng dẫn dự án gốc.
 Repo không tạo debug token, không giả chữ ký và không bảo đảm cài được trên máy chưa root.
@@ -73,7 +86,10 @@ Người dùng sau đó vẫn báo crash trên Passport với 1.5.0.2.
 bổ sung log trước Qt ở **Documents/zalo10/log/zalo10_startup.log**.
 Đây là bản sửa kèm chẩn đoán, chưa xác nhận hết lỗi trên thiết bị.
 
-[Tải BAR 1.5.0.3 để test](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.3-modern-diagnostic-unsigned.bar).
+So sánh tiếp còn phát hiện lỗi đóng gói: ID phiên bản của các bản native 1.5.0.1–3
+đệm 16 byte thay vì 17 byte như SDK. Trình đóng gói và validator đã được sửa;
+source native hiện tăng lên **1.5.0.5**, vẫn cần thử trên điện thoại. Các BAR native
+1.5.0.1–3 chỉ giữ làm lịch sử; ưu tiên thử **1.5.0.4 dùng engine gốc** ở link trên.
 Build, test và checksum không thay thế kiểm tra QR login, gửi/nhận tin, đóng/mở lại
 và thông báo nền trên điện thoại. Xem [cách lấy log Passport](docs/passport-logs-vi.md).
 

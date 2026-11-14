@@ -30,11 +30,9 @@ NavigationPane {
             id: groupViewWarmupTimer
             interval: 800
             repeat: false
-            running: true
-            onTriggered: {
-                var w = groupsDef.createObject();
-                if (w) w.destroy();
-            }
+            running: false
+            // Match ChatsTab: creating/destroying a parentless Page can SIGSEGV.
+            // Real ChatView objects are created only on explicit navigation.
         }
     ]
 

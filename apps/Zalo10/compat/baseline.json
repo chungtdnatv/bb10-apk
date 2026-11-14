@@ -1,0 +1,10 @@
+{
+  "input_name": "Zalo1.5.bar",
+  "input_sha256": "9bc76e228c1b457b64dcbb637f71636bc6dbc32ba8f014dda8fd0648ae78101c",
+  "version_prefix": "1.5.0",
+  "binaries": {
+    "native/Zalo10.so": "4a20278af3d71ec507278660d77182fe7eeef6eaec91689d7da54b4ded4e035a",
+    "native/Zalo10Headless": "c5b340be79ef064ba1dacfd6c11c4fb3ad087afc5df335a0d9ee284fc09daddb"
+  },
+  "provenance": "Original BAR uploaded by the user; the user confirmed this BAR opens on the same Passport."
+}
