@@ -1,0 +1,20 @@
+[
+  {
+    "name": "zca-js",
+    "url": "https://github.com/softtyos/zca-js",
+    "commit": "e1c09a98a1c9cee35377a8d392ac9b5688a7d1de",
+    "license": "MIT",
+    "archive": "zca-js.tar.gz",
+    "sha256": "5a128b3af1ec57014c7f3f0c8238e12d8f3e02c4cae4fd6015fd40ae0b5c3821",
+    "role": "reference source only; not linked or shipped inside BAR"
+  },
+  {
+    "name": "ZolaKit-Swift",
+    "url": "https://github.com/hailinhmacduc/ZolaKit-Swift",
+    "commit": "0ab7a9a6f557fcc225ab5382d3fa4786e2426cd3",
+    "license": "MIT",
+    "archive": "ZolaKit-Swift.tar.gz",
+    "sha256": "0cea90f47a8bdf9cc5ad2c76a293411f6a61a1b97b5ff4fd9492f05236af0609",
+    "role": "reference source only; not linked or shipped inside BAR"
+  }
+]

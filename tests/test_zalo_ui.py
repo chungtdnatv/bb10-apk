@@ -19,14 +19,14 @@ class OriginalEngineUI(unittest.TestCase):
             'native/Zalo10Headless':cascades_elf(entry=0x2000),
             'native/bar-descriptor.xml':b'<qnx><buildId>0</buildId></qnx>',
             'native/assets/ChatView.qml':b'// Original chat implementation must not be replaced\n',
-            'native/assets/SettingsSheet.qml':b'// Original settings implementation must not be replaced\n',
+            'native/assets/SettingsSheet.qml':(fixtures/'SettingsSheet.qml').read_bytes(),
             'native/assets/Other.bin':b'original non-UI content'})
         self.styles=ROOT/'apps/Zalo10/assets'
 
     def test_changes_only_requested_screens_and_modern_assets(self):
         updates=patch_assets(self.original,self.styles)
         old_files=set(updates)&set(self.original)
-        self.assertEqual(old_files,{'native/assets/'+n for n in SCREENS})
+        self.assertEqual(old_files,{'native/assets/'+n for n in (*SCREENS,'SettingsSheet.qml')})
         self.assertIn(b'ModernNavigation',updates['native/assets/ChatsTab.qml'])
         self.assertIn(b'asset:///ChatView.qml',updates['native/assets/ChatsTab.qml'])
         self.assertNotIn(b'choose("markRead")',updates['native/assets/ModernMenu.qml'])
@@ -68,7 +68,7 @@ class OriginalEngineUI(unittest.TestCase):
             verify(output)
             with zipfile.ZipFile(output) as z:
                 for name in ('native/Zalo10.so','native/Zalo10Headless','native/assets/ChatView.qml',
-                             'native/assets/SettingsSheet.qml','native/assets/Other.bin'):
+                             'native/assets/Other.bin'):
                     self.assertEqual(z.read(name),original[name],name)
                 self.assertEqual(z.getinfo('native/Zalo10.so').external_attr,info.external_attr)
                 self.assertIn(b'Package-Version: 1.5.0.4',z.read('META-INF/MANIFEST.MF'))

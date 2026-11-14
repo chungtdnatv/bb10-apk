@@ -6,6 +6,24 @@ NavigationPane {
     id: contactsNav
     peekEnabled: false
     property variant appShell: null
+    property bool composeMode: false
+    property bool composeOpening: false
+    function beginCompose() {
+        composeMode = true;
+        composeOpening = false;
+        searchText = "";
+        searchVisible = false;
+        contactsSearchField.text = "";
+        filterList();
+        if (contactsNav.count() > 1) contactsNav.pop();
+    }
+    onPopTransitionEnded: {
+        if (composeMode) {
+            if (contactsNav.count() > 1) contactsNav.pop();
+            else raiseBottomBar();
+        }
+    }
+    function raiseBottomBar() { if (contactsNav.count() === 1) bottomNavigation.reveal(); }
 
     property string selfName: ""
     onSelfNameChanged: contactsPage.selfName = selfName
@@ -92,8 +110,7 @@ NavigationPane {
             horizontalAlignment: HorizontalAlignment.Fill
             verticalAlignment: VerticalAlignment.Fill
             layout: StackLayout { orientation: LayoutOrientation.TopToBottom }
-            ModernHeader {
-                onMenuRequested: { if (contactsNav.appShell) contactsNav.appShell.openModernMenu(); }
+            ModernHeader { heading: contactsNav.composeMode ? "Tin nhắn mới" : "Zalo10"; onMenuRequested: { if (contactsNav.appShell) contactsNav.appShell.openModernMenu(); }
             }
             Container {
                 horizontalAlignment: HorizontalAlignment.Fill
@@ -101,7 +118,7 @@ NavigationPane {
                 rightPadding: ui.du(1.8)
                 ModernSearch {
                     id: contactsSearchField
-                    placeholder: "Tìm kiếm bạn bè"
+                    placeholder: contactsNav.composeMode ? "Tìm người nhận tin nhắn" : "Tìm kiếm bạn bè"
                     onQueryChanged: {
                         contactsNav.searchText = query;
                         contactsNav.searchVisible = query.length > 0;
@@ -141,13 +158,20 @@ NavigationPane {
                             ModernConversation {
                                 displayName: ListItemData.name || ListItemData.displayName || "Không rõ tên"
                                 avatarSource: ListItemData.localAvatar || ""
-                                preview: "Chạm để xem hồ sơ"
+                                preview: gridCell.ListItem.view.navPane.composeMode ? "Chạm để nhắn tin" : "Chạm để xem hồ sơ"
                             }
 
-                            onTouch: {
-                                if (event.isUp()) {
+                            gestureHandlers: [TapHandler { onTapped: {
                                     var item = ListItemData
                                     var lv   = gridCell.ListItem.view
+                                    if (lv.navPane.composeOpening) return;
+                                    if (lv.navPane.composeMode) {
+                                        if (!lv.navPane.appShell) return;
+                                        lv.navPane.composeOpening = true;
+                                        if (!lv.navPane.appShell.composeConversation(item))
+                                            lv.navPane.composeOpening = false;
+                                        return;
+                                    }
                                     var page = lv.profileDef.createObject()
                                     if (!page) return
                                     page.contactId      = item.threadId || item.uid || ""
@@ -159,8 +183,8 @@ NavigationPane {
                                     page.selfName       = lv.selfNameProp
                                     page.navigationPane = lv.navPane
                                     lv.navPane.push(page)
-                                }
-                            }
+
+                            } }]
                         }
                     }
                 ]
@@ -185,6 +209,7 @@ NavigationPane {
             }
         }
             ModernNavigation {
+                id: bottomNavigation
                 selectedIndex: 1
                 onSectionSelected: { if (contactsNav.appShell) contactsNav.appShell.selectSection(index); }
             }

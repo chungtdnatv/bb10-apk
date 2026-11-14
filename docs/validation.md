@@ -67,3 +67,35 @@ SDK output, and verified by both BAR validators. The UI-only 1.5.0.4 output uses
 canonical 17-byte IDs; native source is bumped to 1.5.0.5 to avoid silently replacing
 the old diagnostic artifact. This is a confirmed format defect, not a device-confirmed
 explanation of every crash. The old BARs are retained only for provenance.
+
+## 1.5.0.6: recipient picker, sync access, floating bottom bar
+
+The user subsequently confirmed **1.5.0.4 opens and runs without the earlier crash**
+on Passport (reported BB10 version approximately 10.3.3.3126). It remains the
+known-working device baseline.
+
+The 1.5.0.6 compatibility build preserves both original binaries, original ChatView
+and login bytes. It changes the compose recipient route to open the existing chat
+and seed contact metadata even without a cached conversation. Normal contact
+browsing keeps the profile route, and duplicate recipient taps are guarded.
+Settings/menu now expose the original native phone-sync feature with login and
+busy guards, confirmation, progress and cancellation. This is an improved entry
+point to existing sync, not a replacement server/history sync implementation.
+The bottom bar adds a shadow and a user-triggered rise animation, without startup
+page creation or animation.
+
+Local checks: 31 toolkit/flow tests, 3 source-package tests and the existing JS
+checks pass. Both source and generated compatibility QML pass syntax qmllint.
+The updated native source build also completes and passes SDK import/unwind/startup
+checks (790 assets); that separate native build is not the device-confirmed engine.
+The actual compatibility BAR passes CRC/digest/index/entry-point validation and
+its provenance report records unchanged original executables. Unit flow tests
+execute extracted QML JavaScript for routing, rollback, contact seeding, push/start
+order and sync entry guards; they do not run the BB10 UI runtime.
+
+Two calling implementations were found and archived with revision/license/hash.
+The TypeScript implementation builds; an offline SRTP test covers round trips,
+sequence rollover and tamper rejection. No authenticated call or Swift media test
+was run. Calling is **not integrated** in 1.5.0.6; see the reference directory for
+specific Node/Apple dependencies requiring a BB10 port. Recipient flow, actual
+phone sync and the new animation still require device testing.

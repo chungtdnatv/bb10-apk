@@ -5,6 +5,7 @@ NavigationPane {
     id: invitesNav
     peekEnabled: false
     property variant appShell: null
+    function raiseBottomBar() { if (invitesNav.count() === 1) bottomNavigation.reveal(); }
 
     property bool searchVisible: false
     property string searchText: ""
@@ -204,6 +205,7 @@ NavigationPane {
             }
         }
             ModernNavigation {
+                id: bottomNavigation
                 selectedIndex: 1
                 onSectionSelected: { if (invitesNav.appShell) invitesNav.appShell.selectSection(index); }
             }

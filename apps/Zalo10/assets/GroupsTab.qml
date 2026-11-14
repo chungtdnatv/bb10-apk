@@ -8,6 +8,7 @@ NavigationPane {
     id: groupsNav
     peekEnabled: false
     property variant appShell: null
+    function raiseBottomBar() { if (groupsNav.count() === 1) bottomNavigation.reveal(); }
 
     property string selfName: ""
     signal onUnreadMessage()
@@ -339,6 +340,7 @@ NavigationPane {
             }
         }
             ModernNavigation {
+                id: bottomNavigation
                 selectedIndex: 2
                 onSectionSelected: { if (groupsNav.appShell) groupsNav.appShell.selectSection(index); }
             }

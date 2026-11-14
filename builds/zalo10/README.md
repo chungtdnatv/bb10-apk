@@ -1,11 +1,19 @@
 # Zalo10 test builds
 
-**Preferred retest: `Zalo10-1.5.0.4-ui-only-original-engine-unsigned.bar`.**
+**Current update to test: `Zalo10-1.5.0.6-ui-only-original-engine-unsigned.bar`.**
+Adds direct chat from the + recipient picker, a menu shortcut to existing phone
+message sync with confirmation/progress, and a floating/rising bottom navigation.
+Both original binaries and ChatView/login remain unchanged. Calling is not yet
+integrated; pinned reference sources and offline checks are in
+`references/zalo-calling/`. 1.5.0.6 needs device testing.
+
+**Known-working device baseline: `Zalo10-1.5.0.4-ui-only-original-engine-unsigned.bar`.**
 The user confirmed the original supplied BAR opens on the same Passport.
 1.5.0.4 retains both original native binaries byte-for-byte and applies the modern
 home UI to the original QML. It disables the unsafe parentless ChatView startup
 prewarm. The adjacent `.report.json` records baseline and binary hashes. Native
-code is reused here, not rebuilt. Device test of the resulting UI remains pending.
+code is reused here, not rebuilt. The user confirmed 1.5.0.4 opens and runs OK
+on Passport, with reported OS approximately 10.3.3.3126.
 
 1.5.0.3 remains available as a **historical source-built diagnostic**. Its POSIX
 startup logger is not present in the original engine used by 1.5.0.4. Use the

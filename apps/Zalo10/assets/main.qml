@@ -64,9 +64,28 @@ TabbedPane {
     }
     
     function selectSection(index) {
-        if (index === 0) root.activeTab = chatsTab;
-        else if (index === 1) root.activeTab = contactsTab;
-        else if (index === 2) root.activeTab = groupsTab;
+        contactsTabContent.composeMode = false;
+        contactsTabContent.composeOpening = false;
+        if (index === 0) { root.activeTab = chatsTab; chatsTabContent.raiseBottomBar(); }
+        else if (index === 1) { root.activeTab = contactsTab; contactsTabContent.raiseBottomBar(); }
+        else if (index === 2) { root.activeTab = groupsTab; groupsTabContent.raiseBottomBar(); }
+    }
+    function openComposer() {
+        contactsTabContent.beginCompose();
+        root.activeTab = contactsTab;
+        contactsTabContent.raiseBottomBar();
+    }
+    function composeConversation(contact) {
+        var threadId = (contact.threadId || contact.uid || "").toString();
+        if (threadId.length === 0) return false;
+        var previousTab = root.activeTab;
+        root.activeTab = chatsTab;
+        if (chatsTabContent.openThread(threadId, false, contact) === false) {
+            root.activeTab = previousTab;
+            return false;
+        }
+        contactsTabContent.composeMode = false;
+        return true;
     }
     function openModernMenu() { modernMenu.open(); }
 
@@ -147,6 +166,7 @@ TabbedPane {
                     else if (root.activeTab === contactsTab) zService.fetchFriends();
                     else chatsTabContent.refreshList();
                 } else if (action === "invites") root.activeTab = invitesTab;
+                else if (action === "phoneSync") settingsSheet.startPhoneSyncFlow();
                 else if (action === "settings") settingsSheet.open();
                 else if (action === "about") aboutSheet.open();
                 else if (action === "markRead") chatsTabContent.markAllRead();

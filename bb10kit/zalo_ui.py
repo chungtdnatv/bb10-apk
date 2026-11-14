@@ -54,7 +54,8 @@ def calls(data):
 
 
 def patch_assets(original,style_root):
-    """Return only UI asset changes. Original ChatView/Login/Settings and business logic remain based on the BAR."""
+    """Return only UI asset changes. Original ChatView/Login and native business logic remain based on the BAR."""
+    from .zalo_features import chat_contact_seed,contact_picker,sync_settings,SHELL_FUNCTIONS
     changed={}
     for p in sorted(style_root.glob('Modern*.qml')):
         content=p.read_bytes()
@@ -99,7 +100,7 @@ def patch_assets(original,style_root):
                     defaultImageSource: "asset:///images/modern/compose-button.png"
                     pressedImageSource: "asset:///images/modern/compose-button-pressed.png"
                     accessibility.name: "Soạn tin nhắn mới"
-                    onClicked: { if (chatsNav.appShell) chatsNav.appShell.selectSection(1); }
+                    onClicked: { if (chatsNav.appShell) chatsNav.appShell.openComposer(); }
                 }
             }
         }'''
@@ -125,6 +126,7 @@ def patch_assets(original,style_root):
             }}
             {body}
             ModernNavigation {{
+                id: bottomNavigation
                 selectedIndex: {section}
                 onSectionSelected: {{ if ({nav}.appShell) {nav}.appShell.selectSection(index); }}
             }}
@@ -178,19 +180,17 @@ def patch_assets(original,style_root):
             'contactsNav': 'if (refreshCooldown) return; refreshCooldown=true; refreshCooldownTimer.restart(); contactsPage.populated=false; contactModel.clear(); contactsLoading.visible=true; zService.fetchFriends();',
             'groupsNav': 'if (refreshCooldown) return; refreshCooldown=true; groupsRefreshCooldownTimer.restart(); groupModel.clear(); groupsLoading.visible=true; zService.fetchConversations();',
             'invitesNav': 'inviteModel.clear(); invitesLoading.visible=true; zService.fetchInvites();'}[nav]
-        text=text.replace('    property variant appShell: null','    property variant appShell: null\n    function refreshList() { '+refresh+' }',1)
+        text=text.replace('    property variant appShell: null','    property variant appShell: null\n    function raiseBottomBar() { if ('+nav+'.count() === 1) bottomNavigation.reveal(); }\n    function refreshList() { '+refresh+' }',1)
         text=text.replace('"No friends found"','"Chưa có cuộc trò chuyện"').replace('"No contacts found"','"Không tìm thấy liên hệ"')
+        if filename=='ContactsTab.qml': text=contact_picker(text)
+        if filename=='ChatsTab.qml': text=chat_contact_seed(text)
         changed['native/assets/'+filename]=text.encode('utf-8')
 
     main=original['native/assets/main.qml'].decode('utf-8')
     main=once(main,'SidebarState.VisibleCompact','SidebarState.Hidden')
     for item in ('chats','contacts','groups','invites'):
         main=once(main,'id: '+item+'TabContent','id: '+item+'TabContent\n            appShell: root')
-    main=once(main,'    function startLogin()', '''    function selectSection(index) {
-        if (index === 0) root.activeTab = chatsTab;
-        else if (index === 1) root.activeTab = contactsTab;
-        else if (index === 2) root.activeTab = groupsTab;
-    }
+    main=once(main,'    function startLogin()',SHELL_FUNCTIONS+'''
     function openModernMenu() { modernMenu.open(); }
 
     function startLogin()''')
@@ -204,12 +204,15 @@ def patch_assets(original,style_root):
                     else if (root.activeTab === contactsTab) contactsTabContent.refreshList();
                     else chatsTabContent.refreshList();
                 } else if (action === "invites") root.activeTab = invitesTab;
+                else if (action === "phoneSync") settingsSheet.startPhoneSyncFlow();
                 else if (action === "settings") settingsSheet.open();
                 else if (action === "about") aboutSheet.open();
                 else if (action === "feedback") app.invokeEmail("Berrylife2025@gmail.com", "Zalo10 Feedback");
             }
         },''')
     changed['native/assets/main.qml']=main.encode('utf-8')
+    if 'native/assets/SettingsSheet.qml' in original:
+        changed['native/assets/SettingsSheet.qml']=sync_settings(original['native/assets/SettingsSheet.qml'].decode()).encode()
     if calls(changed)-calls(original):
         raise ValueError('UI introduces native API calls absent from baseline: '+str(calls(changed)-calls(original)))
     return changed
@@ -272,7 +275,7 @@ def write_package(original,updates,infos,output,version):
     return report,data
 
 
-def build(input_bar,output,build_id=4):
+def build(input_bar,output,build_id=6):
     input_bar=Path(input_bar); output=Path(output)
     if input_bar.resolve()==output.resolve(): raise ValueError('Output must not overwrite the original BAR')
     if not 1<=build_id<=65535: raise ValueError('Invalid build id')

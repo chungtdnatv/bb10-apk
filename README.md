@@ -61,10 +61,15 @@ sau khi workflow có trên default branch. CI đã cấu hình; kết quả ch�
 
 ## Cài thử và trạng thái Passport
 
-Người dùng đã xác nhận **BAR 1.5 gốc mở được trên cùng Passport**. Bản thử ưu tiên
-hiện tại là [1.5.0.4 — giao diện mới, giữ nguyên binary gốc](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.4-ui-only-original-engine-unsigned.bar).
+Người dùng đã xác nhận **BAR 1.5 gốc mở được trên cùng Passport**. Người dùng cũng đã xác nhận bản [1.5.0.4 — giao diện mới, giữ nguyên binary gốc](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.4-ui-only-original-engine-unsigned.bar).
 Cả UI engine và headless giữ nguyên SHA-256 của BAR gốc; chỉ đổi QML/ảnh và tắt
-prewarm tự tạo/hủy ChatView lúc startup. Bản 1.5.0.4 vẫn cần test trên máy.
+prewarm tự tạo/hủy ChatView lúc startup. Bản 1.5.0.4 đã mở và chạy tốt trên Passport.
+
+Bản cập nhật [1.5.0.6](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.6-ui-only-original-engine-unsigned.bar)
+thêm chọn bạn từ dấu + để mở chat trực tiếp, menu đồng bộ tin nhắn từ điện thoại
+và bóng đổ/hiệu ứng trượt lên cho bottom bar. Bản này giữ nguyên hai binary gốc,
+đã kiểm tra đóng gói nhưng chưa test trên thiết bị. **Chưa tích hợp gọi thoại/video.**
+Mã tham khảo gọi Zalo và kết quả kiểm tra: [references/zalo-calling](references/zalo-calling/README.md).
 
 ```sh
 python3 bb10.py build-zalo-ui Zalo1.5.bar

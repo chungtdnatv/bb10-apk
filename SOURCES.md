@@ -25,3 +25,10 @@ Zalo10 includes upstream third-party XZ source and a WebP decoder archive/header
 The decoder archive was supplied by Zalo10 upstream; its exact compiler/source
 revision is not established here. The toolkit does not substitute or relabel it.
 Qt, Cascades, OpenSSL and other SDK libraries come from the SDK image.
+
+## Zalo internet calling references
+
+MIT source snapshots of `softtyos/zca-js` and `hailinhmacduc/ZolaKit-Swift` are
+archived under `references/zalo-calling/` with pinned revisions, SHA-256 and
+license copies. They are research/porting inputs, not code bundled in the BAR.
+See [evidence and BB10 port requirements](references/zalo-calling/README.md).

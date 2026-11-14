@@ -8,6 +8,7 @@ NavigationPane {
     id: chatsNav
     peekEnabled: false
     property variant appShell: null
+    function raiseBottomBar() { if (chatsNav.count() === 1) bottomNavigation.reveal(); }
 
     onPopTransitionEnded: {
         zService.clearActiveThread();
@@ -187,11 +188,12 @@ NavigationPane {
                     defaultImageSource: "asset:///images/modern/compose-button.png"
                     pressedImageSource: "asset:///images/modern/compose-button-pressed.png"
                     accessibility.name: "Soạn tin nhắn mới"
-                    onClicked: { if (chatsNav.appShell) chatsNav.appShell.selectSection(1); }
+                    onClicked: { if (chatsNav.appShell) chatsNav.appShell.openComposer(); }
                 }
             }
         }
             ModernNavigation {
+                id: bottomNavigation
                 selectedIndex: 0
                 onSectionSelected: { if (chatsNav.appShell) chatsNav.appShell.selectSection(index); }
             }
@@ -402,12 +404,12 @@ NavigationPane {
         chatsEmpty.text = chatsNav.searchVisible ? "Không tìm thấy cuộc trò chuyện" : "Chưa có cuộc trò chuyện";
     }
 
-    function openThread(threadId, isGroup) {
+    function openThread(threadId, isGroup, contact) {
         while (chatsNav.count() > 1) {
             chatsNav.pop();
         }
         var page = chatsDef.createObject();
-        if (!page) return;
+        if (!page) return false;
         var threadName = "Chat";
         var avatarUrl  = "";
         for (var i = 0; i < friendModel.size(); i++) {
@@ -419,6 +421,10 @@ NavigationPane {
                 break;
             }
         }
+        if (contact) {
+            threadName = contact.name || contact.displayName || threadName;
+            avatarUrl = contact.localAvatar || contact.avatar || avatarUrl;
+        }
         page.threadId   = threadId;
         page.threadName = threadName;
         page.isGroup    = isGroup;
@@ -428,6 +434,7 @@ NavigationPane {
         chatPageConn.target = page;
         chatsNav.push(page);
         page.startChat();
+        return true;
     }
 
     function formatTime(timestamp) { return ModernFormat.formatTime(timestamp, new Date()); }

@@ -17,6 +17,7 @@ Sheet {
             leftPadding: ui.du(3)
             rightPadding: ui.du(3)
             Button { text: "Làm mới danh sách"; horizontalAlignment: HorizontalAlignment.Fill; onClicked: menu.choose("refresh") }
+            Button { text: "Đồng bộ tin nhắn"; horizontalAlignment: HorizontalAlignment.Fill; onClicked: menu.choose("phoneSync") }
             Button { text: "Lời mời kết bạn"; horizontalAlignment: HorizontalAlignment.Fill; onClicked: menu.choose("invites") }
             Button { text: "Đánh dấu tất cả đã đọc"; horizontalAlignment: HorizontalAlignment.Fill; onClicked: menu.choose("markRead") }
             Button { text: "Cài đặt"; horizontalAlignment: HorizontalAlignment.Fill; onClicked: menu.choose("settings") }
