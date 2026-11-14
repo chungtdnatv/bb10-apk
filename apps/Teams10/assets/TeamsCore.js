@@ -32,7 +32,11 @@ function timestamp(text) {
     return Date.parse(text) || 0;
 }
 function initial(name) {var s=trim(name)||"?",c=s.charCodeAt(0);return s.substring(0,c>=0xd800&&c<=0xdbff?2:1).toUpperCase();}
-function displayTime(text) { var value=timestamp(text);return value ? new Date(value).toLocaleString() : ""; }
+function displayTime(text) {
+    var value=timestamp(text);if(!value)return "";
+    var d=new Date(value);function two(n){return n<10?"0"+n:String(n);}
+    return two(d.getDate())+"/"+two(d.getMonth()+1)+"/"+d.getFullYear()+" "+two(d.getHours())+":"+two(d.getMinutes());
+}
 function mergeMessages(oldRows,newRows) {
     var map={}, rows=[],i;
     for(i=0;i<oldRows.length;++i) if(oldRows[i].id) map["$"+oldRows[i].id]=oldRows[i];
@@ -72,6 +76,8 @@ function messageText(m) {
 function normalizedMessage(m) {
     var sender=String(m.from||"");
     if(sender.indexOf("/contacts/")!==-1)sender=sender.slice(sender.lastIndexOf("/contacts/")+10);
+    if(/^8%3a/i.test(sender)){try{sender=decodeURIComponent(sender);}catch(e){}}
+    if(/^8:orgid:/i.test(sender))sender="8:orgid:"+sender.slice(8).toLowerCase();
     return {id:String(m.id),text:messageText(m),sender:m.imdisplayname||m.imDisplayName||sender||"Hệ thống",senderId:sender,time:messageTime(m),clientMessageId:String(m.clientmessageid||m.clientMessageId||"")};
 }
 function utcString(ms) {
@@ -292,7 +298,7 @@ function create(io) {
     function decorateMessages() {
         for(var i=0;i<state.messages.length;i++){
             var m=state.messages[i],p=people["$"+m.senderId];if(p)m.sender=p.displayName;
-            m.avatar=imageFor(m.senderId,m.sender);m.mine=m.senderId==="8:orgid:"+profile.id;
+            m.avatar=imageFor(m.senderId,m.sender);m.mine=String(m.senderId).toLowerCase()===("8:orgid:"+profile.id).toLowerCase();
         }
     }
     function setChats(raw) {
@@ -306,7 +312,7 @@ function create(io) {
             if(!title||title==="Direct Chat"||title==="Group Chat"||title.indexOf("Group (")===0)title=names.join(", ")||(!c.isLastMessageFromMe&&(last.imDisplayName||last.imdisplayname))||(c.isOneOnOne?"Chat riêng":"Chat nhóm");
             var row={id:c.id,title:title,preview:messageText(last),time:messageTime(last),type:c.isOneOnOne?"oneOnOne":"group",avatar:imageFor(other||c.id,title),person:other};
             rows.push(row);if(state.chatId===c.id)state.chatTitle=title;
-            if(io.observeChat)io.observeChat(account,{id:c.id,title:title,preview:row.preview,timestamp:timestamp(row.time),stamp:String(last.id||row.time||""),own:!!c.isLastMessageFromMe||String(last.from||"").indexOf("8:orgid:"+profile.id)!==-1},state.chatId===c.id&&(!io.isForeground||io.isForeground()));
+            if(io.observeChat)io.observeChat(account,{id:c.id,title:title,preview:row.preview,timestamp:timestamp(row.time),stamp:String(last.id||row.time||""),own:!!c.isLastMessageFromMe||String(last.from||"").toLowerCase().indexOf("8:orgid:"+profile.id.toLowerCase())!==-1},state.chatId===c.id&&(!io.isForeground||io.isForeground()));
         }
         rows.sort(function(a,b){return timestamp(b.time)-timestamp(a.time);});
         for(var n=0;n<Math.min(rows.length,24);n++)if(rows[n].person){loadPhoto(rows[n].person,rows[n].title);rows[n].avatar=imageFor(rows[n].person,rows[n].title);}

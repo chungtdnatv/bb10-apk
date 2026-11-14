@@ -61,7 +61,7 @@ int main(int argc,char **argv){
  int crashed;assert(::waitpid(crash,&crashed,0)==crash);assert(WIFSIGNALED(crashed)&&WTERMSIG(crashed)==SIGABRT);
  std::string folder(argv[1]);folder=folder.substr(0,folder.find_last_of('/'));
  std::ifstream marker((folder+"/data/teams10_crash.flag").c_str());std::string markerText;std::getline(marker,markerText);assert(markerText=="synthetic helper test");
- std::ifstream log((folder+"/data/teams10_startup.log").c_str());std::string logText;std::getline(log,logText);assert(logText.find("1.1.1.6 fatal signal")!=std::string::npos);
+ std::ifstream log((folder+"/data/teams10_startup.log").c_str());std::string logText;std::getline(log,logText);assert(logText.find(std::string(TEAMS10_BUILD_VERSION)+" fatal signal")!=std::string::npos);
  using NotificationCursor::notify;
  assert(!notify(0,"",200,"new",false,false)); // no historical notification flood
  assert(notify(100,"old",200,"new",false,false));

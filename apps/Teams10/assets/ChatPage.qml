@@ -35,23 +35,30 @@ Page {
         horizontalAlignment: HorizontalAlignment.Fill
         verticalAlignment: VerticalAlignment.Fill
         leftPadding: ui.du(1.5);rightPadding: ui.du(1.5)
-        Label { text: chat.statusText; textFormat: TextFormat.Plain; multiline: true; textStyle { color: Color.create("#89adc2"); fontSize: FontSize.XSmall } }
-        Container {
-            layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
-            Button { text: "Làm mới"; enabled: !chat.loading; layoutProperties: StackLayoutProperties { spaceQuota: 1 } onClicked: chat.appRoot.refreshMessages(false) }
-            Button { text: "Tin cũ hơn"; enabled: chat.hasMore&&!chat.loading; layoutProperties: StackLayoutProperties { spaceQuota: 1 } onClicked: chat.appRoot.refreshMessages(true) }
-        }
+        Label { visible: chat.statusText.indexOf("Lỗi")!==-1||chat.statusText.indexOf("HTTP")!==-1||chat.statusText.indexOf("Chưa xác định")!==-1;text: chat.statusText;textFormat: TextFormat.Plain;multiline: true;textStyle { color: Color.create("#89adc2");fontSize: FontSize.XSmall } }
         ActivityIndicator { visible: chat.loading; running: visible; horizontalAlignment: HorizontalAlignment.Center }
         ListView {
             id: messageList
+            property real widthHint: listMeasure.layoutFrame.width>0?listMeasure.layoutFrame.width:ui.du(75)
+            horizontalAlignment: HorizontalAlignment.Fill
+            attachedObjects: [
+                LayoutUpdateHandler { id: listMeasure },
+                ListScrollStateHandler { onAtBeginningChanged: { if(atBeginning&&scrolling&&!chat.loading&&!chat.scrollPending&&chat.hasMore)chat.appRoot.refreshMessages(true); } }
+            ]
             layoutProperties: StackLayoutProperties { spaceQuota: 1 }
             dataModel: ArrayDataModel { id: messageModel }
             listItemComponents: [ListItemComponent {
                 type: ""
-                Container {
+                CustomListItem {
+                    id: messageRow
+                    property real rowWidth: ListItem.view.widthHint
+                    preferredWidth: rowWidth;minWidth: rowWidth;maxWidth: rowWidth
+                    highlightAppearance: HighlightAppearance.None
+                    dividerVisible: false
+                    Container {
                     horizontalAlignment: HorizontalAlignment.Fill
-                    topPadding: ui.du(0.7);bottomPadding: ui.du(0.7)
                     layout: DockLayout {}
+                    topPadding: ui.du(0.7);bottomPadding: ui.du(0.7)
                     Container {
                         horizontalAlignment: ListItemData.mine?HorizontalAlignment.Right:HorizontalAlignment.Left
                         layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
@@ -61,7 +68,7 @@ Page {
                             Label { visible: String(ListItemData.avatar||"").indexOf("asset:///images/avatar-")===0;text: Teams.initial(ListItemData.sender);textFormat: TextFormat.Plain;horizontalAlignment: HorizontalAlignment.Center;verticalAlignment: VerticalAlignment.Center;textStyle { color: Color.White;fontSize: FontSize.Small } }
                         }
                         Container {
-                            maxWidth: ui.du(65)
+                            maxWidth: messageRow.rowWidth*0.82
                             leftPadding: ui.du(1.4);rightPadding: ui.du(1.4);topPadding: ui.du(1);bottomPadding: ui.du(1)
                             background: ListItemData.mine?outgoing.imagePaint:incoming.imagePaint
                             Label { visible: !ListItemData.mine;text: ListItemData.sender;textFormat: TextFormat.Plain;multiline: false;textStyle { color: Color.create("#28c5ed");fontSize: FontSize.Small;fontWeight: FontWeight.Bold } }
@@ -72,6 +79,7 @@ Page {
                                 ImagePaintDefinition { id: outgoing;imageSource: "asset:///images/bubble-own.png";repeatPattern: RepeatPattern.Fill }
                             ]
                         }
+                    }
                     }
                 }
             }]

@@ -3,8 +3,8 @@
     <id>com.bb10toolkit.Teams10</id>
     <name>Teams10</name>
     <author>BB10 Toolkit</author>
-    <versionNumber>1.1.1</versionNumber>
-    <buildId>6</buildId>
+    <versionNumber>1.1.2</versionNumber>
+    <buildId>7</buildId>
     <description>Native Cascades application</description>
     <configuration id="release" name="Device-Release">
         <entryPointType>Qnx/Cascades</entryPointType>
@@ -33,6 +33,7 @@
     </invoke-target>
     <permission>access_internet</permission>
     <permission>post_notification</permission>
+    <permission>access_shared</permission>
     <permission>run_when_backgrounded</permission>
     <permission system="true">_sys_run_headless</permission>
     <permission system="true">_sys_headless_nostop</permission>

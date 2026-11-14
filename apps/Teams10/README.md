@@ -1,4 +1,4 @@
-# Teams10 1.1.1.6 — native BB10 Microsoft 365 chat
+# Teams10 1.1.2.7 — native BB10 Microsoft 365 chat
 
 Independent, unofficial Cascades client for work/school accounts. No WebView,
 password input or own Entra App Registration. Device-code/native interoperability
@@ -24,9 +24,27 @@ launch, integration switches turn off and auto-restore pauses so diagnostics
 remain reachable; the saved session itself is preserved. Boot service startup
 must not consume the UI's crash flag. SIGKILL/OS termination cannot be caught.
 
+## UI / OTA update (1.1.2.7)
+
+Code-login-only landing page; diagnostics/OTA remain available by holding the
+header. Chat refresh/history buttons are removed: foreground refresh stays native,
+older pages load at the top while scrolling. Rows are explicitly viewport-wide,
+with outgoing/incoming docking right/left and normalized sender MRIs. Numeric
+DD/MM/YYYY HH:mm formatting replaces Date.toLocaleString(), which may render the
+locale placeholder `%#c` on BB10. Literal percent content is preserved.
+
+Shared capsule navigation fills available width, reserves 16du and fixes icon
+minimum size. RoundPlate keeps circular end-cap aspect ratios while stretching
+the center only; Zalo uses the same components. Profile has an explicit OTA sheet:
+verified HTTPS download, size/SHA256 and restricted on-device PPS self-update
+where firmware already permits it. No silent install, firmware modification or
+remote executable QML. See [OTA](../../docs/ota-vi.md),
+[UI notes](../../docs/ui-ota-release-vi.md), [shared source](../../shared/README.md).
+PPS/device rendering has not been tested on hardware in this release.
+
 ## Current features
 
-- Device-code login on another phone/PC; optional tenant/domain. Separate resource
+- Device-code login on another phone/PC; organizations authority selected automatically in the UI. Separate resource
   tokens for CSA/IC3 and spaces, refresh rotation, regional allowlisted endpoints.
 - **Remember session:** an encrypted app-private refresh credential is renewed on
   reopening, without requesting another device code unless Microsoft revokes it.

@@ -2,6 +2,7 @@
 #include "TeamsRequestPolicy.hpp"
 #include "NotificationCursor.hpp"
 #include "FeaturePolicy.hpp"
+#include "BuildVersion.hpp"
 #include <QDir>
 #include <QFileInfo>
 #include <QFile>
@@ -91,7 +92,7 @@ void TeamsWorker::run() {
     char errorBuffer[CURL_ERROR_SIZE]={0};
     curl_easy_setopt(curl,CURLOPT_URL,url.constData());
     curl_easy_setopt(curl,CURLOPT_HTTPHEADER,headers);
-    curl_easy_setopt(curl,CURLOPT_USERAGENT,"Teams10/1.1.1.6 (BB10 native)");
+    curl_easy_setopt(curl,CURLOPT_USERAGENT,"Teams10/" TEAMS10_BUILD_VERSION " (BB10 native)");
     curl_easy_setopt(curl,CURLOPT_NOSIGNAL,1L);
     curl_easy_setopt(curl,CURLOPT_CONNECTTIMEOUT,15L);
     curl_easy_setopt(curl,CURLOPT_TIMEOUT,40L);
@@ -241,7 +242,7 @@ void TeamsNative::recordEvent(const QString &event) const {
     const QStringList allowed=QStringList()<<"controller-start"<<"controller-ready"<<"controller-error"<<"login-tapped"<<"login-error"<<"request-queued"<<"http-response"<<"transport-error"<<"session-save"<<"session-saved"<<"session-save-error"<<"hub-start"<<"hub-ready"<<"recovery-mode"<<"chat-list-start"<<"chat-list-ready"<<"safe-upgrade";
     if(!allowed.contains(event))return;
     QFile file("data/teams10_startup.log");
-    if(file.open(QIODevice::WriteOnly|(file.size()>256*1024?QIODevice::Truncate:QIODevice::Append)))file.write(("Teams10 1.1.1.6: "+event+"\n").toUtf8());
+    if(file.open(QIODevice::WriteOnly|(file.size()>256*1024?QIODevice::Truncate:QIODevice::Append)))file.write((QString("Teams10 " TEAMS10_BUILD_VERSION ": ")+event+"\n").toUtf8());
 }
 QString TeamsNative::startupLog() const {
     QFile file("data/teams10_startup.log");

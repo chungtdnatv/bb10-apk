@@ -1,4 +1,15 @@
-# Teams10 native test BARs
+# Teams10 test BARs
+
+[Current: Teams10 1.1.2.7 UI + OTA](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.7-ui-ota-unsigned.bar).
+Code-login-only landing page; fixed numeric timestamps instead of %#c; viewport-wide
+left/right message rows; larger shared rounded bottom bar; Profile OTA updater.
+Install once manually, then use Profile → Cập nhật OTA. Direct PPS installation
+requires firmware support. See [guide](../../docs/ota-vi.md) and
+[UI details](../../docs/ui-ota-release-vi.md). New rendering/install behavior is not
+yet device-tested. Crash recovery/session behavior from 1.1.1.6 is retained;
+photos/Hub remain opt-in. Previous builds below are historical.
+
+## Previous release
 
 [Teams10 1.1.1.6 — native + Hub](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.1.6-recovery-unsigned.bar)
 is the current work/school Microsoft 365 build. It adds encrypted session restore,

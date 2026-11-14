@@ -104,9 +104,9 @@ class ZaloFeatureFlows(unittest.TestCase):
         ''')
 
     def test_animation_starts_only_from_navigation(self):
-        nav = self.changed['native/assets/ModernNavigation.qml'].decode()
+        nav = self.changed['native/assets/BottomNavigation.qml'].decode()
         self.assertIn('StockCurve.CubicOut',nav)
-        self.assertIn('navigation-shadow.png',nav)
+        self.assertIn('RoundPlate',nav)
         self.assertNotIn('onCreationCompleted',nav)
         main = self.script('main.qml','function selectSection(')
         self.assertEqual(main.count('raiseBottomBar()'),3)
@@ -143,7 +143,7 @@ class ZaloFeatureFlows(unittest.TestCase):
     def test_third_tab_is_profile_with_existing_settings_actions(self):
         main=self.changed['native/assets/main.qml'].decode()
         profile=self.changed['native/assets/ModernProfile.qml'].decode()
-        nav=self.changed['native/assets/ModernNavigation.qml'].decode()
+        nav=self.changed['native/assets/BottomNavigation.qml'].decode()
         self.assertNotIn('groupsTab',main)
         self.assertIn('id: profileTab',main)
         self.assertIn('supportsArchive: false',main)

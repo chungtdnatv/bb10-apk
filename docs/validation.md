@@ -344,3 +344,49 @@ mocks and two package/CA tests: 105 cases. Both QML syntax checks pass. SDK:
 UI 101 libraries / 304 strong imports; service 52 / 310; zero orphan unwind
 sections. BAR has 32 assets, two ARM binaries/entry points, version 1.1.1.6.
 Post-login stability and opt-in image/Hub operation require Passport validation.
+
+## Teams10 1.1.2.7 / Zalo10 1.5.0.13 UI and native OTA
+
+Teams landing page now has one explicit code-login button; code/status appear
+when needed and header hold opens diagnostics/OTA. Removed chat refresh/history
+buttons; older pages load on user scrolling to the top. CustomListItem width is
+bound to the ListView's measured width so outgoing/incoming wrappers dock against
+the actual viewport. Own sender MRIs are case-normalized/decoded as identities;
+message content is not blanket-decoded or stripped. Numeric Date components
+replace toLocaleString(), avoiding the BB10 %#c timestamp placeholder.
+
+Both apps use identical shared RoundPlate/BottomNavigation/BottomNavItem assets.
+RoundPlate's left/right assets are 128x256 half-circle caps at height/2 width,
+with only the 1x256 center stretched; navigation reserves 16du and positive icon
+minimums. Zalo search uses the same end-cap geometry. Original-engine UI-only
+patching bundles the new UI dependencies and hides unsupported native OTA actions;
+its existing API/engine-preservation tests still pass.
+
+Native OTA is compiled into each UI only. Explicit checks use fixed repo HTTPS
+endpoints, peer/hostname verification, TLS1.2+, bundled Mozilla roots and no
+redirect/auth forwarding. Downloads stream with bounds, exact size/SHA256 and
+ZIP-magic checks, atomic rename, and a fresh digest before install/open. Feed
+publication verifies the actual BAR's app/package/version and derives size/hash.
+Both versioned BARs and updates/*.json are committed together. Zalo About routes
+updates/release notes to native OTA, removes its hidden WebView and no longer
+ignores certificate errors in the unused legacy native update request path.
+
+The uploaded BarInstaller.bar was inspected without executing its ARM binary.
+Its readable shell source exposed PPS job/runtimeInstall and no-wait self-update.
+The new narrow installer script only accepts the two repo app/package identities,
+checked release version and a controlled Downloads filename. It uses existing
+firmware access; no developer-mode spoofing, global permission changes or timeout
+patches. Submission is not claimed as installation completion. Direct PPS install
+and UI rendering remain untested on Passport; unsupported firmware must use the
+verified BAR with its existing installation method.
+
+Passed: 45 toolkit tests (including compiled C++98 OTA policy, shell syntax/early
+rejections, publisher/feed-to-artifact agreement, shared payload/PNG geometry and
+legacy UI flow/engine preservation), six login UI handler mocks, 37 native Teams
+controller mocks, one runtime helper suite, one native request-policy suite,
+21 historical Graph mocks, two Teams BAR/CA tests, Zalo UI Node assertions and
+three Zalo package tests. QML syntax lint passes for all touched components.
+SDK closure: Teams UI 101 libraries/325 strong imports and service 52/310;
+Zalo UI 105/754 and headless 60/630; zero orphan unwind sections. Teams BAR has
+46 assets, Zalo 824, both with two ARM entry points and fresh SHA512/CRC/indexes.
+No native painter/font imports were reintroduced into Teams.

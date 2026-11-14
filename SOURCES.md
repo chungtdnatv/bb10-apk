@@ -35,7 +35,7 @@ See [evidence and BB10 port requirements](references/zalo-calling/README.md).
 
 ## Teams10
 
-`apps/Teams10` 1.1.1.6 combines native toolkit C++/QML with protocol/auth adaptation
+`apps/Teams10` 1.1.2.7 combines native toolkit C++/QML with protocol/auth adaptation
 from purple-teams (GPL-3.0-or-later) and squads-app (MIT). The combined app is
 GPL-3.0-or-later; original toolkit and squads MIT notices are retained. No libpurple
 or Kotlin binary is linked. Pinned commits and file-level provenance are in
@@ -51,3 +51,15 @@ Python html.entities, PSF notice included in source/assets. The user-uploaded
 Telega BAR was extracted locally as a UI reference: [inspection](references/bbtelega-ui/README.md).
 No Telega binaries, TDLib, extracted QML, signing identity or branded icons are
 redistributed. Teams10 uses original Cascades components for the analogous layout.
+
+
+## Shared UI and native OTA
+
+`shared/ui` and `shared/ota`: newly authored MIT components/transport/policy.
+Both apps compile the same updater and ship identical shared QML/paint/scripts.
+The user-supplied BarInstaller.bar was inspected locally for its PPS shell
+protocol; no uploaded binary/script is redistributed. See
+[inspection/provenance](references/barinstaller/README.md). The implementation
+only updates the two repo app/package IDs using existing firmware access; it
+doesn't enable dev mode or change global permissions/timeouts. The Mozilla CA
+bundle/notice used by Teams is also shipped in Zalo for the new native transport.

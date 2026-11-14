@@ -23,6 +23,7 @@ Sheet {
             Button { text: "Đánh dấu tất cả đã đọc"; horizontalAlignment: HorizontalAlignment.Fill; onClicked: menu.choose("markRead") }
             Button { text: "Cài đặt"; horizontalAlignment: HorizontalAlignment.Fill; onClicked: menu.choose("settings") }
             Button { text: "Gửi góp ý"; horizontalAlignment: HorizontalAlignment.Fill; onClicked: menu.choose("feedback") }
+            Button { text: "Cập nhật OTA";horizontalAlignment: HorizontalAlignment.Fill;onClicked: menu.choose("ota") }
             Button { text: "Giới thiệu"; horizontalAlignment: HorizontalAlignment.Fill; onClicked: menu.choose("about") }
         }
     }

@@ -81,7 +81,7 @@ void BackgroundService::process(const QVariantMap &data){
   QString title=names.value(id,c.value("title").toString());if(title.isEmpty())title=field(last,"imDisplayName","imdisplayname");if(title.isEmpty())title="Teams chat";
   QByteArray html=last.value("content").toString().toUtf8();std::string content(html.constData(),html.size());std::string text=field(last,"messagetype","messageType")=="Text"?NativeText::decode(content):NativeText::plain(content);QString preview=QString::fromUtf8(text.data(),text.size());
   QString time=field(last,"composetime","composeTime");if(time.isEmpty())time=field(last,"originalarrivaltime","originalArrivalTime");
-  QVariantMap summary;summary["id"]=id;summary["title"]=title;summary["preview"]=preview;summary["timestamp"]=stamp(time);summary["stamp"]=last.value("id",time);summary["own"]=c.value("isLastMessageFromMe").toBool()||last.value("from").toString().contains("8:orgid:"+oid);
+  QVariantMap summary;summary["id"]=id;summary["title"]=title;summary["preview"]=preview;summary["timestamp"]=stamp(time);summary["stamp"]=last.value("id",time);summary["own"]=c.value("isLastMessageFromMe").toBool()||last.value("from").toString().toLower().contains("8:orgid:"+oid.toLower());
   m_net.observeChat(account,summary,false);
  }
 }

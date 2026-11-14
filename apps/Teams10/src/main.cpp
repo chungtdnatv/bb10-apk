@@ -1,4 +1,5 @@
 #include "TeamsNative.hpp"
+#include "../../../shared/ota/OtaUpdater.hpp"
 #include "CrashLog.hpp"
 #include <bb/cascades/Application>
 #include <bb/cascades/QmlDocument>
@@ -11,7 +12,7 @@
 using namespace bb::cascades;
 static void stage(const char *text) {
     FILE *f=fopen("data/teams10_startup.log","a");
-    if(f) { fprintf(f,"Teams10 1.1.1.6: %s\n",text);fclose(f); }
+    if(f) { fprintf(f,"Teams10 " TEAMS10_BUILD_VERSION ": %s\n",text);fclose(f); }
 }
 Q_DECL_EXPORT int main(int argc,char **argv) {
     CrashLog::install("Teams10 UI");
@@ -20,9 +21,11 @@ Q_DECL_EXPORT int main(int argc,char **argv) {
     stage("Application created");
     stage("before native bridge");
     TeamsNative native;
+    OtaUpdater ota("Teams10",QString::fromLatin1(TEAMS10_BUILD_VERSION),&app);
     stage("native bridge ready");
     QmlDocument *document=QmlDocument::create("asset:///main.qml").parent(&app);
     document->setContextProperty("teamsNet",&native);
+    document->setContextProperty("ota",&ota);
     AbstractPane *root=document->createRootObject<AbstractPane>();
     if(!root) {
         stage("QML creation failed");

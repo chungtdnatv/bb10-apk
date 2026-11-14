@@ -46,6 +46,9 @@ class OriginalEngineUI(unittest.TestCase):
     def test_no_new_native_api_is_allowed(self):
         with tempfile.TemporaryDirectory() as directory:
             styles=Path(directory)
+            for name in ('RoundPlate.qml','BottomNavigation.qml','BottomNavItem.qml'):
+                (styles/name).write_bytes((self.styles/name).read_bytes())
+            (styles/'images/plates').mkdir(parents=True)
             (styles/'ModernFormat.js').write_bytes((self.styles/'ModernFormat.js').read_bytes())
             (styles/'images/modern').mkdir(parents=True)
             (styles/'ModernHeader.qml').write_text('Container { onCreationCompleted: zService.onlyInNewEngine(); }')

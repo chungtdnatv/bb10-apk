@@ -149,6 +149,7 @@ TabbedPane {
     }
 
     attachedObjects: [
+        UpdateSheet { id: otaSheet },
         PhoneArchiveSheet { id: phoneArchiveSheet },
         ModernMenu {
             id: modernMenu
@@ -162,6 +163,7 @@ TabbedPane {
                 else if (action === "phoneSync") settingsSheet.startPhoneSyncFlow();
                 else if (action === "settings") settingsSheet.open();
                 else if (action === "about") aboutSheet.open();
+                else if (action === "ota") otaSheet.open();
                 else if (action === "markRead") chatsTabContent.markAllRead();
                 else if (action === "feedback") app.invokeEmail("Berrylife2025@gmail.com", "Zalo10 Feedback");
             }

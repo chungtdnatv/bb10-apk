@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "app": "Zalo10",
+  "appId": "com.BerryLife.Zalo10",
+  "packageId": "testRel_Life_Zalo108ff545d2",
+  "version": "1.5.0.13",
+  "barUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.13-native-ui-ota-unsigned.bar",
+  "sha256": "37fa97d1865c958af5b1d9ad53f70ecd793a5c06c3984f016e318146a8c6e2aa",
+  "bytes": 3992660,
+  "minimumOs": "10.3.1",
+  "notes": "UI: Thanh điều hướng và ô tìm kiếm dùng end-cap bán nguyệt, tránh góc bo bị kéo dài.\nUI: Dùng chung bottom bar Tin nhắn/Danh bạ/Profile với Teams10; icon có kích thước tối thiểu.\nNEW: Profile và Giới thiệu có cập nhật OTA qua repo, tải BAR có xác minh SHA-256.\nNEW: Cài trực tiếp bằng PPS trên firmware có hỗ trợ; app có thể đóng khi cài đè chính nó.\nFIX: Bỏ WebView ẩn khỏi đường kiểm tra cập nhật; vẫn giữ sửa cover khởi động và tính năng lịch sử điện thoại.\n",
+  "latestVersion": "1.5.0.13",
+  "downloadUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.13-native-ui-ota-unsigned.bar",
+  "changelog": [
+    {
+      "version": "1.5.0.13",
+      "items": [
+        "UI: Thanh điều hướng và ô tìm kiếm dùng end-cap bán nguyệt, tránh góc bo bị kéo dài.",
+        "UI: Dùng chung bottom bar Tin nhắn/Danh bạ/Profile với Teams10; icon có kích thước tối thiểu.",
+        "NEW: Profile và Giới thiệu có cập nhật OTA qua repo, tải BAR có xác minh SHA-256.",
+        "NEW: Cài trực tiếp bằng PPS trên firmware có hỗ trợ; app có thể đóng khi cài đè chính nó.",
+        "FIX: Bỏ WebView ẩn khỏi đường kiểm tra cập nhật; vẫn giữ sửa cover khởi động và tính năng lịch sử điện thoại."
+      ]
+    }
+  ]
+}

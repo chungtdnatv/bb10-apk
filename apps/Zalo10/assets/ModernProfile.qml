@@ -40,6 +40,7 @@ Page {
             Button { text: "Làm mới danh sách"; horizontalAlignment: HorizontalAlignment.Fill; preferredHeight: ui.du(8); onClicked: profile.actionRequested("refresh") }
             Button { text: "Cài đặt"; horizontalAlignment: HorizontalAlignment.Fill; preferredHeight: ui.du(8); onClicked: profile.actionRequested("settings") }
             Button { text: "Gửi thư góp ý"; horizontalAlignment: HorizontalAlignment.Fill; preferredHeight: ui.du(8); onClicked: profile.actionRequested("feedback") }
+            Button { text: "Cập nhật OTA";horizontalAlignment: HorizontalAlignment.Fill;preferredHeight: ui.du(8);onClicked: profile.actionRequested("ota") }
             Button { text: "Giới thiệu"; horizontalAlignment: HorizontalAlignment.Fill; preferredHeight: ui.du(8); onClicked: profile.actionRequested("about") }
         }
     }

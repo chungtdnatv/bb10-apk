@@ -2,9 +2,9 @@ name: Build BB10 BARs
 on:
   workflow_dispatch:
   push:
-    paths: ['bb10.py', 'bb10kit/**', 'apps/**', 'templates/**', 'tests/**', 'toolchains/image.txt', '.github/workflows/build-bar.yml']
+    paths: ['bb10.py', 'bb10kit/**', 'scripts/**', 'shared/**', 'updates/**', 'apps/**', 'templates/**', 'tests/**', 'toolchains/image.txt', '.github/workflows/build-bar.yml']
   pull_request:
-    paths: ['bb10.py', 'bb10kit/**', 'apps/**', 'templates/**', 'tests/**', 'toolchains/image.txt', '.github/workflows/build-bar.yml']
+    paths: ['bb10.py', 'bb10kit/**', 'scripts/**', 'shared/**', 'updates/**', 'apps/**', 'templates/**', 'tests/**', 'toolchains/image.txt', '.github/workflows/build-bar.yml']
 
 permissions:
   contents: read

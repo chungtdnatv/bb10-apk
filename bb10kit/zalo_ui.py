@@ -61,10 +61,14 @@ def patch_assets(original,style_root):
     changed={}
     for p in sorted(style_root.glob('Modern*.qml')):
         content=p.read_bytes()
-        if p.name=='ModernMenu.qml':
-            # The old engine doesn't implement the newer mark-all-read API.
-            content=b'\n'.join(l for l in content.split(b'\n') if b'choose("markRead")' not in l and b'choose("phoneArchive")' not in l)
+        if p.name in ('ModernMenu.qml','ModernProfile.qml'):
+            # Original engine lacks mark-all, phone archive and the new native OTA backend.
+            content=b'\n'.join(l for l in content.split(b'\n') if b'choose("markRead")' not in l and b'choose("phoneArchive")' not in l and b'choose("ota")' not in l and b'actionRequested("ota")' not in l)
         changed['native/assets/'+p.name]=content
+    for name in ('RoundPlate.qml','BottomNavigation.qml','BottomNavItem.qml'):
+        changed['native/assets/'+name]=(style_root/name).read_bytes()
+    for p in sorted((style_root/'images/plates').glob('*.png')):
+        changed['native/assets/images/plates/'+p.name]=p.read_bytes()
     changed['native/assets/ModernFormat.js']=(style_root/'ModernFormat.js').read_bytes()
     for p in sorted((style_root/'images/modern').glob('*.png')):
         changed['native/assets/images/modern/'+p.name]=p.read_bytes()

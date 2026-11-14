@@ -1,0 +1,40 @@
+{
+  "assets": 824,
+  "entry_points": [
+    "Zalo10",
+    "Zalo10Headless"
+  ],
+  "arm_binaries": 2,
+  "signature_files_present": false,
+  "version": "1.5.0.13",
+  "sha256": "37fa97d1865c958af5b1d9ad53f70ecd793a5c06c3984f016e318146a8c6e2aa",
+  "native_checks": [
+    {
+      "binary": "build/modern/arm/o.le-v7/Zalo10.so",
+      "sdk_libraries": 105,
+      "strong_imports_resolved": 754,
+      "orphan_unwind_sections": 0
+    },
+    {
+      "binary": "build/modern/headless/arm/Zalo10Headless",
+      "sdk_libraries": 60,
+      "strong_imports_resolved": 630,
+      "orphan_unwind_sections": 0
+    }
+  ],
+  "sdk_image": "ghcr.io/zsavajji/bb10-cxx20@sha256:60ddcfc3acb0c0215611c353780f196c3b7928ae266292f7f45038df358574ba",
+  "ota": {
+    "manifest": "updates/Zalo10.json",
+    "download": "fixed repo HTTPS, exact size and SHA256, no redirects",
+    "install": "PPS via existing firmware context; no-wait self-update; checked app/package/version",
+    "device_install_test": "not performed; device firmware support required"
+  },
+  "validation": {
+    "toolkit_tests": 45,
+    "qml_syntax": "pass",
+    "device_visual_runtime": "not tested with this build",
+    "modern_ui_node_assertions": "pass (10 date cases plus search/selection/empty state)",
+    "package_tests": 3,
+    "custom_active_cover": "remains excluded"
+  }
+}

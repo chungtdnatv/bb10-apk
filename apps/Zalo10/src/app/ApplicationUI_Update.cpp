@@ -1,7 +1,7 @@
 #include "app/ApplicationUICommon.hpp"
 
 static const char *VERSION_MANIFEST_URL =
-    "https://raw.githubusercontent.com/BBerryLife/BBerryLife.github.io/main/Data/Zalo10-version.json";
+    "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/updates/Zalo10.json";
 
 static bool isVersionNewer(const QString &a, const QString &b)
 {
@@ -29,7 +29,11 @@ static QString escapeHtmlQt4(const QString &in)
 
 QString ApplicationUI::appVersion()
 {
+#ifdef ZALO10_BUILD_VERSION
+    return QString::fromLatin1(ZALO10_BUILD_VERSION);
+#else
     return bb::ApplicationInfo().version();
+#endif
 }
 
 QString ApplicationUI::exportLog()
@@ -54,13 +58,13 @@ QString ApplicationUI::exportLog()
     return ok ? destPath : QString();
 }
 
-// Bundled OpenSSL is too old for TLS 1.2+ with the GitHub CDN: use AnyProtocol so it
-// negotiates the highest common version.
+// Legacy changelog request: retain peer verification. OTA uses the shared native
+// curl transport with its bundled roots and TLS1.2 requirement.
 static QNetworkRequest buildManifestRequest()
 {
     QNetworkRequest req((QUrl(QString::fromLatin1(VERSION_MANIFEST_URL))));
     QSslConfiguration sslConf = req.sslConfiguration();
-    sslConf.setPeerVerifyMode(QSslSocket::VerifyNone);
+    sslConf.setPeerVerifyMode(QSslSocket::VerifyPeer);
     sslConf.setProtocol(QSsl::AnyProtocol);
     req.setSslConfiguration(sslConf);
     req.setRawHeader("Accept", "application/json, text/plain, */*");
@@ -81,7 +85,7 @@ void ApplicationUI::onManifestSslErrors(const QList<QSslError> &errors)
     for (int i = 0; i < errors.size(); ++i)
         qWarning() << "[App] manifest SSL error:" << errors.at(i).errorString();
     QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
-    if (reply) reply->ignoreSslErrors();
+    Q_UNUSED(reply); // Never bypass certificate verification for update metadata.
 }
 
 void ApplicationUI::onUpdateCheckFetchDone()

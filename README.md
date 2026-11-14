@@ -10,7 +10,7 @@ Cần **Python 3.10+**, Docker đang chạy và Internet để tải SDK image l
 Host hỗ trợ: Linux, macOS hoặc Windows qua WSL2 với Docker integration.
 Không cần cài Momentics trên host. Node.js chỉ cần cho unit test JavaScript của Zalo.
 Test lưu lịch sử native cần C++ compiler và SQLite development headers/library
-(trên Ubuntu: `sudo apt-get install g++ libsqlite3-dev`).
+(trên Ubuntu: `sudo apt-get install g++ libsqlite3-dev libssl-dev`).
 
 ```sh
 git clone --branch bb10-bar-toolkit https://github.com/chungtdnatv/bb10-apk.git
@@ -32,7 +32,7 @@ hoặc cache build; `toolchains/` chứa source và revision để tái tạo/m�
 ## Teams10 cho Microsoft 365
 
 App native độc lập có đăng nhập device-code, đọc lịch sử và gửi văn bản vào chat có sẵn.
-[Tải Teams10 1.1.1.6 native + Hub](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.1.6-recovery-unsigned.bar).
+[Tải Teams10 1.1.2.7 UI + OTA](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.7-ui-ota-unsigned.bar).
 Không có gọi điện. Không cần App Registration riêng: dùng luồng tương thích
 purple-teams/squads-app và public client ID Teams; Microsoft/tenant vẫn có thể từ chối.
 Không dùng WebView hoặc trình duyệt Passport để mở Teams Web.
@@ -44,6 +44,15 @@ python3 bb10.py test Teams10
 
 Xem [cách cài và đăng nhập](docs/teams10-setup-vi.md) và [phạm vi/giới hạn](apps/Teams10/README.md).
 Bản 1.0.0.4 đã đăng nhập được trên Passport theo xác nhận của người dùng. Bản mới thêm lưu phiên mã hóa, tra cứu tên/avatar, giao diện mới và service nhận tin/Hub mỗi khoảng 30 giây; các tính năng mới cần kiểm tra trên máy.
+
+## UI và OTA cho hai app
+
+[Tải Zalo10 1.5.0.13](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.13-native-ui-ota-unsigned.bar).
+Cả hai app có bottom bar bo tròn bằng end-cap đúng tỉ lệ và **Profile → Cập nhật OTA**.
+Teams thêm màn hình code tối giản, sửa thời gian `%#c` và căn tin gửi/nhận phải/trái.
+Cài trực tiếp dùng PPS trên firmware hỗ trợ, tham khảo script trong BarInstaller
+người dùng gửi; không tự tạo quyền firmware. Xem [hướng dẫn OTA](docs/ota-vi.md)
+và [thay đổi UI](docs/ui-ota-release-vi.md).
 
 ## Tạo app mới
 

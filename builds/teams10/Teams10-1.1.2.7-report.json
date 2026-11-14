@@ -1,0 +1,43 @@
+{
+  "assets": 46,
+  "entry_points": [
+    "Teams10",
+    "Teams10Service"
+  ],
+  "arm_binaries": 2,
+  "signature_files_present": false,
+  "version": "1.1.2.7",
+  "sha256": "36ab2a5405e582eb634fffa0b027b29f0b49443f5de34c9424efaa64521e9c95",
+  "native_checks": [
+    {
+      "binary": "build/native/arm/Teams10.so",
+      "sdk_libraries": 101,
+      "strong_imports_resolved": 325,
+      "orphan_unwind_sections": 0
+    },
+    {
+      "binary": "build/native/arm/Teams10Service",
+      "sdk_libraries": 52,
+      "strong_imports_resolved": 310,
+      "orphan_unwind_sections": 0
+    }
+  ],
+  "sdk_image": "ghcr.io/zsavajji/bb10-cxx20@sha256:60ddcfc3acb0c0215611c353780f196c3b7928ae266292f7f45038df358574ba",
+  "ota": {
+    "manifest": "updates/Teams10.json",
+    "download": "fixed repo HTTPS, exact size and SHA256, no redirects",
+    "install": "PPS via existing firmware context; no-wait self-update; checked app/package/version",
+    "device_install_test": "not performed; device firmware support required"
+  },
+  "validation": {
+    "toolkit_tests": 45,
+    "qml_syntax": "pass",
+    "device_visual_runtime": "not tested with this build",
+    "login_ui_handler_tests": 6,
+    "native_controller_mock_tests": 37,
+    "native_runtime_helpers": 1,
+    "native_route_policy": 1,
+    "historical_graph_controller_tests": 21,
+    "package_ca_tests": 2
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "app": "Teams10",
+  "appId": "com.bb10toolkit.Teams10",
+  "packageId": "testRel_kit_Teams105d440259",
+  "version": "1.1.2.7",
+  "barUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.7-ui-ota-unsigned.bar",
+  "sha256": "36ab2a5405e582eb634fffa0b027b29f0b49443f5de34c9424efaa64521e9c95",
+  "bytes": 338532,
+  "minimumOs": "10.3.1",
+  "notes": "FIX: Hiển thị thời gian bằng định dạng số, tránh chuỗi %#c từ locale BB10.\nFIX: Tin mình gửi áp lề phải, tin nhận áp lề trái theo chiều rộng thực của danh sách.\nUI: Màn hình đăng nhập chỉ giữ nút bằng code; bỏ nút Làm mới/Tin cũ hơn trong chat, tự tải lịch sử khi cuộn lên.\nUI: Bottom bar lớn hơn, icon có kích thước tối thiểu, góc tròn dùng end-cap đúng tỉ lệ.\nNEW: Profile có cập nhật OTA: tải BAR, xác minh SHA-256 và cài qua PPS trên firmware hỗ trợ.\n",
+  "latestVersion": "1.1.2.7",
+  "downloadUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.7-ui-ota-unsigned.bar",
+  "changelog": [
+    {
+      "version": "1.1.2.7",
+      "items": [
+        "FIX: Hiển thị thời gian bằng định dạng số, tránh chuỗi %#c từ locale BB10.",
+        "FIX: Tin mình gửi áp lề phải, tin nhận áp lề trái theo chiều rộng thực của danh sách.",
+        "UI: Màn hình đăng nhập chỉ giữ nút bằng code; bỏ nút Làm mới/Tin cũ hơn trong chat, tự tải lịch sử khi cuộn lên.",
+        "UI: Bottom bar lớn hơn, icon có kích thước tối thiểu, góc tròn dùng end-cap đúng tỉ lệ.",
+        "NEW: Profile có cập nhật OTA: tải BAR, xác minh SHA-256 và cài qua PPS trên firmware hỗ trợ."
+      ]
+    }
+  ]
+}

@@ -24,7 +24,7 @@ Entry-Point: LD_LIBRARY_PATH=app/native/lib:/usr/lib/qt4/lib app/native/Teams10.
 Entry-Point-Type: Qnx/Cascades
 Entry-Point-Icon: native/icon.png
 Entry-Point-Orientation: auto
-Entry-Point-User-Actions: access_internet,post_notification,run_when_backgrounded
+Entry-Point-User-Actions: access_internet,post_notification,run_when_backgrounded,access_shared
 Entry-Point-System-Actions: run_native,_sys_run_headless,_sys_headless_nostop,_sys_access_pim_unified
 
 
@@ -32,7 +32,7 @@ Entry-Point-Name: Teams10 Service
 Entry-Point-Key: Teams10Service
 Entry-Point: LD_LIBRARY_PATH=app/native/lib:/usr/lib/qt4/lib app/native/Teams10Service
 Entry-Point-Type: Qnx/Elf
-Entry-Point-User-Actions: access_internet,post_notification,run_when_backgrounded
+Entry-Point-User-Actions: access_internet,post_notification,run_when_backgrounded,access_shared
 Entry-Point-System-Actions: run_native,_sys_run_headless,_sys_headless_nostop,_sys_access_pim_unified
 
 Invoke-Target-Key: com.bb10toolkit.Teams10.service

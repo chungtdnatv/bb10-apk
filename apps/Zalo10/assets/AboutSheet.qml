@@ -6,6 +6,7 @@ Sheet {
     id: aboutSheetRoot
     property variant zService: null
 
+    attachedObjects: [UpdateSheet { id: aboutOtaSheet }]
     NavigationPane {
         id: aboutNav
 
@@ -208,14 +209,7 @@ Sheet {
                             text: "Update"
                             layoutProperties: StackLayoutProperties { spaceQuota: 1 }
                             rightMargin: ui.du(0.8)
-                            onClicked: {
-                                updateBtn.enabled = false;
-                                updateCheckingToast.show();
-                                aboutNav.pendingManifestAction = "update";
-                                manifestTimeoutTimer.restart();
-                                // Cache-bust: jsDelivr sends a long max-age, so a changing query string avoids a stale copy.
-                                manifestFetcher.url = manifestFetcher.manifestUrl + "?t=" + new Date().getTime();
-                            }
+                            onClicked: aboutOtaSheet.open()
                         }
 
                         Button {
@@ -223,50 +217,12 @@ Sheet {
                             text: "Change List"
                             layoutProperties: StackLayoutProperties { spaceQuota: 1 }
                             leftMargin: ui.du(0.8)
-                            onClicked: {
-                                var changelogPage = changelogPageDef.createObject();
-                                aboutNav.activeChangelogPage = changelogPage;
-                                aboutNav.push(changelogPage);
-                                aboutNav.pendingManifestAction = "changelog";
-                                manifestTimeoutTimer.restart();
-                                manifestFetcher.url = manifestFetcher.manifestUrl + "?t=" + new Date().getTime();
-                            }
+                            onClicked: aboutOtaSheet.open()
                         }
                     }
 
-                    // Hidden WebView fetches Data/Zalo10-version.json through its own TLS stack: Qt4's
-                    // QNetworkAccessManager fails the TLS handshake against GitHub's CDN.
-                    WebView {
-                        id: manifestFetcher
-                        visible: false
-                        enabled: false
-                        preferredWidth: 1
-                        preferredHeight: 1
+                    // Release notes and checks use the native OTA transport.
 
-                        // jsDelivr instead of raw.githubusercontent.com: its CSP header breaks evaluateJavaScript()
-                        // on BB10's WebKit.
-                        property string manifestUrl: "https://cdn.jsdelivr.net/gh/BBerryLife/BBerryLife.github.io@main/Data/Zalo10-version.json"
-
-                        onLoadingChanged: {
-                            if (loadRequest.status === WebLoadStatus.Succeeded) {
-                                manifestFetcher.evaluateJavaScript("document.body.textContent || document.body.innerText || ''");
-                            } else if (loadRequest.status === WebLoadStatus.Failed) {
-                                if (aboutNav.pendingManifestAction.length === 0) return;
-                                aboutNav.onManifestFailed("Could not load update info from " + manifestFetcher.manifestUrl + ". Try opening that link in Browser to check.");
-                            }
-                        }
-
-                        onJavaScriptResult: {
-                            if (aboutNav.pendingManifestAction.length === 0) return;
-                            try {
-                                var manifest = JSON.parse(result);
-                                aboutNav.onManifestLoaded(manifest);
-                            } catch (e) {
-                                var preview = (typeof result === "undefined") ? "<undefined>" : String(result).substring(0, 200);
-                                aboutNav.onManifestFailed("Parse failed: " + e + " || got: " + preview);
-                            }
-                        }
-                    }
                 }
             }
         }

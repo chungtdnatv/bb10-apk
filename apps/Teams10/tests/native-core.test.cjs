@@ -208,3 +208,18 @@ test('safe photo setting skips image requests without losing names, session pers
 test('Cascades initials preserve astral characters and Vietnamese letters',()=>{
  const h=harness();assert.equal(h.context.initial(' Nguyễn'),'N');assert.equal(h.context.initial('🙂 Friend'),'🙂');assert.equal(h.context.initial(''),'?' );
 });
+
+test('timestamps bypass broken BB10 locale formatting without stripping percent content',()=>{
+ const h=harness();vm.runInContext("Date.prototype.toLocaleString=function(){return '%#c';}",h.context);
+ const date=new Date('2026-11-14T08:07:00Z'),pad=n=>String(n).padStart(2,'0');
+ const expected=pad(date.getDate())+'/'+pad(date.getMonth()+1)+'/'+date.getFullYear()+' '+pad(date.getHours())+':'+pad(date.getMinutes());
+ assert.equal(h.context.displayTime('2026-11-14T08:07:00Z'),expected);assert(!h.context.displayTime('2026-11-14T08:07:00Z').includes('%#c'));assert.equal(h.context.displayTime('invalid'),'');
+ assert.equal(h.context.messageText({messagetype:'Text',content:'literal %#c %20'}),'literal %#c %20');
+});
+test('own MRI matching is case insensitive so outgoing bubbles can dock right',()=>{
+ const h=harness();h.auth([chat()]);const m=message();m.from='8:ORGID:'+USER;h.open([m]);assert.equal(h.api.state.messages[0].mine,true);
+});
+
+test('encoded sender MRIs are decoded only as identity fields, preserving literal text',()=>{
+ const h=harness();h.auth([chat()]);const m=message();m.from='https://teams.microsoft.com/contacts/'+encodeURIComponent('8:orgid:'+USER);m.content='literal %20';h.open([m]);assert.equal(h.api.state.messages[0].mine,true);assert.equal(h.api.state.messages[0].text,'literal %20');
+});

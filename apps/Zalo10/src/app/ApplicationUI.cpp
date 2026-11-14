@@ -1,4 +1,5 @@
 #include "app/ApplicationUICommon.hpp"
+#include "../../../../shared/ota/OtaUpdater.hpp"
 #include <bb/cascades/Page>
 #include <bb/cascades/Container>
 #include <bb/cascades/Label>
@@ -55,6 +56,7 @@ ApplicationUI::ApplicationUI() : QObject(), m_zService(NULL), m_updateManager(NU
     QmlDocument *qml = QmlDocument::create("asset:///main.qml").parent(this);
     qml->setContextProperty("app",      this);
     qml->setContextProperty("zService", zService);
+    qml->setContextProperty("ota",new OtaUpdater("Zalo10",appVersion(),this));
 
     AbstractPane *root = qml->createRootObject<AbstractPane>();
     zalo10_startup_stage(root ? "ApplicationUI: QML root created" : "ApplicationUI: QML root failed");

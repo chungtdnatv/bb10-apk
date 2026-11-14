@@ -4,7 +4,8 @@ set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
 include(BB10Qt4)
 set(CMAKE_CXX_STANDARD 98)
 qt4_wrap_cpp(APP_MOC src/TeamsNative.hpp)
-add_library(Teams10 SHARED src/main.cpp src/TeamsNative.cpp src/SessionStore.cpp src/TeamsHub.cpp ${APP_MOC} cmake/qnx-dso.c)
+qt4_wrap_cpp(OTA_MOC "${CMAKE_CURRENT_SOURCE_DIR}/../../shared/ota/OtaUpdater.hpp")
+add_library(Teams10 SHARED ../../shared/ota/OtaUpdater.cpp ${OTA_MOC} src/main.cpp src/TeamsNative.cpp src/SessionStore.cpp src/TeamsHub.cpp ${APP_MOC} cmake/qnx-dso.c)
 target_sources(Teams10 PRIVATE "$ENV{QNX_TARGET}/armle-v7/lib/crti.o" "$ENV{QNX_TARGET}/armle-v7/lib/crtn.o")
 set_target_properties(Teams10 PROPERTIES PREFIX "" SUFFIX ".so"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/arm")
@@ -22,3 +23,11 @@ set_target_properties(Teams10Service PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAK
 target_link_libraries(Teams10Service PRIVATE QtGui QtNetwork QtCore bb bbsystem bbdata bbplatform unifieddatasourcec curl ssl crypto socket sqlite3 z cpp m bps c)
 
 target_link_options(Teams10Service PRIVATE -Wl,-z,defs "-Wl,-T,${CMAKE_CURRENT_SOURCE_DIR}/cmake/bb10-exidx.ld")
+
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/bar-descriptor.xml" APP_DESCRIPTOR)
+string(REGEX MATCH "<versionNumber>([^<]+)" _version "${APP_DESCRIPTOR}")
+set(APP_VERSION "${CMAKE_MATCH_1}")
+string(REGEX MATCH "<buildId>([^<]+)" _build "${APP_DESCRIPTOR}")
+target_compile_definitions(Teams10 PRIVATE "TEAMS10_BUILD_VERSION=\"${APP_VERSION}.${CMAKE_MATCH_1}\"")
+
+target_compile_definitions(Teams10Service PRIVATE "TEAMS10_BUILD_VERSION=\"${APP_VERSION}.${CMAKE_MATCH_1}\"")

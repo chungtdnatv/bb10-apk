@@ -11,12 +11,7 @@ Container {
     preferredHeight: ui.du(7.8)
     minHeight: ui.du(7.8)
     bottomMargin: ui.du(1)
-    ImageView {
-        imageSource: "asset:///images/modern/dark-search-bg.png"
-        horizontalAlignment: HorizontalAlignment.Fill
-        verticalAlignment: VerticalAlignment.Fill
-        scalingMethod: ScalingMethod.Fill
-    }
+    RoundPlate { tone: "field";fallbackHeight: ui.du(7.8) }
     Container {
         horizontalAlignment: HorizontalAlignment.Fill
         verticalAlignment: VerticalAlignment.Center

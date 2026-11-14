@@ -9,6 +9,7 @@ NavigationPane {
     property bool foreground: true
     property bool authenticated: false
     property bool waiting: false
+    property bool loginAttempted: false
     property bool loginBusy: false
     property int selectedTab: 0
     property variant chatRows: []
@@ -24,6 +25,7 @@ NavigationPane {
     property string chatsSignature: ""
     peekEnabled: false
     function render(state) {
+        if(state.phase!=="signedOut")loginAttempted=true;
         authenticated=state.phase==="ready";
         waiting=state.phase==="waiting";
         waitingSession=state.phase==="waitingSession";
@@ -82,23 +84,24 @@ NavigationPane {
             if (!Teams.controller() || typeof Teams.controller().startLogin!=="function") throw new Error("Bộ điều khiển đăng nhập chưa sẵn sàng");
             root.render(Teams.controller().state);
             teamsNet.recordEvent("controller-ready");
-            if(teamsNet.recoveryMode())root.statusText="Lần trước app bị dừng. Mở Chẩn đoán để lấy log; bấm Khôi phục phiên đã lưu khi muốn thử lại.";
+            if(teamsNet.recoveryMode()){root.loginAttempted=true;root.statusText="Lần trước app bị dừng. Giữ tiêu đề Teams10 để mở Chẩn đoán, hoặc bấm đăng nhập bằng code để thử lại.";}
             else Teams.controller().restoreSession();
             return true;
         } catch (e) {
             Teams.releaseController();
-            root.loginBusy=false;
+            root.loginBusy=false;root.loginAttempted=true;
             root.statusText="Không khởi tạo được đăng nhập: "+String(e)+". Mở Chẩn đoán đăng nhập để xem chi tiết.";
             teamsNet.recordEvent("controller-error");
             return false;
         }
     }
     function beginLogin() {
+        root.loginAttempted=true;
         root.statusText="Đã nhận thao tác đăng nhập…";
         teamsNet.recordEvent("login-tapped");
         if (!root.initializeService()) return;
         try {
-            Teams.controller().startLogin(tenantField.text);
+            Teams.controller().startLogin("");
         } catch (e) {
             root.loginBusy=false;
             root.statusText="Lỗi khi bắt đầu đăng nhập: "+String(e);
@@ -106,7 +109,7 @@ NavigationPane {
         }
     }
     onCreationCompleted: {
-        try { tenantField.text=teamsNet.tenant(); } catch (e) { root.statusText=String(e); }
+
         bootstrapTimer.start();
     }
 
@@ -145,32 +148,24 @@ NavigationPane {
                     text: root.selectedTab===2&&root.authenticated ? "Profile" : "Teams10"
                     layoutProperties: StackLayoutProperties { spaceQuota: 1 }
                     textStyle { color: Color.create("#27c5ed"); fontSize: FontSize.XXLarge; fontWeight: FontWeight.Bold }
+                    gestureHandlers: [LongPressHandler { onLongPressed: root.showDiagnostics() }]
                 }
-                Label { text: "1.1.1.6"; textStyle { color: Color.create("#809aaf"); fontSize: FontSize.XSmall } verticalAlignment: VerticalAlignment.Center }
+                Label { visible: root.authenticated&&root.selectedTab===2;text: typeof ota!=="undefined"?ota.currentVersion:""; textStyle { color: Color.create("#809aaf"); fontSize: FontSize.XSmall } verticalAlignment: VerticalAlignment.Center }
             }
-            ScrollView {
+            Container {
                 visible: !root.authenticated
-                layoutProperties: StackLayoutProperties { spaceQuota: 1 }
                 horizontalAlignment: HorizontalAlignment.Fill
+                layoutProperties: StackLayoutProperties { spaceQuota: 1 }
+                layout: DockLayout {}
                 Container {
-                    topPadding: ui.du(2)
-                    Label { text: "Microsoft 365 · công ty / trường học"; multiline: true; textStyle.color: Color.White }
-                    Label { text: root.statusText; textFormat: TextFormat.Plain; multiline: true; textStyle.color: Color.create("#b8d5e6") }
-                    TextField { id: tenantField; hintText: "Domain/Tenant tùy chọn — có thể để trống"; enabled: !root.loginBusy; inputMode: TextFieldInputMode.EmailAddress }
-                    Button { text: "Đăng nhập Microsoft"; horizontalAlignment: HorizontalAlignment.Fill; enabled: !root.loginBusy; onClicked: root.beginLogin() }
-                    ActivityIndicator { visible: root.loginBusy; running: visible; horizontalAlignment: HorizontalAlignment.Center }
-                    Container {
-                        visible: root.waiting
-                        topPadding: ui.du(2);bottomPadding: ui.du(2)
-                        Label { text: "microsoft.com/devicelogin"; textStyle { color: Color.White; fontSize: FontSize.Large } horizontalAlignment: HorizontalAlignment.Center }
-                        Label { text: root.loginCode; textFormat: TextFormat.Plain; textStyle { color: Color.create("#27c5ed"); fontSize: FontSize.XXLarge; fontWeight: FontWeight.Bold } horizontalAlignment: HorizontalAlignment.Center }
-                        Label { text: "Mở trang trên bằng điện thoại/PC khác, nhập mã và xác nhận tài khoản."; multiline: true; textStyle.color: Color.White }
-                    }
-                    Button { text: "Hủy đăng nhập"; visible: root.loginBusy&&!root.waitingSession; onClicked: Teams.controller().signOut() }
-                    Button { text: "Khôi phục phiên đã lưu";visible: !root.loginBusy;horizontalAlignment: HorizontalAlignment.Fill;onClicked: { if(root.initializeService())Teams.controller().restoreSession(); } }
-                    Button { text: "Chẩn đoán đăng nhập"; horizontalAlignment: HorizontalAlignment.Fill; onClicked: root.showDiagnostics() }
-                    Button { text: "Hướng dẫn"; horizontalAlignment: HorizontalAlignment.Fill; onClicked: setupSheet.open() }
-                    Label { text: "Client không chính thức. Phiên được mã hóa trong sandbox để tự đăng nhập lại; Đăng xuất sẽ xóa phiên. Microsoft/công ty vẫn có thể yêu cầu xác nhận lại."; multiline: true; textStyle { color: Color.create("#8daabd"); fontSize: FontSize.Small } }
+                    horizontalAlignment: HorizontalAlignment.Fill
+                    verticalAlignment: VerticalAlignment.Center
+                    leftPadding: ui.du(3);rightPadding: ui.du(3)
+                    Button { text: "Đăng nhập bằng code";horizontalAlignment: HorizontalAlignment.Fill;enabled: !root.loginBusy;onClicked: root.beginLogin() }
+                    ActivityIndicator { visible: root.loginBusy;running: visible;horizontalAlignment: HorizontalAlignment.Center }
+                    Label { visible: root.waiting;text: "microsoft.com/devicelogin";horizontalAlignment: HorizontalAlignment.Center;textStyle { color: Color.White;fontSize: FontSize.Large } }
+                    Label { visible: root.waiting;text: root.loginCode;textFormat: TextFormat.Plain;horizontalAlignment: HorizontalAlignment.Center;textStyle { color: Color.create("#27c5ed");fontSize: FontSize.XXLarge;fontWeight: FontWeight.Bold } }
+                    Label { visible: root.loginAttempted&&root.statusText.length>0;text: root.statusText;textFormat: TextFormat.Plain;multiline: true;textStyle { color: Color.create("#a9c9db");fontSize: FontSize.Small } }
                 }
             }
             Container {
@@ -178,7 +173,7 @@ NavigationPane {
                 layoutProperties: StackLayoutProperties { spaceQuota: 1 }
                 horizontalAlignment: HorizontalAlignment.Fill
                 TextField { hintText: root.selectedTab===1?"Tìm liên hệ trong các chat có sẵn":"Tìm kiếm cuộc trò chuyện"; onTextChanging: {root.searchQuery=text;root.rebuildChats();} }
-                Label { text: root.selectedTab===1?"Liên hệ từ hội thoại đã có · chạm để nhắn tin":root.statusText; textFormat: TextFormat.Plain; multiline: true; textStyle { color: Color.create("#86a7bb"); fontSize: FontSize.XSmall } }
+                Label { visible: root.statusText.indexOf("HTTP")!==-1||root.statusText.indexOf("Lỗi")!==-1;text: root.statusText;textFormat: TextFormat.Plain;multiline: true;textStyle { color: Color.create("#86a7bb");fontSize: FontSize.XSmall } }
                 ActivityIndicator { running: root.loadingChats; visible: running; horizontalAlignment: HorizontalAlignment.Center }
                 ListView {
                     layoutProperties: StackLayoutProperties { spaceQuota: 1 }
@@ -237,48 +232,19 @@ NavigationPane {
                         ToggleButton { checked: teamsNet.backgroundEnabled();onCheckedChanged: teamsNet.setBackgroundEnabled(checked) }
                     }
                     Label { text: "Kiểm tra khoảng 30 giây khi app đóng; cần Internet và quyền service nền/Hub của hệ thống. Đây chưa phải push tức thì."; multiline: true;textStyle { color: Color.create("#8daabd");fontSize: FontSize.Small } }
+                    Button { text: "Cập nhật OTA";horizontalAlignment: HorizontalAlignment.Fill;onClicked: otaSheet.open() }
                     Button { text: "Làm mới danh sách"; horizontalAlignment: HorizontalAlignment.Fill;onClicked: Teams.controller().refreshChats() }
                     Button { text: "Chẩn đoán phiên và service"; horizontalAlignment: HorizontalAlignment.Fill;onClicked: root.showDiagnostics() }
                     Button { text: "Hướng dẫn / Giới thiệu"; horizontalAlignment: HorizontalAlignment.Fill;onClicked: setupSheet.open() }
                     Button { text: "Đăng xuất"; horizontalAlignment: HorizontalAlignment.Fill;onClicked: logoutDialog.show() }
                 }
             }
-            Container {
-                visible: root.authenticated
-                horizontalAlignment: HorizontalAlignment.Center
-                preferredWidth: ui.du(62)
-                preferredHeight: ui.du(10)
-                topPadding: ui.du(0.8);bottomPadding: ui.du(0.8);leftPadding: ui.du(1);rightPadding: ui.du(1)
-                background: navPaint.imagePaint
-                layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
-                Container {
-                    layoutProperties: StackLayoutProperties { spaceQuota: 1 }
-                    horizontalAlignment: HorizontalAlignment.Fill
-                    background: root.selectedTab===0?activePaint.imagePaint:Color.Transparent
-                    ImageView { imageSource: "asset:///images/chat.png";preferredWidth: ui.du(4);preferredHeight: ui.du(4);horizontalAlignment: HorizontalAlignment.Center }
-                    Label { text: "Tin nhắn";horizontalAlignment: HorizontalAlignment.Center;textStyle { color: root.selectedTab===0?Color.create("#27c5ed"):Color.create("#b4d2e2");fontSize: FontSize.Small } }
-                    gestureHandlers: [TapHandler { onTapped: root.selectedTab=0 }]
-                }
-                Container {
-                    layoutProperties: StackLayoutProperties { spaceQuota: 1 }
-                    background: root.selectedTab===1?activePaint.imagePaint:Color.Transparent
-                    ImageView { imageSource: "asset:///images/people.png";preferredWidth: ui.du(4);preferredHeight: ui.du(4);horizontalAlignment: HorizontalAlignment.Center }
-                    Label { text: "Danh bạ";horizontalAlignment: HorizontalAlignment.Center;textStyle { color: root.selectedTab===1?Color.create("#27c5ed"):Color.create("#b4d2e2");fontSize: FontSize.Small } }
-                    gestureHandlers: [TapHandler { onTapped: root.selectedTab=1 }]
-                }
-                Container {
-                    layoutProperties: StackLayoutProperties { spaceQuota: 1 }
-                    background: root.selectedTab===2?activePaint.imagePaint:Color.Transparent
-                    ImageView { imageSource: "asset:///images/profile.png";preferredWidth: ui.du(4);preferredHeight: ui.du(4);horizontalAlignment: HorizontalAlignment.Center }
-                    Label { text: "Profile";horizontalAlignment: HorizontalAlignment.Center;textStyle { color: root.selectedTab===2?Color.create("#27c5ed"):Color.create("#b4d2e2");fontSize: FontSize.Small } }
-                    gestureHandlers: [TapHandler { onTapped: root.selectedTab=2 }]
-                }
-            }
+            BottomNavigation { visible: root.authenticated;selectedIndex: root.selectedTab;onSectionSelected: root.selectedTab=index }
+
         }
     }
     attachedObjects: [
-        ImagePaintDefinition { id: navPaint; imageSource: "asset:///images/nav.png"; repeatPattern: RepeatPattern.Fill },
-        ImagePaintDefinition { id: activePaint; imageSource: "asset:///images/active.png"; repeatPattern: RepeatPattern.Fill },
+        UpdateSheet { id: otaSheet },
         Timer { id: pendingTimer; interval: 100;repeat: false;onTriggered: root.openPending() },
         Timer { interval: 1500;repeat: true;running: root.waitingSession;onTriggered: Teams.controller().restoreSession() },
         Connections { target: teamsNet;onOpenConversation: pendingTimer.restart() },
@@ -290,6 +256,7 @@ NavigationPane {
                 Container {
                     leftPadding: ui.du(2); rightPadding: ui.du(2)
                     Label { text: "Có thể chọn và sao chép nội dung dưới đây. Log chỉ ghi mốc xử lý, không ghi mã đăng nhập, token hay tin nhắn."; multiline: true }
+                    Button { text: "Cập nhật OTA";horizontalAlignment: HorizontalAlignment.Fill;onClicked: otaSheet.open() }
                     TextArea { id: diagnosticText; editable: false; textFormat: TextFormat.Plain; layoutProperties: StackLayoutProperties { spaceQuota: 1 } horizontalAlignment: HorizontalAlignment.Fill }
                 }
             }

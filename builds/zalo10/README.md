@@ -1,6 +1,17 @@
 # Zalo10 test builds
 
-**Latest: 1.5.0.12 history-linking/Profile native build.**
+**Current: [1.5.0.13 native UI + OTA](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.13-native-ui-ota-unsigned.bar).**
+Shared circular-end-cap navigation/search UI and Profile OTA; native verified
+HTTPS/SHA256 download, firmware PPS installation when supported. Update/release
+notes no longer use the hidden About WebView. Retains history pairing and the
+no-custom-cover startup fix. See [OTA](../../docs/ota-vi.md) and
+[UI notes](../../docs/ui-ota-release-vi.md). Device rendering/PPS install unverified.
+Original-engine UI-only builds keep style updates but don't contain native OTA.
+
+## Historical builds
+
+
+**Previous: 1.5.0.12 history-linking/Profile native build.**
 Adds verified overlap reconciliation and explicit contact/group pairing; account
 metadata, native timestamps, image URL loading or user-supplied local preview.
 Android content:// locators alone cannot recover missing image bytes. Removes
@@ -8,7 +19,7 @@ per-tab pill backgrounds overlapping the outer bar; renames Profile. Keeps the
 no-custom-cover fix from 11. See `docs/zalo12-history-vi.md`; device testing pending.
 
 
-**Latest native test: 1.5.0.11, custom active-frame cover removed.**
+**Previous native test: 1.5.0.11, custom active-frame cover removed.**
 Two supplied version-9 runs log SIGSEGV after scene set and before cover ready.
 Version 11 excludes that component from startup, MOC and linked binary, adds
 first-event-loop tracing, and retains the phone-history archive. This is a targeted
@@ -16,7 +27,7 @@ test based on the logged interval, not a proven on-device fix. Original-engine
 recovery 10 remains available. See `docs/zalo11-startup-vi.md`.
 
 
-Current recovery build: **1.5.0.10 UI-only with original native engine**.
+Historical recovery build: **1.5.0.10 UI-only with original native engine**.
 The user reported native **1.5.0.9 crashes immediately on launch on Passport**.
 The later supplied log narrows its failure to the scene-set/active-cover interval.
 Do not describe native 9 as working or use it as the preferred device test.
