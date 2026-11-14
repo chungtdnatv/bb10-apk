@@ -1,0 +1,201 @@
+import bb.cascades 1.4
+import bb.system 1.0
+import QtQuick 1.0
+import "TeamsCore.js" as Teams
+
+NavigationPane {
+    id: root
+    property variant service: null
+    property variant activeChat: null
+    property bool foreground: true
+    property bool authenticated: false
+    property bool waiting: false
+    property bool loginBusy: false
+    property int chatCount: 0
+    property bool loadingChats: false
+    property string userName: ""
+    property string userMail: ""
+    property string statusText: ""
+    property string loginCode: ""
+    property string chatsMore: ""
+    property string chatsSignature: ""
+    peekEnabled: false
+    function render(state) {
+        authenticated=state.phase==="ready";
+        waiting=state.phase==="waiting";
+        loginBusy=state.phase==="requesting" || state.phase==="waiting" || state.phase==="loadingProfile";
+        loadingChats=state.loadingChats;chatCount=state.chats.length;
+        userName=state.profile ? state.profile.displayName : "";
+        userMail=state.profile ? (state.profile.mail || state.profile.userPrincipalName || "") : "";
+        statusText=state.status;
+        loginCode=state.code;
+        chatsMore=state.chatsMore;
+        var signature=JSON.stringify(state.chats);
+        if(signature!==chatsSignature) {
+            chatsSignature=signature;chatsModel.clear();
+            for(var i=0;i<state.chats.length;++i) chatsModel.append(state.chats[i]);
+        }
+        if(activeChat && state.chatId===activeChat.chatId) activeChat.render(state);
+    }
+    onPopTransitionEnded: {
+        if (page && page===root.activeChat) {
+            root.activeChat=null;
+            root.service.closeChat();
+            page.destroy();
+        }
+    }
+    onCreationCompleted: {
+        clientField.text=teamsNet.clientId();tenantField.text=teamsNet.tenant();
+        service=Teams.create({
+            now:function(){return Date.now();},
+            send:function(id,method,url,body,headers){teamsNet.request(id,method,url,body,headers);},
+            changed:function(state){root.render(state);},
+            pollAfter:function(ms){loginTimer.interval=ms;loginTimer.restart();},
+            cancelPoll:function(){loginTimer.stop();},
+            abortAll:function(){teamsNet.abortAll();},
+            saveConfig:function(client,tenant){teamsNet.saveConfig(client,tenant);},
+            loadCache:function(account,resource){return teamsNet.loadCache(account,resource);},
+            saveCache:function(account,resource,data){return teamsNet.saveCache(account,resource,data);},
+            sent:function(ok,id,text){if(root.activeChat) root.activeChat.sent(ok,id,text);}
+        });
+        render(service.state);
+    }
+    Page {
+        id: home
+        actionBarVisibility: ChromeVisibility.Hidden
+        Container {
+            background: Color.create("#172335")
+            horizontalAlignment: HorizontalAlignment.Fill
+            verticalAlignment: VerticalAlignment.Fill
+            leftPadding: ui.du(2)
+            rightPadding: ui.du(2)
+            topPadding: ui.du(1.5)
+            Label {
+                text: "Teams10"
+                textStyle { color: Color.create("#aaa9ff"); fontSize: FontSize.XXLarge; fontWeight: FontWeight.Bold }
+            }
+            Label {
+                text: root.authenticated ? root.userName+" · "+root.userMail : "Microsoft 365 công ty / trường học"
+                textFormat: TextFormat.Plain
+                multiline: true
+                textStyle { color: Color.create("#c6d4e9"); fontSize: FontSize.Small }
+            }
+            Label {
+                text: root.statusText
+                textFormat: TextFormat.Plain
+                multiline: true
+                textStyle { color: Color.create("#d4ddec"); fontSize: FontSize.Small }
+            }
+            ScrollView {
+                visible: !root.authenticated
+                layoutProperties: StackLayoutProperties { spaceQuota: 1 }
+                horizontalAlignment: HorizontalAlignment.Fill
+                Container {
+                    horizontalAlignment: HorizontalAlignment.Fill
+                    Label { text: "Application (Client) ID"; textStyle.color: Color.White }
+                    TextField {
+                        id: clientField
+                        hintText: "GUID từ Entra App registrations"
+                        enabled: !root.loginBusy
+                        inputMode: TextFieldInputMode.EmailAddress
+                    }
+                    Label { text: "Tenant ID hoặc domain tổ chức"; textStyle.color: Color.White }
+                    TextField {
+                        id: tenantField
+                        hintText: "Tenant ID / tencongty.onmicrosoft.com"
+                        enabled: !root.loginBusy
+                        inputMode: TextFieldInputMode.EmailAddress
+                    }
+                    Button {
+                        text: "Đăng nhập Microsoft"
+                        horizontalAlignment: HorizontalAlignment.Fill
+                        enabled: !root.loginBusy
+                        onClicked: root.service.startLogin(clientField.text,tenantField.text)
+                    }
+                    ActivityIndicator { visible: root.loginBusy; running: visible; horizontalAlignment: HorizontalAlignment.Center }
+                    Container {
+                        visible: root.waiting
+                        horizontalAlignment: HorizontalAlignment.Fill
+                        topPadding: ui.du(2)
+                        bottomPadding: ui.du(2)
+                        Label { text: "microsoft.com/devicelogin"; textStyle { color: Color.White; fontSize: FontSize.Large } horizontalAlignment: HorizontalAlignment.Center }
+                        Label { text: root.loginCode; textFormat: TextFormat.Plain; textStyle { color: Color.create("#aaa9ff"); fontSize: FontSize.XXLarge; fontWeight: FontWeight.Bold } horizontalAlignment: HorizontalAlignment.Center }
+                        Label { text: "Mở trang trên bằng điện thoại hoặc PC, nhập mã rồi chấp thuận quyền truy cập."; multiline: true; textStyle.color: Color.White }
+                    }
+                    Button { text: "Hủy đăng nhập"; visible: root.loginBusy; horizontalAlignment: HorizontalAlignment.Fill; onClicked: root.service.signOut() }
+                    Button { text: "Hướng dẫn lấy Client ID / Tenant ID"; horizontalAlignment: HorizontalAlignment.Fill; onClicked: setupSheet.open() }
+                    Label {
+                        text: "Client không chính thức. Bản đầu hỗ trợ chat có sẵn, đọc và gửi văn bản; không có gọi điện. Token chỉ giữ trong RAM."
+                        multiline: true
+                        textStyle { color: Color.create("#b2bfd3"); fontSize: FontSize.Small }
+                    }
+                    Label { text: teamsNet.diagnostic(); multiline: true; textStyle { color: Color.create("#b2bfd3"); fontSize: FontSize.XSmall } }
+                }
+            }
+            Container {
+                visible: root.authenticated
+                layoutProperties: StackLayoutProperties { spaceQuota: 1 }
+                horizontalAlignment: HorizontalAlignment.Fill
+                Container {
+                    layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
+                    Button { text: "Làm mới"; layoutProperties: StackLayoutProperties { spaceQuota: 1 } enabled: !root.loadingChats; onClicked: root.service.refreshChats(false) }
+                    Button { text: "Đăng xuất"; layoutProperties: StackLayoutProperties { spaceQuota: 1 } onClicked: logoutDialog.show() }
+                }
+                ActivityIndicator { running: root.loadingChats; visible: running; horizontalAlignment: HorizontalAlignment.Center }
+                Label { visible: root.chatCount===0 && !root.loadingChats; text: "Chưa có hội thoại. Tạo chat trong Teams chính thức rồi làm mới tại đây."; multiline: true; textStyle.color: Color.White }
+                ListView {
+                    layoutProperties: StackLayoutProperties { spaceQuota: 1 }
+                    dataModel: ArrayDataModel { id: chatsModel }
+                    listItemComponents: [ListItemComponent {
+                        type: ""
+                        Container {
+                            background: Color.create("#172335")
+                            horizontalAlignment: HorizontalAlignment.Fill
+                            topPadding: ui.du(1.7)
+                            bottomPadding: ui.du(1.7)
+                            Label { text: ListItemData.title; textFormat: TextFormat.Plain; multiline: false; textStyle { color: Color.White; fontSize: FontSize.Large; fontWeight: FontWeight.Bold } }
+                            Label { text: ListItemData.preview || "Chạm để đọc tin nhắn"; textFormat: TextFormat.Plain; multiline: false; textStyle { color: Color.create("#b2bfd3"); fontSize: FontSize.Small } }
+                            Label { text: ListItemData.time ? Teams.displayTime(ListItemData.time) : ""; textStyle { color: Color.create("#929ab7"); fontSize: FontSize.XSmall } }
+                            Container { preferredHeight: 1; horizontalAlignment: HorizontalAlignment.Fill; background: Color.create("#35425b") }
+                        }
+                    }]
+                    onTriggered: {
+                        if(root.activeChat) return;
+                        var item=dataModel.data(indexPath),page=chatDef.createObject();
+                        if(!page) return;
+                        page.controller=root.service;page.chatId=item.id;page.chatTitle=item.title;
+                        root.activeChat=page;root.push(page);root.service.openChat(item);
+                    }
+                }
+                Button { text: "Tải thêm hội thoại"; visible: root.chatsMore.length>0; enabled: !root.loadingChats; horizontalAlignment: HorizontalAlignment.Fill; onClicked: root.service.refreshChats(true) }
+            }
+        }
+    }
+    attachedObjects: [
+        Connections { target: Application; onFullscreen: root.foreground=true; onThumbnail: root.foreground=false; onInvisible: root.foreground=false },
+        Connections { target: teamsNet; onCompleted: { if(root.service) root.service.receive(id,status,body,error,headers); } },
+        Timer { id: loginTimer; interval: 5000; repeat: false; onTriggered: { if(root.service) root.service.pollLogin(); } },
+        Timer { interval: 30000; repeat: true; running: root.authenticated && root.foreground; onTriggered: { if(root.service) root.service.tick(); } },
+        ComponentDefinition { id: chatDef; source: "asset:///ChatPage.qml" },
+        SystemDialog {
+            id: logoutDialog
+            title: "Đăng xuất Teams10?"
+            body: "Xóa token khỏi RAM và cache tin nhắn trên máy. Không xóa lịch sử trên Teams."
+            confirmButton.label: "Đăng xuất"
+            cancelButton.label: "Hủy"
+            onFinished: { if(result===SystemUiResult.ConfirmButtonSelection) { root.service.signOut();if(!teamsNet.clearCache()) root.statusText="Đã đăng xuất nhưng chưa xóa được cache trên máy."; } }
+        },
+        Sheet {
+            id: setupSheet
+            Page {
+                titleBar: TitleBar { title: "Thiết lập Microsoft Entra"; dismissAction: ActionItem { title: "Đóng"; onTriggered: setupSheet.close() } }
+                ScrollView {
+                    Container {
+                        leftPadding: ui.du(3);rightPadding: ui.du(3);topPadding: ui.du(3)
+                        Label { text: "1. Trên PC, mở entra.microsoft.com → App registrations → New registration.\n\n2. Chọn tài khoản trong tổ chức của bạn và tạo app Teams10.\n\n3. Overview: sao chép Application (client) ID và Directory (tenant) ID.\n\n4. Authentication → Advanced settings: bật Allow public client flows.\n\n5. API permissions → Microsoft Graph → Delegated: User.Read, Chat.Read, ChatMessage.Send, offline_access.\n\n6. Nhờ IT cấp consent nếu chính sách tenant yêu cầu. Không tạo hoặc nhập Client secret.\n\nNếu tenant chặn device code hoặc yêu cầu thiết bị được quản lý, IT cần cho phép phương án truy cập phù hợp. App không bỏ qua chính sách này."; multiline: true }
+                    }
+                }
+            }
+        }
+    ]
+}

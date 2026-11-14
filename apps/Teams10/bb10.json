@@ -1,0 +1,15 @@
+{
+  "build_script": "scripts/build.sh",
+  "output": "build/Teams10-unsigned.bar",
+  "tests": [
+    [
+      "node",
+      "--test",
+      "tests/core.test.cjs"
+    ],
+    [
+      "python3",
+      "tests/test_package.py"
+    ]
+  ]
+}

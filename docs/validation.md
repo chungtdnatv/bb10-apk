@@ -136,3 +136,22 @@ and ZALO_SQLITE_LIBRARY; CI explicitly installs libsqlite3-dev. The actual nativ
 Both final BAR QML sets pass syntax lint. No phone sync/session/UI runtime was
 available in cloud. Native 9 launch is unverified; original-engine 8 is the fallback.
 See phone-history-vi.md for limits and device test steps.
+
+## Teams10 1.0.0.1
+
+New independent native app: OAuth device code with tenant-owned public client,
+delegated Graph /me + list/read/send existing chats, foreground refresh and
+account-scoped SQLite cache. Tokens stay in RAM; explicit logout clears session
+and local cache. No voice/video, private Teams API or reuse of third-party IDs.
+HTTPS uses SDK curl/OpenSSL in a serialized worker, TLS1.2, CA/hostname validation,
+redirects disabled and destination allowlisting. Mozilla roots from certifi
+2026.10.19 are shipped with MPL2.0 notice.
+
+Build passes SDK imports/startup/entry/unwind checks: 97 dependent SDK libraries,
+136 resolved strong imports. Actual unsigned BAR passes CRC/digests/index and
+entry validation (10 assets, one Teams10 entry). Both QML files pass syntax lint.
+35 toolkit tests, 21 tests of the real JS controller using mock HTTP/cache/clock,
+and 2 package/CA-store tests pass. SDK-checked dynamic dependencies are not proof
+that the actual phone's libcurl/TLS configuration negotiates with Microsoft.
+No Client ID/tenant registration was supplied; real device login, Microsoft Graph
+read/send and Passport launch remain untested. See Teams10 README/setup guide.

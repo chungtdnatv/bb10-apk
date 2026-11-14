@@ -29,6 +29,21 @@ Có thể đặt `--jobs 2` nếu cần giới hạn số compiler chạy đồn
 Image được ghim theo SHA-256 trong `toolchains/image.txt`. Repo không chứa SDK 4 GB
 hoặc cache build; `toolchains/` chứa source và revision để tái tạo/mở rộng toolchain.
 
+## Teams10 cho Microsoft 365
+
+App native riêng có đăng nhập device-code, đọc lịch sử và gửi văn bản vào chat có sẵn.
+[Tải Teams10 1.0.0.1](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.0.0.1-unsigned.bar).
+Không có gọi điện. Cần App Registration của tổ chức, delegated permissions và tenant
+cho phép truy cập; nhập Client ID/Tenant ID trên máy, không dùng client secret.
+
+```sh
+python3 bb10.py build Teams10
+python3 bb10.py test Teams10
+```
+
+Xem [cách lấy ID và cài Teams10](docs/teams10-setup-vi.md) và [phạm vi/giới hạn](apps/Teams10/README.md).
+Chưa có kiểm tra đăng nhập/gửi thật trong tenant hoặc xác nhận chạy trên Passport.
+
 ## Tạo app mới
 
 ```sh
@@ -56,7 +71,7 @@ python3 bb10.py verify dist/Zalo10-modern-unsigned.bar
 ```
 
 `verify` kiểm tra nội dung BAR và entry point ARM; không xác thực chữ ký phát hành.
-GitHub Actions chạy test, build Hello10 + Zalo10 và tải `dist/*.bar` lên artifact
+GitHub Actions chạy test, build Hello10 + Zalo10 + Teams10 và tải `dist/*.bar` lên artifact
 **bb10-unsigned-test-bars**. Có thể chạy Actions → Build BB10 BARs → Run workflow
 sau khi workflow có trên default branch. CI đã cấu hình; kết quả chạy CI phải xem
 ở Actions, không suy ra từ kết quả build cục bộ.

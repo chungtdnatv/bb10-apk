@@ -32,3 +32,11 @@ MIT source snapshots of `softtyos/zca-js` and `hailinhmacduc/ZolaKit-Swift` are
 archived under `references/zalo-calling/` with pinned revisions, SHA-256 and
 license copies. They are research/porting inputs, not code bundled in the BAR.
 See [evidence and BB10 port requirements](references/zalo-calling/README.md).
+
+## Teams10
+
+`apps/Teams10` is newly authored MIT toolkit C++/QML/JavaScript, built on the MIT
+Cascades starter. It does not link purple-teams, squads-app or Zalo protocol code.
+The CA store is Mozilla's bundle distributed by certifi 2026.10.19 (MPL2.0);
+license included in app assets. SDK curl/OpenSSL/Qt/SQLite remain system libraries.
+See apps/Teams10/README.md and docs/teams-bb10-research-vi.md for design and sources.
