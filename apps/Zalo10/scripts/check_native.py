@@ -5,8 +5,11 @@ import json
 import os
 import re
 import subprocess
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT.parents[1]))
+from bb10kit.elf import check_cascades
 BIN = '/opt/bb10-toolchain/bin/arm-unknown-nto-qnx6.5.0eabi-'
 TARGET = Path(os.environ.get('QNX_TARGET', '/opt/bb10-sdk/target/qnx6'))/'armle-v7'
 LIBDIRS = [TARGET/'lib', TARGET/'usr/lib', TARGET/'usr/lib/qt4/lib']
@@ -42,6 +45,7 @@ def check(file):
     header=run('readelf','-h',file)
     assert 'ARM' in header and 'ELF32' in header
     if file.suffix=='.so':
+        check_cascades(file.read_bytes())
         assert 'main' in definitions(file), 'Cascades entry symbol not exported'
         entry = int(re.search(r'Entry point address:\s*(0x[0-9a-fA-F]+)', header).group(1), 16)
         main = next(int(line.split()[0], 16) for line in run('nm','-D','--defined-only',file).splitlines() if line.split()[-1]=='main')

@@ -1,5 +1,6 @@
 #include "applicationui.hpp"
 #include "utils/LogSanitizer.hpp"
+#include "utils/StartupTrace.h"
 
 #include <bb/cascades/Application>
 #include <bb/cascades/ThemeSupport>
@@ -20,6 +21,10 @@
 #include <openssl/crypto.h>
 
 using namespace bb::cascades;
+
+#ifndef ZALO10_BUILD_VERSION
+#define ZALO10_BUILD_VERSION "unversioned SDK build"
+#endif
 
 // SIGTERM via self-pipe: manualExit() doesn't fire when Navigator kills the app (card swipe).
 // The handler only write()s a byte; QSocketNotifier runs the real cleanup.
@@ -88,12 +93,17 @@ static void zalo10MessageHandler(QtMsgType type, const char *msg)
 
 Q_DECL_EXPORT int main(int argc, char **argv)
 {
+    zalo10_startup_init(ZALO10_BUILD_VERSION);
     qInstallMsgHandler(zalo10MessageHandler);
     installZalo10TermHandler();
 
+    zalo10_startup_stage("before OpenSSL version log");
     qDebug() << "[App] OpenSSL:" << SSLeay_version(SSLEAY_VERSION);
 
+    zalo10_startup_stage("before Cascades Application constructor");
     Application app(argc, argv);
+    zalo10_startup_install_handlers();
+    zalo10_startup_stage("Cascades Application created");
 
     Application::instance()->themeSupport()->setVisualStyle(VisualStyle::Bright);
     {
@@ -103,10 +113,13 @@ Q_DECL_EXPORT int main(int argc, char **argv)
         }
     }
 
+    zalo10_startup_stage("before ApplicationUI constructor");
     ApplicationUI appui;
+    zalo10_startup_stage("ApplicationUI created");
 
     QSocketNotifier termNotifier(g_zalo10TermFd[0], QSocketNotifier::Read);
     QObject::connect(&termNotifier, SIGNAL(activated(int)), &appui, SLOT(onTermSignal(int)));
 
+    zalo10_startup_stage("entering event loop");
     return Application::exec();
 }

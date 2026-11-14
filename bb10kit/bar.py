@@ -4,6 +4,7 @@ import hashlib
 from pathlib import PurePosixPath
 import struct
 import zipfile
+from .elf import check_cascades
 
 
 def logical_lines(data):
@@ -64,6 +65,8 @@ def verify(path):
                 raise ValueError('Expected an ARM little-endian ELF32: '+name)
             if name in entries and struct.unpack_from('<I',elf,24)[0] == 0:
                 raise ValueError('ELF entry point is zero (startup crash risk): '+name)
+            if name in entries and struct.unpack_from('<H',elf,16)[0]==3:
+                check_cascades(elf)
         if 'native/assets/.assets.index' in files:
             index = archive.read('native/assets/.assets.index').decode().splitlines()
             actual = {n.removeprefix('native/assets/') for n in files

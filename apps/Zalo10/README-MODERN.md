@@ -9,12 +9,15 @@ Giao diện có nền trắng, avatar tròn, tìm kiếm thường trực, menu 
 soạn tin mở danh bạ và thanh Tin nhắn / Danh bạ / Nhóm. Dữ liệu vẫn đến từ core
 Zalo gốc. Backend cung cấp cờ chưa đọc nên UI dùng chấm xanh, không tự tạo số đếm.
 
-## Sửa lỗi startup trong 1.5.0.2
+## Chẩn đoán startup trong 1.5.0.3
 
 Người dùng báo 1.5.0.1 thoát ngay khi mở trên Passport. Binary bản đó có
 `e_entry=0`; BAR gốc có entry address của `main`. CMake nay link `-e main`,
 native checker đối chiếu địa chỉ thật với symbol `main`, và UI có trang báo lỗi
-native nếu tạo scene QML thất bại. Chưa có kết quả thử lại trên thiết bị.
+native nếu tạo scene QML thất bại. Người dùng vẫn báo 1.5.0.2 crash trên Passport.
+1.5.0.3 khôi phục SDK crti/crtn, stack note QNX và cờ entry ARM kiểu cũ; phase log
+được ghi trước Qt ở Documents/zalo10/log/zalo10_startup.log. Trang lỗi QML có nút
+xuất runtime log. Xem docs/passport-logs-vi.md ở root; cần retest trên máy.
 
 Builder tạo cả UI và headless bằng `bb10-c++`, giữ ABI Dinkumware của SDK.
 Không dùng libc++20 để link trực tiếp Qt. Hai đoạn hỗ trợ `qnx-dso.c` và

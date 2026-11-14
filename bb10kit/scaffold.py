@@ -10,10 +10,12 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 from .bar import verify, logical_lines
+from .elf import finalize_cascades
 
 
 def package(project):
     project=Path(project).resolve()
+    finalize_cascades(project/'build/native/arm'/(project.name+'.so'))
     ns='http://www.qnx.com/schemas/application/1.0'
     ET.register_namespace('',ns)
     tree=ET.parse(project/'bar-descriptor.xml')

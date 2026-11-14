@@ -30,6 +30,7 @@ INCLUDEPATH += src
 INCLUDEPATH += $$(QNX_TARGET)/usr/include/qt4/QtGui
 
 HEADERS += \
+    src/utils/StartupTrace.h \
     src/utils/ZaloCookieJar.hpp \
     src/core/ServiceHandoff.hpp \
     src/utils/LogSanitizer.hpp \
@@ -42,6 +43,7 @@ HEADERS += \
     src/core/HubIntegration.hpp
 
 SOURCES += \
+    src/utils/StartupTrace.c \
     src/main.cpp \
     src/app/ApplicationUI.cpp \
     src/app/ApplicationUI_Share.cpp \

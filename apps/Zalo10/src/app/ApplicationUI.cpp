@@ -2,10 +2,15 @@
 #include <bb/cascades/Page>
 #include <bb/cascades/Container>
 #include <bb/cascades/Label>
+#include <bb/cascades/Button>
+#include <bb/cascades/ScrollView>
+#include <bb/system/SystemToast>
 #include <QtDeclarative/QDeclarativeError>
+#include "utils/StartupTrace.h"
 
 ApplicationUI::ApplicationUI() : QObject(), m_zService(NULL), m_updateManager(NULL), m_exitHandled(false), m_pendingShareMimeType("text/plain")
 {
+    zalo10_startup_stage("ApplicationUI: creating invoke manager");
     m_pInvokeManager = new InvokeManager(this);
     bool invokeConnectOk = QObject::connect(
         m_pInvokeManager, SIGNAL(invoked(const bb::system::InvokeRequest&)),
@@ -17,10 +22,13 @@ ApplicationUI::ApplicationUI() : QObject(), m_zService(NULL), m_updateManager(NU
         m_pLocaleHandler, SIGNAL(systemLanguageChanged()),
         this,             SLOT(onSystemLanguageChanged()));
     Q_ASSERT(res); Q_UNUSED(res);
+    zalo10_startup_stage("ApplicationUI: loading translations");
     onSystemLanguageChanged();
 
+    zalo10_startup_stage("ApplicationUI: before ZaloService constructor");
     ZaloService *zService = new ZaloService(this);
     m_zService = zService;
+    zalo10_startup_stage("ApplicationUI: ZaloService created");
 
     ServiceHandoff::markUiAlive();
     pingHandoffService(ServiceHandoff::ACTION_UI_OPENED);
@@ -43,11 +51,13 @@ ApplicationUI::ApplicationUI() : QObject(), m_zService(NULL), m_updateManager(NU
             Application::instance()->themeSupport()->setVisualStyle(VisualStyle::Dark);
     }
 
+    zalo10_startup_stage("ApplicationUI: before loading main.qml");
     QmlDocument *qml = QmlDocument::create("asset:///main.qml").parent(this);
     qml->setContextProperty("app",      this);
     qml->setContextProperty("zService", zService);
 
     AbstractPane *root = qml->createRootObject<AbstractPane>();
+    zalo10_startup_stage(root ? "ApplicationUI: QML root created" : "ApplicationUI: QML root failed");
     if (!root) {
         QStringList details;
         const QList<QDeclarativeError> errors = qml->errors();
@@ -63,13 +73,32 @@ ApplicationUI::ApplicationUI() : QObject(), m_zService(NULL), m_updateManager(NU
             + details.join("\n")
             + "\nLog: data/zalo10_runtime.log");
         content->add(message);
-        fallback->setContent(content);
+        Button *exportButton = new Button();
+        exportButton->setText(QString::fromUtf8("Xuất log ra Documents"));
+        QObject::connect(exportButton, SIGNAL(clicked()), this, SLOT(exportStartupLogs()));
+        content->add(exportButton);
+        ScrollView *scroll = new ScrollView();
+        scroll->setContent(content);
+        fallback->setContent(scroll);
         root = fallback;
     }
     Application::instance()->setScene(root);
+    zalo10_startup_stage("ApplicationUI: scene set");
 
     ActiveFrameCover *cover = new ActiveFrameCover();
     Application::instance()->setCover(cover);
+    zalo10_startup_stage("ApplicationUI: active frame ready");
+}
+
+void ApplicationUI::exportStartupLogs()
+{
+    const QString path = exportLog();
+    bb::system::SystemToast *toast = new bb::system::SystemToast(this);
+    toast->setBody(path.isEmpty()
+        ? QString::fromUtf8("Chưa xuất được runtime log. Kiểm tra Documents/zalo10/log/zalo10_startup.log hoặc lấy log từ sandbox.")
+        : QString::fromUtf8("Đã lưu runtime log: ") + path);
+    toast->show();
+    QObject::connect(toast, SIGNAL(finished(bb::system::SystemUiResult::Type)), toast, SLOT(deleteLater()));
 }
 
 void ApplicationUI::minimizeApp()

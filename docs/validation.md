@@ -21,3 +21,25 @@ pinned in `toolchains/image.txt` (a flattened local copy because Docker uses vfs
 GitHub Actions is configured separately; local validation does not claim its run
 has finished. No BB10 runtime/emulator was available in cloud. Passport launch,
 QR login, messaging and headless/Hub behavior are pending device retest of 1.5.0.2.
+
+## Follow-up after the 1.5.0.2 Passport crash report
+
+The user reported that 1.5.0.2 also exits on launch. The next test BAR is 1.5.0.3.
+Comparing to the supplied original BAR showed missing SDK startup objects,
+legacy QNX stack note, init/fini hooks and EF_ARM_HASENTRY in the rebuilt shared
+ELF. The build now includes SDK crti/crtn, immediate binding, a narrowly scoped
+post-link entry-flag finalizer, and explicit validation of that startup metadata.
+The original supplied BAR passes the stricter validator; no original binary is
+modified or used as a substitute for the new source-built application.
+
+The UI adds a POSIX phase log before Qt and a fatal-signal logger which preserves
+the original signal termination. Phase-only logs mirror to shared Documents;
+the native QML failure page has a runtime-log export button. Host POSIX tests
+verify phase mirroring, shared-path failure, shared-file readability, and that
+SIGABRT is logged and still terminates the harness. These tests require a host
+C compiler; they do not emulate QNX on a phone.
+
+Local checks: 16 toolkit tests, 3 package tests and the existing JavaScript tests
+pass; both applications build with the updated startup metadata. Device behavior
+of 1.5.0.3 is not yet verified. The startup/runtime log and device OS version are
+needed before identifying the remaining Passport failure with confidence.

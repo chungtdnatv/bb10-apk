@@ -37,6 +37,7 @@ public slots:
     Q_INVOKABLE void quitApp();
     Q_INVOKABLE QString appVersion();
     Q_INVOKABLE QString exportLog();
+    void exportStartupLogs();
 
     Q_INVOKABLE void checkForUpdate();
     Q_INVOKABLE void fetchChangelog();

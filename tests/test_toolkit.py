@@ -12,6 +12,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 from bb10kit.bar import verify
+from elf_fixtures import cascades_elf
 
 REPO=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('bb10cli',REPO/'bb10.py')
@@ -20,11 +21,8 @@ spec.loader.exec_module(cli)
 
 
 def fixture(path, entry=0x1000, tamper=False, missing_key=False):
-    elf=bytearray(52)
-    elf[:6]=b'\x7fELF\x01\x01'
-    struct.pack_into('<HH',elf,16,3,40)
-    struct.pack_into('<I',elf,24,entry)
-    files={'native/Test.so':bytes(elf),'native/assets/main.qml':b'import bb.cascades 1.4\nPage {}\n',
+    elf=cascades_elf(entry=entry)
+    files={'native/Test.so':elf,'native/assets/main.qml':b'import bb.cascades 1.4\nPage {}\n',
            'native/assets/.assets.index':b'1\n1\nmain.qml\n'}
     header=['Archive-Manifest-Version: 1.5','','Entry-Point-Name: Test',
             'Entry-Point: app/native/Test.so','Entry-Point-Type: Qnx/Cascades']

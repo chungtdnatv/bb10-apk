@@ -2,6 +2,10 @@
 
 ## App closes immediately
 
+For the Passport crash on 1.5.0.2, see the detailed Vietnamese guide:
+[Lấy startup/runtime log trên Passport](passport-logs-vi.md). Version 1.5.0.3
+mirrors phase markers to shared Documents and keeps a sandbox fallback.
+
 1. Record the device model, BB10 version and exact BAR version.
 2. Run `python3 bb10.py verify path/to/app.bar`. A Cascades UI is a shared ELF,
    but its entry address must point to `main`; `e_entry=0` is rejected.

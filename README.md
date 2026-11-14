@@ -68,11 +68,14 @@ Repo không tạo debug token, không giả chữ ký và không bảo đảm c�
 **1.5.0.1 đã bị báo crash lúc mở trên Passport; không dùng bản đó để test tiếp.**
 Binary có ELF entry point bằng 0. **1.5.0.2** đã sửa linker để entry point trỏ vào
 `main`, bổ sung kiểm tra chống tái diễn và màn hình native báo lỗi QML.
-Đây là lỗi build đã xác định và sửa; cần thử lại trên thiết bị để xác nhận crash đã hết.
+Người dùng sau đó vẫn báo crash trên Passport với 1.5.0.2.
+**1.5.0.3** khôi phục thêm SDK startup objects, QNX stack note và cờ entry kiểu cũ;
+bổ sung log trước Qt ở **Documents/zalo10/log/zalo10_startup.log**.
+Đây là bản sửa kèm chẩn đoán, chưa xác nhận hết lỗi trên thiết bị.
 
-[Tải BAR 1.5.0.2 để test](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.2-modern-unsigned.bar).
+[Tải BAR 1.5.0.3 để test](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.3-modern-diagnostic-unsigned.bar).
 Build, test và checksum không thay thế kiểm tra QR login, gửi/nhận tin, đóng/mở lại
-và thông báo nền trên điện thoại. Xem [cách lấy log](docs/troubleshooting.md).
+và thông báo nền trên điện thoại. Xem [cách lấy log Passport](docs/passport-logs-vi.md).
 
 ## Cấu trúc source
 
