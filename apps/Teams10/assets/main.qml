@@ -23,7 +23,7 @@ NavigationPane {
     function render(state) {
         authenticated=state.phase==="ready";
         waiting=state.phase==="waiting";
-        loginBusy=state.phase==="requesting" || state.phase==="waiting" || state.phase==="loadingProfile";
+        loginBusy=state.phase==="requesting" || state.phase==="waiting" || state.phase==="loadingProfile" || state.phase==="connecting";
         loadingChats=state.loadingChats;chatCount=state.chats.length;
         userName=state.profile ? state.profile.displayName : "";
         userMail=state.profile ? (state.profile.mail || state.profile.userPrincipalName || "") : "";
@@ -45,9 +45,10 @@ NavigationPane {
         }
     }
     onCreationCompleted: {
-        clientField.text=teamsNet.clientId();tenantField.text=teamsNet.tenant();
+        tenantField.text=teamsNet.tenant();
         service=Teams.create({
             now:function(){return Date.now();},
+            decodeBase64Url:function(part){return teamsNet.decodeBase64Url(part);},
             send:function(id,method,url,body,headers){teamsNet.request(id,method,url,body,headers);},
             changed:function(state){root.render(state);},
             pollAfter:function(ms){loginTimer.interval=ms;loginTimer.restart();},
@@ -92,17 +93,10 @@ NavigationPane {
                 horizontalAlignment: HorizontalAlignment.Fill
                 Container {
                     horizontalAlignment: HorizontalAlignment.Fill
-                    Label { text: "Application (Client) ID"; textStyle.color: Color.White }
-                    TextField {
-                        id: clientField
-                        hintText: "GUID từ Entra App registrations"
-                        enabled: !root.loginBusy
-                        inputMode: TextFieldInputMode.EmailAddress
-                    }
-                    Label { text: "Tenant ID hoặc domain tổ chức"; textStyle.color: Color.White }
+                    Label { text: "Domain/Tenant (tùy chọn)"; textStyle.color: Color.White }
                     TextField {
                         id: tenantField
-                        hintText: "Tenant ID / tencongty.onmicrosoft.com"
+                        hintText: "Để trống tự chọn tổ chức khi đăng nhập"
                         enabled: !root.loginBusy
                         inputMode: TextFieldInputMode.EmailAddress
                     }
@@ -110,7 +104,7 @@ NavigationPane {
                         text: "Đăng nhập Microsoft"
                         horizontalAlignment: HorizontalAlignment.Fill
                         enabled: !root.loginBusy
-                        onClicked: root.service.startLogin(clientField.text,tenantField.text)
+                        onClicked: root.service.startLogin(tenantField.text)
                     }
                     ActivityIndicator { visible: root.loginBusy; running: visible; horizontalAlignment: HorizontalAlignment.Center }
                     Container {
@@ -123,9 +117,9 @@ NavigationPane {
                         Label { text: "Mở trang trên bằng điện thoại hoặc PC, nhập mã rồi chấp thuận quyền truy cập."; multiline: true; textStyle.color: Color.White }
                     }
                     Button { text: "Hủy đăng nhập"; visible: root.loginBusy; horizontalAlignment: HorizontalAlignment.Fill; onClicked: root.service.signOut() }
-                    Button { text: "Hướng dẫn lấy Client ID / Tenant ID"; horizontalAlignment: HorizontalAlignment.Fill; onClicked: setupSheet.open() }
+                    Button { text: "Hướng dẫn đăng nhập native"; horizontalAlignment: HorizontalAlignment.Fill; onClicked: setupSheet.open() }
                     Label {
-                        text: "Client không chính thức. Bản đầu hỗ trợ chat có sẵn, đọc và gửi văn bản; không có gọi điện. Token chỉ giữ trong RAM."
+                        text: "Client không chính thức dùng luồng tương thích purple-teams và Client ID công khai của Teams. Không cần tạo App Registration riêng. Microsoft/tenant vẫn có thể từ chối. Token chỉ giữ trong RAM."
                         multiline: true
                         textStyle { color: Color.create("#b2bfd3"); fontSize: FontSize.Small }
                     }
@@ -188,11 +182,11 @@ NavigationPane {
         Sheet {
             id: setupSheet
             Page {
-                titleBar: TitleBar { title: "Thiết lập Microsoft Entra"; dismissAction: ActionItem { title: "Đóng"; onTriggered: setupSheet.close() } }
+                titleBar: TitleBar { title: "Đăng nhập Teams10 native"; dismissAction: ActionItem { title: "Đóng"; onTriggered: setupSheet.close() } }
                 ScrollView {
                     Container {
                         leftPadding: ui.du(3);rightPadding: ui.du(3);topPadding: ui.du(3)
-                        Label { text: "1. Trên PC, mở entra.microsoft.com → App registrations → New registration.\n\n2. Chọn tài khoản trong tổ chức của bạn và tạo app Teams10.\n\n3. Overview: sao chép Application (client) ID và Directory (tenant) ID.\n\n4. Authentication → Advanced settings: bật Allow public client flows.\n\n5. API permissions → Microsoft Graph → Delegated: User.Read, Chat.Read, ChatMessage.Send, offline_access.\n\n6. Nhờ IT cấp consent nếu chính sách tenant yêu cầu. Không tạo hoặc nhập Client secret.\n\nNếu tenant chặn device code hoặc yêu cầu thiết bị được quản lý, IT cần cho phép phương án truy cập phù hợp. App không bỏ qua chính sách này."; multiline: true }
+                        Label { text: "1. Bấm Đăng nhập Microsoft; không nhập Client ID hay mật khẩu vào app.\n\n2. Trên điện thoại/PC khác, mở microsoft.com/devicelogin, nhập mã đang hiển thị và xác nhận tài khoản công ty/trường học.\n\n3. Đây là client độc lập. Luồng tương thích dùng định danh public-client Teams giống purple-teams; màn hình Microsoft có thể hiện tên Microsoft Teams. Teams10 không phải ứng dụng Microsoft.\n\n4. Chờ app xác nhận dịch vụ chat rồi chọn hội thoại có sẵn để đọc/gửi văn bản.\n\n5. Nếu cần, nhập domain/Tenant tổ chức trước khi lấy mã mới. Để trống sẽ dùng organizations.\n\nNếu Microsoft/tenant từ chối đăng nhập hoặc yêu cầu thiết bị/ứng dụng được quản lý, app sẽ dừng và hiển thị lỗi. Không có cách vượt chính sách trong app.\n\nChưa hỗ trợ Teams cá nhân, gọi điện, tạo chat mới, channels hoặc gửi tệp."; multiline: true }
                     }
                 }
             }

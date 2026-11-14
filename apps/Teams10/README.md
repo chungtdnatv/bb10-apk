@@ -1,34 +1,46 @@
-# Teams10 — BB10 Microsoft 365 chat MVP
+# Teams10 1.0.0.2 — native BB10 Microsoft 365 chat client
 
-Native Cascades C++/QML application for work/school Microsoft 365 accounts.
-Uses the organization's own Entra public-client registration and Microsoft Graph
-v1.0 delegated permissions. This is an independent, unofficial client.
+Independent, unofficial Cascades C++/QML client for work/school Teams accounts.
+No WebView, Teams browser engine or own Entra App Registration is required in
+this version. Authentication/protocol interoperability follows purple-teams and
+squads-app; it is **not an officially supported Microsoft integration**. Microsoft
+or the tenant can reject this client, device-code flow or access to chat services.
 
 ## Implemented
 
-- Editable Client ID/Tenant ID, device-code login on another phone/PC, cancellation,
-  expiration, authorization_pending, slow_down and token renewal during the session.
-- `/me`, list existing 1:1/group/meeting chats, pagination and last-message sorting.
-- Read chat messages, older pages, updates/deletions observed on refresh, plain-text
-  rendering of HTML and attachment names. Up to 500 messages per open chat/cache.
-- Send text to an existing chat, guard duplicate taps, preserve draft on failure.
-  Uncertain network delivery never causes an automatic POST retry.
-- Foreground refresh every 30 seconds, manual refresh, explicit 403/429 messages.
-- Account/client/tenant-scoped SQLite cache; explicit logout clears tokens in RAM
-  and deletes local cache. Microsoft tokens are never saved in settings/SQLite.
-- Dedicated HTTPS worker using SDK curl/OpenSSL, TLS1.2, CA + hostname validation,
-  no redirects, bounded payloads/timeouts, Graph/Entra allowlisted destinations.
+- Microsoft device-code login on another phone/PC; optional tenant/domain.
+- Fixed public Teams client identifier used by upstream compatibility clients.
+  The Microsoft confirmation page may identify Microsoft Teams; this independent
+  program is Teams10, not Microsoft Teams. No client secret or password input.
+- V1 device/resource grant, session refresh-token rotation and separate resource
+  tokens for CSA chat discovery and IC3 message requests. Optional Graph `/me`
+  profile lookup only if account claims aren't available in the initial token.
+- Regional chat discovery (emea/amer/apac), existing private/group/meeting chats,
+  latest-message sorting, readable text/HTML and older message windows.
+- Send escaped plain text to existing chats; duplicate-tap guard and draft retained
+  on failure. Timeout/429/403 never automatically repeats a send. A successful
+  submission is followed by history refresh; no fabricated server message IDs.
+- Manual and foreground 30-second refresh, up to 500 cached messages per chat.
+- Account/tenant/protocol-scoped SQLite cache exposed only after successful service
+  authentication. Explicit logout clears RAM tokens and local cache.
+- Native SDK curl/OpenSSL HTTPS worker, TLS1.2, CA and hostname verification,
+  bounded responses/timeouts, fixed endpoint/method allowlist and no automatic
+  curl redirects. GET regional redirects are validated and rebuilt explicitly.
 
-## Configure
+## Install
 
-See [Vietnamese Entra and installation guide](../../docs/teams10-setup-vi.md).
-Required delegated permissions: User.Read, Chat.Read, ChatMessage.Send,
-offline_access. No client secret. Register an app you control; do not borrow the
-client ID of Teams or another client. A single-tenant registration should use its
-actual Directory (tenant) ID. Tenant consent/Conditional Access may require IT.
-The app supports the global Microsoft 365 cloud endpoints, not sovereign clouds.
+[Download and Vietnamese guide](../../docs/teams10-setup-vi.md).
+Install the BAR as a separate app, select **Đăng nhập Microsoft**, then enter the
+shown code at https://microsoft.com/devicelogin on a supported phone/PC. Tenant
+can be left blank (`organizations`). Tokens stay in RAM: after terminating the
+app, sign in again. Only public tenant/client configuration is saved in settings.
 
-## Build and test
+A tenant policy refusal is shown as an error; the app does not attempt different
+client IDs or forge device compliance. Global Microsoft 365 endpoints only, not
+personal Teams or sovereign clouds. Browser access on another device does not
+prove this authentication flow will be allowed.
+
+## Build and verification
 
 ```sh
 python3 bb10.py build Teams10
@@ -36,49 +48,35 @@ python3 bb10.py test Teams10
 python3 bb10.py verify dist/Teams10-unsigned.bar
 ```
 
-Python3 + Docker for build; Node >=18, C++ compiler and SQLite dev package for the
-repository's complete test suite. The SDK image/compiler is pinned by the toolkit.
-The app uses the same SDK entry/init/ARM flags as the fixed toolkit starter.
-`check_native.py` validates the dependency closure and exported main entry.
+Build uses the toolkit's pinned Docker BB10 SDK. Tests require Node >=18, C++ and
+SQLite development headers. `tests/native-core.test.cjs` runs the actual shipped
+controller with synthetic HTTP/cache/clock responses (23 tests). Native route
+policy is compiled and tested as C++98. Package tests compare shipped assets and
+version and parse the CA store. Historical Graph-only controller/tests remain in
+`compat/` and `tests/core.test.cjs`; that controller is **not shipped or executed**.
+SDK imports/entry/unwind and QML syntax are also checked separately.
 
-Node tests run the **actual TeamsCore.js** with mock HTTP/cache/clock transports.
-These verify device login, expiry/cancel, scopes, tenant errors, pagination,
-HTML-to-text, token renewal, isolation of old callbacks, and send behavior. They
-are not real Microsoft authentication or a BB10 runtime emulator. Package tests
-verify the actual BAR and parse the distributed CA bundle. QML has separate syntax
-lint. Native SDK import checks do not prove the installed phone's TLS behavior.
+These are offline/build checks, not real Microsoft authentication or a BB10
+emulator. No company account has been used in development. Actual Passport
+startup, device login, chat service responses and send/receive remain unverified.
 
-## Limits and device validation
+## Limits
 
-No calling, new-chat creation, channels/Teams browsing, media upload/download,
-rich cards, reactions, read receipts, Hub/headless or background push in this MVP.
-Text is limited to 6,000 UTF-16 code units per send. Existing chat member expansion
-can return at most 25 members; group titles prefer the supplied topic.
-History/notifications remain subject to Graph permissions and tenant retention.
-Refresh polls the selected chat or inbox; there is no Trouter/private Teams API.
-Foreground refresh updates recently created messages; edits/deletions to very old
-messages outside fetched pages aren't guaranteed to appear until revisiting them.
+No calls, channels, new-chat creation, media transfers, rich cards, read receipts,
+Hub/headless operation, Trouter realtime events or background notifications.
+Media is a placeholder. Missing member names fall back to chat titles and sender
+names learned from history. Internal Teams endpoints may change without notice.
+Older history uses timestamp windows; edits/deletions outside fetched windows
+aren't guaranteed to update. Sends are capped at 6,000 UTF-16 units and 24,000
+encoded JSON bytes. The cache is not encrypted by this application. Logs contain
+static startup markers only (`data/teams10_startup.log`), no chat/token payloads.
 
-There is no default Client ID and no fake/demo login. Token state lasts only while
-Teams10 is running: reopening after termination requires device login again. Cache
-is readable only after authenticating the same identity; local data is not encrypted
-at rest by this application, so device storage security still matters. Settings
-persist only the public client/tenant identifiers. No request bodies or tokens are
-written to logs. `data/teams10_startup.log` contains static startup stage markers.
+## Sources and licenses
 
-No tenant credentials/client registration were available during cloud development.
-Real device-code login, Microsoft Graph access, send/receive and the QNX TLS stack
-must be verified on Passport. Use automatic date/time for certificate validity.
-The BAR is unsigned like the other toolkit test builds; use the same installation
-method as the working Zalo BAR and do not overwrite Zalo's application identity.
-
-## Sources and licensing
-
-App/controller/network/cache code: BB10 Toolkit contributors, MIT. No purple-teams,
-squads-app or Zalo service source is linked. The build/layout is based on the toolkit
-MIT Cascades starter. The generated T icon is a geometric independent app icon.
-
-`assets/certs/cacert.pem` is the Mozilla CA bundle from certifi 2026.10.19,
-https://github.com/certifi/python-certifi, MPL2.0 notice distributed alongside it.
-SDK Qt/curl/OpenSSL/SQLite are system dependencies; they aren't vendored in this app.
-Research and official Graph references: [teams-bb10-research-vi.md](../../docs/teams-bb10-research-vi.md).
+This combined app is distributed under GPL-3.0-or-later due to the purple-teams
+protocol/auth adaptation. See [pinned upstream references](../../references/teams-native/README.md),
+`LICENSE`, and `licenses/`. Original toolkit MIT notices and squads-app's MIT
+notice are retained in source and assets. No libpurple, Android runtime or Kotlin
+binary is linked. The geometric T icon is independent of Microsoft's branding.
+Mozilla CA store from certifi 2026.10.19 is MPL2.0 with notice in `assets/certs/`.
+SDK Qt/curl/OpenSSL/SQLite remain system dependencies.

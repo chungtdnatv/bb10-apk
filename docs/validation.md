@@ -232,3 +232,23 @@ Native SDK checks resolve 725 UI imports across 104 SDK libraries, 630 headless
 imports across 60 libraries; 808 BAR assets validate. Exact shipped QML passes
 syntax lint. Device data matching, time display, new picker and bar geometry remain
 unverified in cloud. See docs/zalo12-history-vi.md for workflow and limitations.
+
+## Teams10 1.0.0.2 native interoperability
+
+Native controller replaces the own-registration Graph runtime with the upstream
+work-account public client/device-code flow, CSA regional discovery and IC3 chat.
+No WebView or calling. Fixed endpoint/method policy, TLS validation, RAM-only tokens
+and independently scoped refresh grants remain enforced. Redirects are manual and
+allowlisted; tokens cannot be forwarded to arbitrary returned hosts.
+
+Passed: 40 toolkit tests, 23 actual native-controller mock tests, one compiled
+C++98 route-policy test (multiple endpoint assertions), 21 retained historical
+Graph-controller tests, two package/CA tests and both QML syntax checks. Final SDK
+closure: 97 libraries, 144 strong imports resolved, zero orphan unwind sections;
+BAR: 12 assets, one ARM binary, Teams10 entry, version 1.0.0.2. Full test log was
+produced by `python3 bb10.py test Teams10` with host SQLite include/library overrides.
+
+No real Microsoft account or tenant authenticated in cloud. Passport startup,
+device TLS and actual read/send remain untested. Offline synthetic success does
+not establish that a tenant will accept this unofficial client. Combined source
+is GPL-3.0-or-later with upstream MIT notices; provenance in references/teams-native.

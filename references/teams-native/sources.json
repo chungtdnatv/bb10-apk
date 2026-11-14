@@ -1,0 +1,14 @@
+[
+  {
+    "name": "purple-teams",
+    "url": "https://github.com/EionRobb/purple-teams",
+    "commit": "76d8b3a58886954feaec7c456750abd146121dd3",
+    "role": "protocol/auth reference; no libpurple/Android binary linked"
+  },
+  {
+    "name": "squads-app",
+    "url": "https://github.com/kernoeb/squads-app",
+    "commit": "46443c1fc2c4d83d9da9b95d1cde5536f4c5c713",
+    "role": "protocol/auth reference; no libpurple/Android binary linked"
+  }
+]

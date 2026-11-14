@@ -1,16 +1,18 @@
-# Teams10 1.0.0.1 test BAR
+# Teams10 native test BARs
 
-`Teams10-1.0.0.1-unsigned.bar`: native BB10 work/school Microsoft 365 client.
-Login with device code, list/read existing chats, send text. No calls or channels.
-Independent package ID: `com.bb10toolkit.Teams10`; doesn't replace Zalo.
+[Teams10 1.0.0.2](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.0.0.2-native-client-unsigned.bar)
+is the current native work/school Microsoft 365 client: device-code login, existing
+chats, text history/send. No WebView or calls. No own App Registration needed.
 
-Requires your organization's Entra App Registration (public client) with delegated
-User.Read, Chat.Read, ChatMessage.Send and offline_access and permitted tenant
-policies. No client secret, password entry or borrowed Microsoft client ID.
-Use an external phone/PC to confirm the code. Tokens remain in RAM only.
+Independent package `com.bb10toolkit.Teams10`, does not replace Zalo. Uses the
+public Teams client ID and native interoperability described by purple-teams and
+squads-app. Microsoft/tenant policy may refuse it. Tokens stay in RAM only.
+[Installation/login guide](../../docs/teams10-setup-vi.md),
+[source, licenses and limits](../../apps/Teams10/README.md).
 
-Guide: [Client ID/Tenant ID and installation](../../docs/teams10-setup-vi.md).
-Source and limits: [apps/Teams10](../../apps/Teams10/README.md).
-Checksum and validation report are adjacent. BAR is unsigned for the same rooted
-BB10 installation path as the toolkit's other builds. Cloud build/tests pass;
-real Microsoft login/send, Passport launch and device TLS have not been verified.
+Checksum and build report are adjacent. Unsigned test BAR, using the installation
+method for the other working toolkit BARs. Offline tests/build passed; actual
+company login/send/receive, Passport startup and device TLS remain unverified.
+
+1.0.0.1 is retained as historical Graph-only build; it required an organization-owned
+App Registration. Current instructions and source apply to 1.0.0.2.

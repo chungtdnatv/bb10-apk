@@ -1,4 +1,5 @@
 #include "TeamsNative.hpp"
+#include "TeamsRequestPolicy.hpp"
 #include <QDir>
 #include <QFileInfo>
 #include <QUrl>
@@ -21,8 +22,10 @@ size_t receiveHeader(char *ptr,size_t size,size_t nmemb,void *data) {
     Transfer *out=static_cast<Transfer *>(data);
     QByteArray line(ptr,(int)(size*nmemb));
     int colon=line.indexOf(':');
-    if (colon>0 && line.left(colon).toLower()=="retry-after")
-        out->headers["retry-after"]=QString::fromLatin1(line.mid(colon+1).trimmed());
+    if(colon>0) {
+        QByteArray name=line.left(colon).toLower();
+        if(name=="retry-after"||name=="location")out->headers[QString::fromLatin1(name)]=QString::fromLatin1(line.mid(colon+1).trimmed());
+    }
     return size*nmemb;
 }
 int progress(void *data,double,double,double,double) {
@@ -38,13 +41,9 @@ bool safeRequest(const TeamsRequest &r) {
     if (url.scheme()!="https" || !url.userInfo().isEmpty() || !url.fragment().isEmpty() || url.port(443)!=443) return false;
     if (r.method!="GET" && r.method!="POST") return false;
     if (r.body.toUtf8().size()>64*1024) return false;
-    QString host=url.host().toLower();
-    if (host=="graph.microsoft.com") {
-        if (!url.path().startsWith("/v1.0/")) return false;
-    } else if (host=="login.microsoftonline.com") {
-        if (r.method!="POST" || !QRegExp("/[A-Za-z0-9.-]+/oauth2/v2\\.0/(devicecode|token)").exactMatch(url.path())) return false;
-        if (r.headers.contains("Authorization")) return false;
-    } else return false;
+    TeamsRequestPolicy::Service service=TeamsRequestPolicy::route(url.host().toLower().toStdString(),std::string(url.encodedPath().constData()),r.method.toStdString());
+    if(service==TeamsRequestPolicy::Denied)return false;
+    if(service==TeamsRequestPolicy::OAuth && r.headers.contains("Authorization"))return false;
     for (QVariantMap::const_iterator i=r.headers.constBegin();i!=r.headers.constEnd();++i) {
         if (i.key()!="Authorization" && i.key()!="Content-Type" && i.key()!="Accept") return false;
         if (i.value().toString().contains('\r') || i.value().toString().contains('\n')) return false;
@@ -67,7 +66,7 @@ void TeamsWorker::run() {
     char errorBuffer[CURL_ERROR_SIZE]={0};
     curl_easy_setopt(curl,CURLOPT_URL,url.constData());
     curl_easy_setopt(curl,CURLOPT_HTTPHEADER,headers);
-    curl_easy_setopt(curl,CURLOPT_USERAGENT,"Teams10/1.0 BB10");
+    curl_easy_setopt(curl,CURLOPT_USERAGENT,"Teams10/1.0.0.2 (BB10 native)");
     curl_easy_setopt(curl,CURLOPT_NOSIGNAL,1L);
     curl_easy_setopt(curl,CURLOPT_CONNECTTIMEOUT,15L);
     curl_easy_setopt(curl,CURLOPT_TIMEOUT,40L);
@@ -135,6 +134,11 @@ void TeamsNative::finished() {
 void TeamsNative::abortAll() {
     m_pending.clear();
     if (m_worker) m_worker->cancelled.fetchAndStoreOrdered(1);
+}
+QString TeamsNative::decodeBase64Url(const QString &part) const {
+    if(part.size()>32768||!QRegExp("[A-Za-z0-9_-]+").exactMatch(part))return QString();
+    QByteArray raw=part.toLatin1();raw.replace('-','+');raw.replace('_','/');while(raw.size()%4)raw+='=';
+    return QString::fromUtf8(QByteArray::fromBase64(raw));
 }
 QString TeamsNative::clientId() const { return m_settings.value("clientId").toString(); }
 QString TeamsNative::tenant() const { return m_settings.value("tenant","").toString(); }

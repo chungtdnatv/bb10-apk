@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
 const path=require('node:path');
-const source=fs.readFileSync(path.join(__dirname,'../assets/TeamsCore.js'),'utf8').replace('.pragma library','');
+const source=fs.readFileSync(path.join(__dirname,'../compat/TeamsGraphCore.js'),'utf8').replace('.pragma library','');
 const CLIENT='00000000-0000-0000-0000-000000000001';
 const TENANT='00000000-0000-0000-0000-000000000002';
 function harness() {

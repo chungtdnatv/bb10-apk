@@ -30,6 +30,7 @@ public:
     ~TeamsNative();
     Q_INVOKABLE void request(int id,const QString &method,const QString &url,const QString &body,const QVariantMap &headers);
     Q_INVOKABLE void abortAll();
+    Q_INVOKABLE QString decodeBase64Url(const QString &part) const;
     Q_INVOKABLE QString clientId() const;
     Q_INVOKABLE QString tenant() const;
     Q_INVOKABLE void saveConfig(const QString &client,const QString &tenant);

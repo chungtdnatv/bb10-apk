@@ -1,64 +1,57 @@
-# Cài và cấu hình Teams10 1.0.0.1
+# Cài Teams10 native 1.0.0.2
 
-Bản đầu hỗ trợ tài khoản Microsoft 365 công ty/trường học: đăng nhập, đọc và gửi
-văn bản trong chat có sẵn. Không có gọi điện. Không hỗ trợ Teams cá nhân.
+[Tải BAR Teams10 1.0.0.2](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.0.0.2-native-client-unsigned.bar).
 
-## Lấy Client ID và Tenant ID
-
-Trên PC mở https://entra.microsoft.com/ bằng tài khoản tổ chức:
-
-1. **Identity → Applications → App registrations → New registration**.
-2. Tên **Teams10**; chọn **Accounts in this organizational directory only**.
-3. Bấm **Register**; không cần tạo Web redirect URI cho device-code flow.
-4. **Overview**: sao chép **Application (client) ID** và **Directory (tenant) ID**.
-5. **Authentication → Advanced settings → Allow public client flows → Yes → Save**.
-6. **API permissions → Add a permission → Microsoft Graph → Delegated permissions**:
-   thêm `User.Read`, `Chat.Read`, `ChatMessage.Send`, `offline_access`.
-7. Nếu tenant yêu cầu admin consent, nhờ IT cấp cho app. Không có quyền đăng ký
-   app thì nhờ IT tạo App Registration và cung cấp hai ID này.
-
-Không tạo **Client secret**. Không dùng Client ID có sẵn của app Teams chính thức.
-Client/Tenant ID là định danh công khai; mật khẩu/token/secret thì không gửi qua chat.
-Tên/vị trí menu Entra có thể thay đổi theo giao diện hoặc quyền tài khoản.
+Bản này là client native độc lập cho Microsoft 365 công ty/trường học, có đăng
+nhập bằng mã, đọc và gửi văn bản trong chat có sẵn. Không có gọi điện. Không dùng
+Teams Web trên trình duyệt Passport. Không cần bạn xin Client ID/App Registration
+riêng như bản 1.0.0.1.
 
 ## Cài và đăng nhập
 
-1. Cài `Teams10-1.0.0.1-unsigned.bar` bằng cách đã dùng cho BAR Zalo đang chạy.
-   Đây là app có package ID riêng `com.bb10toolkit.Teams10`, không thay Zalo.
-2. Nhập hai ID vào Teams10. Single-tenant app phải dùng Tenant ID thực tế,
-   không để trống hoặc thay bằng `organizations`.
-3. Bấm **Đăng nhập Microsoft**. App hiện mã ngắn.
-4. Trên điện thoại/PC khác, mở https://microsoft.com/devicelogin và nhập mã.
-5. Chọn tài khoản tổ chức, xác nhận app và quyền khi được hỏi; trở lại Passport.
-6. App tải hồ sơ và các chat có sẵn. Chạm một chat để đọc, nhập văn bản rồi **Gửi**.
+1. Tải BAR bằng liên kết trên và cài bằng cách đã dùng với BAR Zalo chạy được.
+   Package riêng `com.bb10toolkit.Teams10`, không thay Zalo.
+2. Mở Teams10; để trống **Domain/Tenant**. Chỉ điền domain/Tenant công ty nếu cần.
+3. Bấm **Đăng nhập Microsoft**, đợi mã ngắn xuất hiện.
+4. Trên điện thoại/PC khác, mở https://microsoft.com/devicelogin, nhập đúng mã
+   đang hiển thị trong app và đăng nhập tài khoản công ty/trường học.
+5. Kiểm tra tài khoản và xác nhận yêu cầu. Luồng tương thích dùng Client ID công
+   khai của Teams giống purple-teams; trang Microsoft có thể hiện Microsoft Teams.
+   Teams10 vẫn là app bên thứ ba, không phải ứng dụng do Microsoft phát hành.
+6. Trở lại Passport, chờ xác nhận dịch vụ chat; chọn hội thoại để đọc/gửi văn bản.
 
-Không cần gửi mật khẩu cho app. Token chỉ nằm trong RAM; tắt app hoàn toàn rồi
-mở lại phải xác nhận đăng nhập lại. Client ID/Tenant ID được lưu cho lần sau.
+Không nhập mật khẩu vào Teams10 hoặc gửi mật khẩu/token cho người khác. Token chỉ
+ở RAM; đóng hẳn app rồi mở lại cần đăng nhập lại. Cấu hình domain được lưu trên máy.
 
 ## Đọc và gửi
 
-- Chat riêng, group chat và meeting chat có sẵn; chưa có màn hình tạo chat mới.
-- **Tải thêm hội thoại** / **Tin cũ hơn** để phân trang. Cache tối đa 500 tin/chat.
-- HTML được đổi thành văn bản; tệp chỉ hiện tên, chưa tải/upload media.
+- Chat riêng, nhóm và meeting chat có sẵn; chưa có channels hoặc tạo chat mới.
+- Bấm **Tin cũ hơn** để đọc lịch sử; tối đa 500 tin được giữ trong mỗi chat/cache.
+- HTML được đổi thành văn bản; ảnh/tệp chỉ có thông báo, chưa tải hoặc gửi media.
 - App làm mới khi foreground mỗi 30 giây hoặc bấm **Làm mới**.
-- Nếu gửi bị timeout, giữ nguyên bản nháp và kiểm tra lại lịch sử trước khi gửi lại;
-  app không tự gửi lại vì không biết server đã nhận tin hay chưa.
-- **Đăng xuất** xóa token RAM và cache trên máy; không xóa dữ liệu Microsoft Teams.
+- Nếu gửi timeout, làm mới lịch sử trước khi gửi lại để tránh trùng tin. Máy chủ
+  nhận yêu cầu gửi chưa đồng nghĩa người nhận đã đọc hoặc tin đã được giao.
+- **Đăng xuất** xóa token RAM và cache trên máy, không xóa dữ liệu trên Teams.
 
-## Xử lý lỗi
+## Khi gặp lỗi
 
-- `unauthorized_client` / yêu cầu public client: kiểm tra bước 5 và Client/Tenant ID.
-- Thiếu quyền/403: kiểm tra delegated permissions và consent trong đúng tenant.
-- Tenant chặn device-code, yêu cầu máy được quản lý/tuân thủ hoặc client được phê
-  duyệt: nhờ IT chọn phương án truy cập được cho phép; app không vượt qua chính sách.
-- HTTP429: đợi thời gian Microsoft yêu cầu rồi thử lại, không bấm gửi liên tục.
-- TLS/chứng chỉ: kiểm tra ngày giờ trên Passport và Internet. Không tắt xác minh TLS.
-  Bản này có CA bundle riêng và chỉ cho TLS1.2; vẫn cần xác minh trên OS BB10 thực tế.
-- Không mở được: lấy `data/teams10_startup.log` trong sandbox Teams10. File chỉ có
-  các mốc startup, không chứa token, nội dung chat hay mật khẩu.
+- `unauthorized_client`, `invalid_grant`, 401/403 hoặc thông báo tenant từ chối:
+  Microsoft/công ty có thể chặn public client hoặc device-code. App hiển thị lỗi
+  và dừng, không đổi danh tính hay vượt yêu cầu thiết bị/ứng dụng được quản lý.
+  Truy cập Teams trên thiết bị cá nhân khác không đảm bảo luồng này được phép.
+- HTTP429: chờ thời gian được yêu cầu rồi thử lại; không bấm gửi liên tục.
+- HTTP/JSON chưa hỗ trợ: API Teams nội bộ có thể khác theo tenant/vùng hoặc thay
+  đổi. Gửi mã lỗi và nội dung thông báo đã che thông tin cá nhân để kiểm tra.
+- TLS/chứng chỉ: bật ngày giờ tự động trên Passport và kiểm tra Internet. App có
+  CA bundle riêng, chỉ cho TLS1.2, không có tùy chọn tắt xác minh chứng chỉ.
+- Không mở được: lấy `data/teams10_startup.log` trong sandbox Teams10 bằng công
+  cụ truy cập sandbox/development đang dùng. Đây không phải thư mục Documents.
+  Log chỉ chứa mốc startup; không ghi token hay tin nhắn.
 
-## Trạng thái kiểm tra
+## Trạng thái bản thử
 
-Build ARMv7/SDK, metadata ELF/entry, toàn bộ BAR và unit test mock được kiểm tra
-trong cloud. Chưa có App Registration/tài khoản tenant để kiểm tra đăng nhập và gửi
-thật; chưa có xác nhận khởi động trên Passport. Không coi unit test là kiểm tra E2E.
+Đã kiểm tra build ARMv7, SDK imports/entry, BAR, QML và các test mô phỏng. Chưa
+thử đăng nhập, đọc/gửi thật bằng tài khoản công ty hoặc chạy trên Passport.
+Đây là BAR thử unsigned như các bản trong repo, không phải bản được Microsoft
+chứng nhận. Không đảm bảo tenant của bạn sẽ chấp nhận client không chính thức.
+Xem [mã nguồn và phạm vi](../apps/Teams10/README.md).

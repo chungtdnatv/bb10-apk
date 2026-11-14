@@ -35,8 +35,12 @@ See [evidence and BB10 port requirements](references/zalo-calling/README.md).
 
 ## Teams10
 
-`apps/Teams10` is newly authored MIT toolkit C++/QML/JavaScript, built on the MIT
-Cascades starter. It does not link purple-teams, squads-app or Zalo protocol code.
+`apps/Teams10` 1.0.0.2 combines native toolkit C++/QML with protocol/auth adaptation
+from purple-teams (GPL-3.0-or-later) and squads-app (MIT). The combined app is
+GPL-3.0-or-later; original toolkit and squads MIT notices are retained. No libpurple
+or Kotlin binary is linked. Pinned commits and file-level provenance are in
+[references/teams-native](references/teams-native/README.md).
 The CA store is Mozilla's bundle distributed by certifi 2026.10.19 (MPL2.0);
 license included in app assets. SDK curl/OpenSSL/Qt/SQLite remain system libraries.
-See apps/Teams10/README.md and docs/teams-bb10-research-vi.md for design and sources.
+Historical Graph-only controller remains in `apps/Teams10/compat`, unshipped.
+See apps/Teams10/README.md for design, verification and device-testing limits.
