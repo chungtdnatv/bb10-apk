@@ -10,7 +10,7 @@
 using namespace bb::cascades;
 static void stage(const char *text) {
     FILE *f=fopen("data/teams10_startup.log","a");
-    if(f) { fprintf(f,"Teams10 1.0.0.3: %s\n",text);fclose(f); }
+    if(f) { fprintf(f,"Teams10 1.0.0.4: %s\n",text);fclose(f); }
 }
 Q_DECL_EXPORT int main(int argc,char **argv) {
     stage("before Application");

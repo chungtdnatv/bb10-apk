@@ -4,7 +4,7 @@ import "TeamsCore.js" as Teams
 
 Page {
     id: chat
-    property variant controller: null
+    property variant appRoot: null
     property string chatId: ""
     property string chatTitle: ""
     property string statusText: ""
@@ -38,8 +38,8 @@ Page {
         Label { text: chat.statusText; textFormat: TextFormat.Plain; multiline: true; textStyle { color: Color.create("#c6d4e9"); fontSize: FontSize.Small } }
         Container {
             layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
-            Button { text: "Làm mới"; enabled: !chat.loading; layoutProperties: StackLayoutProperties { spaceQuota: 1 } onClicked: chat.controller.refreshMessages(false) }
-            Button { text: "Tin cũ hơn"; enabled: chat.hasMore && !chat.loading; layoutProperties: StackLayoutProperties { spaceQuota: 1 } onClicked: chat.controller.refreshMessages(true) }
+            Button { text: "Làm mới"; enabled: !chat.loading; layoutProperties: StackLayoutProperties { spaceQuota: 1 } onClicked: chat.appRoot.refreshMessages(false) }
+            Button { text: "Tin cũ hơn"; enabled: chat.hasMore && !chat.loading; layoutProperties: StackLayoutProperties { spaceQuota: 1 } onClicked: chat.appRoot.refreshMessages(true) }
         }
         ActivityIndicator { visible: chat.loading; running: visible; horizontalAlignment: HorizontalAlignment.Center }
         ListView {
@@ -70,7 +70,7 @@ Page {
             text: chat.sending ? "Đang gửi…" : "Gửi"
             horizontalAlignment: HorizontalAlignment.Fill
             enabled: !chat.sending && draft.text.replace(/^\s+|\s+$/g, "").length>0
-            onClicked: chat.controller.sendMessage(draft.text)
+            onClicked: chat.appRoot.sendMessage(draft.text)
         }
     }
     attachedObjects: [Timer {

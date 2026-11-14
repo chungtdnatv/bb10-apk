@@ -1,6 +1,6 @@
-# Cài Teams10 native 1.0.0.3
+# Cài Teams10 native 1.0.0.4
 
-[Tải BAR Teams10 1.0.0.3](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.0.0.3-native-client-unsigned.bar).
+[Tải BAR Teams10 1.0.0.4](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.0.0.4-native-client-unsigned.bar).
 
 Bản này là client native độc lập cho Microsoft 365 công ty/trường học, có đăng
 nhập bằng mã, đọc và gửi văn bản trong chat có sẵn. Không có gọi điện. Không dùng
@@ -48,9 +48,18 @@ Không nhập mật khẩu vào Teams10 hoặc gửi mật khẩu/token cho ngư
   cụ truy cập sandbox/development đang dùng. Đây không phải thư mục Documents.
   Log chỉ chứa mốc startup; không ghi token hay tin nhắn.
 
+## Sửa lỗi khởi tạo 1.0.0.4
+
+Log `controller-start` → `controller-error` kèm “Bộ điều khiển đăng nhập chưa sẵn
+sàng” xảy ra trước yêu cầu mạng. Bản mới giữ bộ điều khiển có hàm trong JavaScript,
+tránh chuyển qua thuộc tính QML variant có thể làm mất hàm trên engine cũ. Trang
+chat cũng dùng cầu nối QML để đọc/gửi thay vì giữ đối tượng JavaScript trong variant.
+Cài đè BAR mới và kiểm tra đầu màn hình ghi **Teams10 1.0.0.4**. Cần xác nhận lại
+trên Passport; HTTPS/CA OK trong log cũ chưa chứng minh đăng nhập mạng đã chạy.
+
 ## Nếu bấm đăng nhập chưa có mã
 
-Bản 1.0.0.3 hiển thị phiên bản ngay ở đầu màn hình. Đợi tối đa khoảng 40 giây
+Bản 1.0.0.4 hiển thị phiên bản ngay ở đầu màn hình. Đợi tối đa khoảng 40 giây
 cho yêu cầu HTTPS trả về. Nếu vẫn lỗi, bấm **Chẩn đoán đăng nhập**; chọn/sao chép
 nội dung hoặc chụp màn hình này để gửi lại. Không cần tìm file trong sandbox.
 Các mốc `login-tapped`, `controller-ready`, `request-queued`, `http-response`

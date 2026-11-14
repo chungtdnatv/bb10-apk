@@ -5,7 +5,6 @@ import "TeamsCore.js" as Teams
 
 NavigationPane {
     id: root
-    property variant service: null
     property variant activeChat: null
     property bool foreground: true
     property bool authenticated: false
@@ -40,16 +39,18 @@ NavigationPane {
     onPopTransitionEnded: {
         if (page && page===root.activeChat) {
             root.activeChat=null;
-            root.service.closeChat();
+            Teams.controller().closeChat();
             page.destroy();
         }
     }
+    function refreshMessages(more) { if (Teams.controller()) Teams.controller().refreshMessages(more); }
+    function sendMessage(text) { if (Teams.controller()) Teams.controller().sendMessage(text); }
     function initializeService() {
-        if (root.service) return true;
+        if (Teams.controller()) return true;
         try {
             root.statusText="Đang khởi tạo đăng nhập…";
             teamsNet.recordEvent("controller-start");
-        root.service=Teams.create({
+        Teams.initialize({
             now:function(){return new Date().getTime();},
             decodeBase64Url:function(part){return teamsNet.decodeBase64Url(part);},
             send:function(id,method,url,body,headers){teamsNet.request(id,method,url,body,headers);},
@@ -62,12 +63,12 @@ NavigationPane {
             saveCache:function(account,resource,data){return teamsNet.saveCache(account,resource,data);},
             sent:function(ok,id,text){if(root.activeChat) root.activeChat.sent(ok,id,text);}
         });
-            if (!root.service || typeof root.service.startLogin!=="function") throw new Error("Bộ điều khiển đăng nhập chưa sẵn sàng");
-            root.render(root.service.state);
+            if (!Teams.controller() || typeof Teams.controller().startLogin!=="function") throw new Error("Bộ điều khiển đăng nhập chưa sẵn sàng");
+            root.render(Teams.controller().state);
             teamsNet.recordEvent("controller-ready");
             return true;
         } catch (e) {
-            root.service=null;
+            Teams.releaseController();
             root.loginBusy=false;
             root.statusText="Không khởi tạo được đăng nhập: "+String(e)+". Mở Chẩn đoán đăng nhập để xem chi tiết.";
             teamsNet.recordEvent("controller-error");
@@ -79,7 +80,7 @@ NavigationPane {
         teamsNet.recordEvent("login-tapped");
         if (!root.initializeService()) return;
         try {
-            root.service.startLogin(tenantField.text);
+            Teams.controller().startLogin(tenantField.text);
         } catch (e) {
             root.loginBusy=false;
             root.statusText="Lỗi khi bắt đầu đăng nhập: "+String(e);
@@ -102,7 +103,7 @@ NavigationPane {
             rightPadding: ui.du(2)
             topPadding: ui.du(1.5)
             Label {
-                text: "Teams10 1.0.0.3"
+                text: "Teams10 1.0.0.4"
                 textStyle { color: Color.create("#aaa9ff"); fontSize: FontSize.XXLarge; fontWeight: FontWeight.Bold }
             }
             Label {
@@ -146,7 +147,7 @@ NavigationPane {
                         Label { text: root.loginCode; textFormat: TextFormat.Plain; textStyle { color: Color.create("#aaa9ff"); fontSize: FontSize.XXLarge; fontWeight: FontWeight.Bold } horizontalAlignment: HorizontalAlignment.Center }
                         Label { text: "Mở trang trên bằng điện thoại hoặc PC, nhập mã rồi chấp thuận quyền truy cập."; multiline: true; textStyle.color: Color.White }
                     }
-                    Button { text: "Hủy đăng nhập"; visible: root.loginBusy; horizontalAlignment: HorizontalAlignment.Fill; onClicked: root.service.signOut() }
+                    Button { text: "Hủy đăng nhập"; visible: root.loginBusy; horizontalAlignment: HorizontalAlignment.Fill; onClicked: Teams.controller().signOut() }
                     Button { text: "Hướng dẫn đăng nhập native"; horizontalAlignment: HorizontalAlignment.Fill; onClicked: setupSheet.open() }
                     Label {
                         text: "Client không chính thức dùng luồng tương thích purple-teams và Client ID công khai của Teams. Không cần tạo App Registration riêng. Microsoft/tenant vẫn có thể từ chối. Token chỉ giữ trong RAM."
@@ -163,7 +164,7 @@ NavigationPane {
                 horizontalAlignment: HorizontalAlignment.Fill
                 Container {
                     layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
-                    Button { text: "Làm mới"; layoutProperties: StackLayoutProperties { spaceQuota: 1 } enabled: !root.loadingChats; onClicked: root.service.refreshChats(false) }
+                    Button { text: "Làm mới"; layoutProperties: StackLayoutProperties { spaceQuota: 1 } enabled: !root.loadingChats; onClicked: Teams.controller().refreshChats(false) }
                     Button { text: "Đăng xuất"; layoutProperties: StackLayoutProperties { spaceQuota: 1 } onClicked: logoutDialog.show() }
                 }
                 ActivityIndicator { running: root.loadingChats; visible: running; horizontalAlignment: HorizontalAlignment.Center }
@@ -188,11 +189,11 @@ NavigationPane {
                         if(root.activeChat) return;
                         var item=dataModel.data(indexPath),page=chatDef.createObject();
                         if(!page) return;
-                        page.controller=root.service;page.chatId=item.id;page.chatTitle=item.title;
-                        root.activeChat=page;root.push(page);root.service.openChat(item);
+                        page.appRoot=root;page.chatId=item.id;page.chatTitle=item.title;
+                        root.activeChat=page;root.push(page);Teams.controller().openChat(item);
                     }
                 }
-                Button { text: "Tải thêm hội thoại"; visible: root.chatsMore.length>0; enabled: !root.loadingChats; horizontalAlignment: HorizontalAlignment.Fill; onClicked: root.service.refreshChats(true) }
+                Button { text: "Tải thêm hội thoại"; visible: root.chatsMore.length>0; enabled: !root.loadingChats; horizontalAlignment: HorizontalAlignment.Fill; onClicked: Teams.controller().refreshChats(true) }
             }
         }
     }
@@ -210,9 +211,9 @@ NavigationPane {
             }
         },
         Connections { target: Application; onFullscreen: root.foreground=true; onThumbnail: root.foreground=false; onInvisible: root.foreground=false },
-        Connections { target: teamsNet; onCompleted: { if(root.service) root.service.receive(id,status,body,error,headers); } },
-        Timer { id: loginTimer; interval: 5000; repeat: false; onTriggered: { if(root.service) root.service.pollLogin(); } },
-        Timer { interval: 30000; repeat: true; running: root.authenticated && root.foreground; onTriggered: { if(root.service) root.service.tick(); } },
+        Connections { target: teamsNet; onCompleted: { if(Teams.controller()) Teams.controller().receive(id,status,body,error,headers); } },
+        Timer { id: loginTimer; interval: 5000; repeat: false; onTriggered: { if(Teams.controller()) Teams.controller().pollLogin(); } },
+        Timer { interval: 30000; repeat: true; running: root.authenticated && root.foreground; onTriggered: { if(Teams.controller()) Teams.controller().tick(); } },
         ComponentDefinition { id: chatDef; source: "asset:///ChatPage.qml" },
         SystemDialog {
             id: logoutDialog
@@ -220,7 +221,7 @@ NavigationPane {
             body: "Xóa token khỏi RAM và cache tin nhắn trên máy. Không xóa lịch sử trên Teams."
             confirmButton.label: "Đăng xuất"
             cancelButton.label: "Hủy"
-            onFinished: { if(result===SystemUiResult.ConfirmButtonSelection) { root.service.signOut();if(!teamsNet.clearCache()) root.statusText="Đã đăng xuất nhưng chưa xóa được cache trên máy."; } }
+            onFinished: { if(result===SystemUiResult.ConfirmButtonSelection) { Teams.controller().signOut();if(!teamsNet.clearCache()) root.statusText="Đã đăng xuất nhưng chưa xóa được cache trên máy."; } }
         },
         Sheet {
             id: setupSheet

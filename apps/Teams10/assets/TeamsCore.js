@@ -292,3 +292,14 @@ function create(io) {
     api.tick=function(){if(state.phase==="ready"&&!state.sending){if(state.chatId)api.refreshMessages(false);else api.refreshChats();}};
     api.state=state;return api;
 }
+
+// QtQuick 1 / BB10 QVariant properties can convert plain JS objects to maps,
+// losing callable members. Keep the live API in this script engine instead.
+var liveController=null;
+function controller() { return liveController; }
+function initialize(io) {
+    var candidate=create(io);
+    if(!candidate || typeof candidate.startLogin!=="function")throw new Error("Không tạo được bộ điều khiển JavaScript");
+    liveController=candidate;
+}
+function releaseController() { liveController=null; }

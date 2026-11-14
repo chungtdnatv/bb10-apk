@@ -266,3 +266,20 @@ Passed 40 toolkit tests, four actual QML-handler/controller integration mocks,
 two BAR/CA tests and QML syntax lint. SDK closure: 97 libraries, 152 resolved strong
 imports, zero orphan unwind sections; BAR version 1.0.0.3 with 12 assets.
 Passport login and authenticated read/send still require device verification.
+
+
+## Teams10 1.0.0.4 callable controller retention
+
+User device log confirms controller-start/controller-error, no request-queued;
+startLogin is missing after assigning the JS API to a QML variant property.
+Remove the live controller from QML variants: retain it in the script library;
+ChatPage calls forwarding methods on the root QML QObject. Existing diagnostic
+sheet and guards remain. Tests now model the lossy QVariantMap boundary instead
+of treating QML property assignment as ordinary JavaScript assignment.
+
+Passed: 40 toolkit tests, five UI/handler tests, 23 native protocol mocks, one
+C++98 route-policy test, 21 historical Graph tests, two BAR/CA tests, both QML
+syntax checks. SDK: 97 libraries, 152 resolved imports, zero orphan unwind sections.
+BAR 1.0.0.4 has 12 assets. Tests exercise the actual handlers/controller with a
+modeled property boundary; there is no real QNX/QML runtime in cloud. Repaired
+Passport startup/login path and actual company read/send still need device testing.
