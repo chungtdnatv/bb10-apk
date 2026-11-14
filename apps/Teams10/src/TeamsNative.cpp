@@ -2,6 +2,8 @@
 #include "TeamsRequestPolicy.hpp"
 #include <QDir>
 #include <QFileInfo>
+#include <QFile>
+#include <QStringList>
 #include <QUrl>
 #include <QRegExp>
 #include <QDateTime>
@@ -66,7 +68,7 @@ void TeamsWorker::run() {
     char errorBuffer[CURL_ERROR_SIZE]={0};
     curl_easy_setopt(curl,CURLOPT_URL,url.constData());
     curl_easy_setopt(curl,CURLOPT_HTTPHEADER,headers);
-    curl_easy_setopt(curl,CURLOPT_USERAGENT,"Teams10/1.0.0.2 (BB10 native)");
+    curl_easy_setopt(curl,CURLOPT_USERAGENT,"Teams10/1.0.0.3 (BB10 native)");
     curl_easy_setopt(curl,CURLOPT_NOSIGNAL,1L);
     curl_easy_setopt(curl,CURLOPT_CONNECTTIMEOUT,15L);
     curl_easy_setopt(curl,CURLOPT_TIMEOUT,40L);
@@ -113,6 +115,7 @@ TeamsNative::~TeamsNative() {
     curl_global_cleanup();
 }
 void TeamsNative::request(int id,const QString &method,const QString &url,const QString &body,const QVariantMap &headers) {
+    recordEvent("request-queued");
     TeamsRequest r; r.id=id; r.method=method; r.url=url; r.body=body; r.headers=headers;
     // Actual validation runs asynchronously so callers have installed their callbacks first.
     if (m_pending.size()<24) m_pending.append(r);
@@ -128,6 +131,7 @@ void TeamsNative::startNext() {
 }
 void TeamsNative::finished() {
     TeamsWorker *done=m_worker; m_worker=0;
+    recordEvent(done->status ? "http-response" : "transport-error");
     emit completed(done->request.id,done->status,done->body,done->error,done->responseHeaders);
     done->deleteLater(); startNext();
 }
@@ -171,4 +175,17 @@ bool TeamsNative::clearCache() {
 QString TeamsNative::diagnostic() const {
     const curl_version_info_data *info=curl_version_info(CURLVERSION_NOW);
     return QString("HTTPS %1 / %2 | CA %3 | Cache %4").arg(QString::fromLatin1(info->version)).arg(QString::fromLatin1(info->ssl_version ? info->ssl_version : "no TLS")).arg(QFileInfo(m_ca).exists()?"OK":"missing").arg(m_db?"OK":"unavailable");
+}
+
+void TeamsNative::recordEvent(const QString &event) const {
+    const QStringList allowed=QStringList()<<"controller-start"<<"controller-ready"<<"controller-error"<<"login-tapped"<<"login-error"<<"request-queued"<<"http-response"<<"transport-error";
+    if(!allowed.contains(event))return;
+    QFile file("data/teams10_startup.log");
+    if(file.open(QIODevice::WriteOnly|QIODevice::Append))file.write(("Teams10 1.0.0.3: "+event+"\n").toUtf8());
+}
+QString TeamsNative::startupLog() const {
+    QFile file("data/teams10_startup.log");
+    if(!file.open(QIODevice::ReadOnly))return "Chưa có log startup.";
+    if(file.size()>12000)file.seek(file.size()-12000);
+    return QString::fromUtf8(file.readAll());
 }

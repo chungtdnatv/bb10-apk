@@ -1,4 +1,4 @@
-# Teams10 1.0.0.2 — native BB10 Microsoft 365 chat client
+# Teams10 1.0.0.3 — native BB10 Microsoft 365 chat client
 
 Independent, unofficial Cascades C++/QML client for work/school Teams accounts.
 No WebView, Teams browser engine or own Entra App Registration is required in
@@ -80,3 +80,15 @@ notice are retained in source and assets. No libpurple, Android runtime or Kotli
 binary is linked. The geometric T icon is independent of Microsoft's branding.
 Mozilla CA store from certifi 2026.10.19 is MPL2.0 with notice in `assets/certs/`.
 SDK Qt/curl/OpenSSL/SQLite remain system dependencies.
+
+## Login startup diagnostics (1.0.0.3)
+
+The UI defers controller startup until after creation, retries initialization on
+login tap and surfaces synchronous initialization/login exceptions instead of
+silently losing the action. The clock adapter uses `new Date().getTime()` for old
+script engines. Four tests execute the actual QML handler bodies with the actual
+controller, including missing/failed startup and a Date implementation without
+Date.now. They do not emulate Cascades. The login diagnostic sheet displays status,
+transport information and allowlisted static event markers from the startup log;
+no auth codes, request bodies, tokens or message payloads are logged. The exact
+cause of the reported Passport no-response behavior is not confirmed on hardware.

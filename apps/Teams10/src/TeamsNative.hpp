@@ -38,6 +38,8 @@ public:
     Q_INVOKABLE bool saveCache(const QString &account,const QString &resource,const QString &data);
     Q_INVOKABLE bool clearCache();
     Q_INVOKABLE QString diagnostic() const;
+    Q_INVOKABLE void recordEvent(const QString &event) const;
+    Q_INVOKABLE QString startupLog() const;
 signals:
     void completed(int id,int status,const QString &body,const QString &error,const QVariantMap &headers);
 private slots:

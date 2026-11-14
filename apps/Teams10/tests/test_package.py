@@ -16,7 +16,7 @@ class TeamsBar(unittest.TestCase):
         with zipfile.ZipFile(bar) as z:
             for name in ('main.qml','ChatPage.qml','TeamsCore.js','certs/cacert.pem','certs/LICENSE.txt','LICENSE.txt'):
                 self.assertEqual(z.read('native/assets/'+name),(ROOT/'assets'/name).read_bytes())
-            self.assertIn(b'Package-Version: 1.0.0.2',z.read('META-INF/MANIFEST.MF'))
+            self.assertIn(b'Package-Version: 1.0.0.3',z.read('META-INF/MANIFEST.MF'))
             self.assertIn(b'access_internet',z.read('native/bar-descriptor.xml'))
     def test_bundled_ca_store_parses_as_trust_roots(self):
         ctx=ssl.create_default_context(cafile=str(ROOT/'assets/certs/cacert.pem'))

@@ -15,7 +15,7 @@ NavigationPane {
     property bool loadingChats: false
     property string userName: ""
     property string userMail: ""
-    property string statusText: ""
+    property string statusText: "Đang chuẩn bị Teams10…"
     property string loginCode: ""
     property string chatsMore: ""
     property string chatsSignature: ""
@@ -44,10 +44,13 @@ NavigationPane {
             page.destroy();
         }
     }
-    onCreationCompleted: {
-        tenantField.text=teamsNet.tenant();
-        service=Teams.create({
-            now:function(){return Date.now();},
+    function initializeService() {
+        if (root.service) return true;
+        try {
+            root.statusText="Đang khởi tạo đăng nhập…";
+            teamsNet.recordEvent("controller-start");
+        root.service=Teams.create({
+            now:function(){return new Date().getTime();},
             decodeBase64Url:function(part){return teamsNet.decodeBase64Url(part);},
             send:function(id,method,url,body,headers){teamsNet.request(id,method,url,body,headers);},
             changed:function(state){root.render(state);},
@@ -59,8 +62,35 @@ NavigationPane {
             saveCache:function(account,resource,data){return teamsNet.saveCache(account,resource,data);},
             sent:function(ok,id,text){if(root.activeChat) root.activeChat.sent(ok,id,text);}
         });
-        render(service.state);
+            if (!root.service || typeof root.service.startLogin!=="function") throw new Error("Bộ điều khiển đăng nhập chưa sẵn sàng");
+            root.render(root.service.state);
+            teamsNet.recordEvent("controller-ready");
+            return true;
+        } catch (e) {
+            root.service=null;
+            root.loginBusy=false;
+            root.statusText="Không khởi tạo được đăng nhập: "+String(e)+". Mở Chẩn đoán đăng nhập để xem chi tiết.";
+            teamsNet.recordEvent("controller-error");
+            return false;
+        }
     }
+    function beginLogin() {
+        root.statusText="Đã nhận thao tác đăng nhập…";
+        teamsNet.recordEvent("login-tapped");
+        if (!root.initializeService()) return;
+        try {
+            root.service.startLogin(tenantField.text);
+        } catch (e) {
+            root.loginBusy=false;
+            root.statusText="Lỗi khi bắt đầu đăng nhập: "+String(e);
+            teamsNet.recordEvent("login-error");
+        }
+    }
+    onCreationCompleted: {
+        try { tenantField.text=teamsNet.tenant(); } catch (e) { root.statusText=String(e); }
+        bootstrapTimer.start();
+    }
+
     Page {
         id: home
         actionBarVisibility: ChromeVisibility.Hidden
@@ -72,7 +102,7 @@ NavigationPane {
             rightPadding: ui.du(2)
             topPadding: ui.du(1.5)
             Label {
-                text: "Teams10"
+                text: "Teams10 1.0.0.3"
                 textStyle { color: Color.create("#aaa9ff"); fontSize: FontSize.XXLarge; fontWeight: FontWeight.Bold }
             }
             Label {
@@ -104,7 +134,7 @@ NavigationPane {
                         text: "Đăng nhập Microsoft"
                         horizontalAlignment: HorizontalAlignment.Fill
                         enabled: !root.loginBusy
-                        onClicked: root.service.startLogin(tenantField.text)
+                        onClicked: root.beginLogin()
                     }
                     ActivityIndicator { visible: root.loginBusy; running: visible; horizontalAlignment: HorizontalAlignment.Center }
                     Container {
@@ -123,6 +153,7 @@ NavigationPane {
                         multiline: true
                         textStyle { color: Color.create("#b2bfd3"); fontSize: FontSize.Small }
                     }
+                    Button { text: "Chẩn đoán đăng nhập"; horizontalAlignment: HorizontalAlignment.Fill; onClicked: { diagnosticText.text=root.statusText+"\n\n"+teamsNet.diagnostic()+"\n\n"+teamsNet.startupLog(); diagnosticSheet.open(); } }
                     Label { text: teamsNet.diagnostic(); multiline: true; textStyle { color: Color.create("#b2bfd3"); fontSize: FontSize.XSmall } }
                 }
             }
@@ -166,6 +197,18 @@ NavigationPane {
         }
     }
     attachedObjects: [
+        Timer { id: bootstrapTimer; interval: 1; repeat: false; onTriggered: root.initializeService() },
+        Sheet {
+            id: diagnosticSheet
+            Page {
+                titleBar: TitleBar { title: "Chẩn đoán Teams10"; dismissAction: ActionItem { title: "Đóng"; onTriggered: diagnosticSheet.close() } }
+                Container {
+                    leftPadding: ui.du(2); rightPadding: ui.du(2)
+                    Label { text: "Có thể chọn và sao chép nội dung dưới đây. Log chỉ ghi mốc xử lý, không ghi mã đăng nhập, token hay tin nhắn."; multiline: true }
+                    TextArea { id: diagnosticText; editable: false; textFormat: TextFormat.Plain; layoutProperties: StackLayoutProperties { spaceQuota: 1 } horizontalAlignment: HorizontalAlignment.Fill }
+                }
+            }
+        },
         Connections { target: Application; onFullscreen: root.foreground=true; onThumbnail: root.foreground=false; onInvisible: root.foreground=false },
         Connections { target: teamsNet; onCompleted: { if(root.service) root.service.receive(id,status,body,error,headers); } },
         Timer { id: loginTimer; interval: 5000; repeat: false; onTriggered: { if(root.service) root.service.pollLogin(); } },

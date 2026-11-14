@@ -252,3 +252,17 @@ No real Microsoft account or tenant authenticated in cloud. Passport startup,
 device TLS and actual read/send remain untested. Offline synthetic success does
 not establish that a tenant will accept this unofficial client. Combined source
 is GPL-3.0-or-later with upstream MIT notices; provenance in references/teams-native.
+
+
+## Teams10 1.0.0.3 login initialization and diagnostics
+
+Reported: login tap appeared to do nothing on Passport. Exact hardware cause
+remains unconfirmed. Deferred/retryable controller initialization and visible
+exception handling replace the unguarded creation/click path. Clock adapter avoids
+Date.now; diagnostic sheet exposes static login/transport event markers.
+
+Passed 40 toolkit tests, four actual QML-handler/controller integration mocks,
+23 native protocol mocks, one C++98 route policy test, 21 historical Graph mocks,
+two BAR/CA tests and QML syntax lint. SDK closure: 97 libraries, 152 resolved strong
+imports, zero orphan unwind sections; BAR version 1.0.0.3 with 12 assets.
+Passport login and authenticated read/send still require device verification.

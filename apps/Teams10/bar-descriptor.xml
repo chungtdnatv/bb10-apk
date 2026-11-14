@@ -4,7 +4,7 @@
     <name>Teams10</name>
     <author>BB10 Toolkit</author>
     <versionNumber>1.0.0</versionNumber>
-    <buildId>2</buildId>
+    <buildId>3</buildId>
     <description>Native Cascades application</description>
     <configuration id="release" name="Device-Release">
         <entryPointType>Qnx/Cascades</entryPointType>

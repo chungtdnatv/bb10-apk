@@ -1,6 +1,6 @@
-# Cài Teams10 native 1.0.0.2
+# Cài Teams10 native 1.0.0.3
 
-[Tải BAR Teams10 1.0.0.2](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.0.0.2-native-client-unsigned.bar).
+[Tải BAR Teams10 1.0.0.3](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.0.0.3-native-client-unsigned.bar).
 
 Bản này là client native độc lập cho Microsoft 365 công ty/trường học, có đăng
 nhập bằng mã, đọc và gửi văn bản trong chat có sẵn. Không có gọi điện. Không dùng
@@ -47,6 +47,16 @@ Không nhập mật khẩu vào Teams10 hoặc gửi mật khẩu/token cho ngư
 - Không mở được: lấy `data/teams10_startup.log` trong sandbox Teams10 bằng công
   cụ truy cập sandbox/development đang dùng. Đây không phải thư mục Documents.
   Log chỉ chứa mốc startup; không ghi token hay tin nhắn.
+
+## Nếu bấm đăng nhập chưa có mã
+
+Bản 1.0.0.3 hiển thị phiên bản ngay ở đầu màn hình. Đợi tối đa khoảng 40 giây
+cho yêu cầu HTTPS trả về. Nếu vẫn lỗi, bấm **Chẩn đoán đăng nhập**; chọn/sao chép
+nội dung hoặc chụp màn hình này để gửi lại. Không cần tìm file trong sandbox.
+Các mốc `login-tapped`, `controller-ready`, `request-queued`, `http-response`
+hoặc `transport-error` giúp phân biệt lỗi khởi tạo, nút bấm và kết nối. Log không
+chứa mã đăng nhập/token/tin nhắn; dòng trạng thái có thể chứa tên tenant hoặc
+thông báo Microsoft, hãy che thông tin cá nhân trước khi gửi.
 
 ## Trạng thái bản thử
 

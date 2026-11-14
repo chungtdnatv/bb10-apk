@@ -5,6 +5,11 @@
     [
       "node",
       "--test",
+      "tests/login-ui.test.cjs"
+    ],
+    [
+      "node",
+      "--test",
       "tests/native-core.test.cjs"
     ],
     [
