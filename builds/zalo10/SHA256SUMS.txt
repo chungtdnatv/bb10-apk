@@ -1,0 +1,2 @@
+6e174707af34484a42c0b6cb374941ae213f611d1e93d050081e10130f663fe7  Zalo10-1.5.0.1-modern-unsigned.bar
+54933bc51ffe295d9b7c1bd7dab6d81ce39483b6c691c22bf2d0d68ccffb75de  Zalo10-modern-source.zip
