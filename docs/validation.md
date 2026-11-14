@@ -283,3 +283,39 @@ syntax checks. SDK: 97 libraries, 152 resolved imports, zero orphan unwind secti
 BAR 1.0.0.4 has 12 assets. Tests exercise the actual handlers/controller with a
 modeled property boundary; there is no real QNX/QML runtime in cloud. Repaired
 Passport startup/login path and actual company read/send still need device testing.
+
+## Teams10 1.1.0.5 persistence, profiles, native Hub/background and UI
+
+User confirmed 1.0.0.4 device-code login on Passport. This build adds encrypted
+refresh-session restore, cross-process session ownership, consumer/federated
+profile lookup, authenticated circular image cache, HTML5/emoji handling and a
+Cascades dark/capsule/bubble UI. A separate native service polls CSA summaries
+about every 30 seconds after UI closure. UDS per-chat items have standard Hub
+notification fallback. UI uses a native QTimer rather than animation-driven
+QML timing while minimized. No real-time Trouter push or calls.
+
+Telega upload inspected locally without running its ARM code. QML depends on
+bb.shared/TDLib; no extracted QML/binaries/icons are redistributed. Layout concepts
+were ported using original Cascades controls and generated paint images; uploaded
+BAR fingerprint/file inventory is in references/bbtelega-ui.
+
+Passed: 40 root tests, five actual QML-handler integration mocks, 32 actual native
+controller mocks, one compiled C++98 runtime helper suite (cipher round-trip,
+tampering/wrong key, actual fork/lease handoff, native HTML preview and notification
+cursor), one route-policy suite, 21 retained Graph compatibility tests and two
+BAR/CA tests: 102 cases total. Both QML syntax checks pass. Package checks compare
+every shipped source asset, verify SHA512 asset manifest/CRCs and both entry/invoke
+references. ARM SDK checks: UI 101 libraries / 325 strong imports; service 52 / 332;
+zero orphan unwind sections, 24 packaged assets and two ARM entry points.
+
+Session ciphertext uses AES256-CBC encrypt-then-HMAC-SHA256, random IV, random
+separate app-private key, mode0600 and atomic replace. It is not hardware-backed
+and the SQLite message cache is not encrypted. Service never evaluates QtScript
+or constructs QML/TextDocument. Access tokens are RAM-only; refresh credentials
+are deliberately persisted for the user's requested remember-session behavior.
+
+Current session restore, directory/photo responses, Hub permission/notification
+delivery, boot start and continuous closed-app reception remain **unverified on
+hardware**. Restricted BB10 permissions can be denied; metadata alone doesn't
+grant them. The native service can miss intermediate events between summary polls.
+Device checks and service heartbeat/error instructions are in docs/teams10-setup-vi.md.

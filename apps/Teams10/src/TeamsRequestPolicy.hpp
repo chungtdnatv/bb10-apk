@@ -2,7 +2,7 @@
 #define TEAMS10_REQUEST_POLICY_HPP
 #include <string>
 namespace TeamsRequestPolicy {
-enum Service { Denied, OAuth, GraphProfile, ChatAggregate, ChatService };
+enum Service { Denied, OAuth, GraphProfile, ChatAggregate, ChatService, Directory, Photo };
 inline bool authority(const std::string &s) {
  if(s.empty()||s=="common"||s=="consumers"||s.size()>253)return false;
  for(size_t i=0;i<s.size();++i) {
@@ -25,6 +25,15 @@ inline Service route(const std::string &host,const std::string &path,const std::
  for(int i=0;i<3;++i) {
   std::string r=regions[i];
   if(method=="GET"&&path=="/api/csa/"+r+"/api/v2/teams/users/me")return ChatAggregate;
+  std::string mt="/api/mt/"+r+"/beta/users/";
+  if(method=="POST"&&(path==mt+"fetchShortProfile"||path==mt+"fetchFederated"||path==mt+"fetchTflConsumers"))return Directory;
+  if(method=="GET"&&path.compare(0,mt.size(),mt)==0) {
+   std::string tail=path.substr(mt.size());size_t marker=tail.find("/profilepicturev2/");
+   if(marker!=std::string::npos) {
+    std::string self=tail.substr(0,marker),who=tail.substr(marker+18);
+    if(!self.empty()&&self.find('/')==std::string::npos&&self!="."&&self!=".."&&!who.empty()&&who.find('/')==std::string::npos&&who!="."&&who!="..")return Photo;
+   }
+  }
   std::string base="/api/chatsvc/"+r+"/v1/users/ME/conversations/";
   if(path.compare(0,base.size(),base)==0 && path.size()>base.size()+9 && path.compare(path.size()-9,9,"/messages")==0) {
    std::string id=path.substr(base.size(),path.size()-base.size()-9);

@@ -1,0 +1,55 @@
+{
+  "assets": 24,
+  "entry_points": [
+    "Teams10",
+    "Teams10Service"
+  ],
+  "arm_binaries": 2,
+  "signature_files_present": false,
+  "version": "1.1.0.5",
+  "package_id": "com.bb10toolkit.Teams10",
+  "sha256": "20f4d73b9b8078197272f05324a73b93ce6588d853abeb5a879ece9e729c875f",
+  "sdk_image": "ghcr.io/zsavajji/bb10-cxx20@sha256:60ddcfc3acb0c0215611c353780f196c3b7928ae266292f7f45038df358574ba",
+  "native_checks": [
+    {
+      "binary": "build/native/arm/Teams10.so",
+      "sdk_libraries": 101,
+      "strong_imports_resolved": 325,
+      "orphan_unwind_sections": 0
+    },
+    {
+      "binary": "build/native/arm/Teams10Service",
+      "sdk_libraries": 52,
+      "strong_imports_resolved": 332,
+      "orphan_unwind_sections": 0
+    }
+  ],
+  "validation": {
+    "toolkit_tests": 40,
+    "login_ui_handler_tests": 5,
+    "native_controller_mock_tests": 32,
+    "crypto_lease_native_preview_notification_helper_tests": 1,
+    "native_route_policy_tests": 1,
+    "historical_graph_controller_tests": 21,
+    "package_ca_tests": 2,
+    "qml_syntax": "pass, both files",
+    "previous_device_login": "user confirmed on Passport with 1.0.0.4",
+    "current_device_session_avatar_hub_background": "not yet tested on device"
+  },
+  "background": {
+    "implementation": "native separate entry point, no QML/QtScript engine",
+    "interval_ms": 30000,
+    "delivery": "latest summary polling, not realtime push",
+    "permission_grant": "device dependent; manifest declaration is not a grant"
+  },
+  "session_storage": {
+    "cipher": "AES256-CBC encrypt-then-HMAC-SHA256",
+    "key": "random, separate mode-0600 sandbox file; not hardware-backed",
+    "refresh_rotation": "UI/service fcntl lease and atomic credential replacement"
+  },
+  "ca_bundle": {
+    "source": "certifi 2026.10.19 Mozilla roots",
+    "sha256": "b67dce2c84359d6ba0b0ffbb980c819737cb6fc94aa85ead330ae1e957c69e69",
+    "license": "MPL-2.0"
+  }
+}

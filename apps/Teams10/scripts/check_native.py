@@ -55,6 +55,6 @@ def check(file):
     return {'binary':str(file.relative_to(ROOT)), 'sdk_libraries':len(visited),
             'strong_imports_resolved':len(imports), 'orphan_unwind_sections':0}
 
-checks=[check(ROOT/'build/native/arm/Teams10.so')]
+checks=[check(ROOT/'build/native/arm/Teams10.so'),check(ROOT/'build/native/arm/Teams10Service')]
 (ROOT/'build/native-checks.json').write_text(json.dumps(checks,indent=2)+'\n')
 print('PASS:',json.dumps(checks))

@@ -9,13 +9,14 @@ const OTHER='00000000-0000-0000-0000-000000000012';
 const TENANT='00000000-0000-0000-0000-000000000013';
 const CHAT='19:synthetic@thread.v2';
 function jwt(extra={}) {return 'header.'+Buffer.from(JSON.stringify({oid:USER,tid:TENANT,name:'Test User',upn:'user@example.invalid',...extra})).toString('base64url')+'.signature';}
-function harness() {
+function harness(extraIo={}) {
  const context=vm.createContext({});vm.runInContext(source,context);
  const sent=[],timers=[],events=[],cache=new Map();let now=Date.UTC(2026,10,14),aborts=0;
  const io={now:()=>now,decodeBase64Url:s=>Buffer.from(s,'base64url').toString('utf8'),
   send:(id,method,url,body,headers)=>sent.push({id,method,url,body,headers}),changed:()=>{},
   pollAfter:ms=>timers.push(ms),cancelPoll:()=>{},abortAll:()=>aborts++,saveConfig:()=>{},
   loadCache:(a,r)=>cache.get(a+'|'+r)||'',saveCache:(a,r,data)=>{cache.set(a+'|'+r,data);return true},sent:(...args)=>events.push(args)};
+ Object.assign(io,extraIo);
  const api=context.create(io);
  function take(fragment) {let index=sent.findIndex(r=>r.url.includes(fragment));assert(index>=0,'missing '+fragment+' among '+sent.map(r=>r.url));return sent.splice(index,1)[0];}
  function reply(r,code,data,error='',headers={}) {api.receive(r.id,code,typeof data==='string'?data:JSON.stringify(data),error,headers);}
@@ -31,7 +32,7 @@ function harness() {
   reply(take('/api/csa/'+region),200,{chats});assert.equal(api.state.phase,'ready');
  }
  function open(rows=[],id=CHAT){api.openChat({id,title:'Chat'});if(sent.some(r=>r.url.includes('/oauth2/v2.0/token')))grant('chat');reply(take('/messages?'),200,{messages:rows});}
- return {api,context,sent,timers,events,cache,take,reply,grant,token,auth,open,advance:ms=>now+=ms,aborts:()=>aborts};
+ return {api,io,context,sent,timers,events,cache,take,reply,grant,token,auth,open,advance:ms=>now+=ms,aborts:()=>aborts};
 }
 function message(id='1700000000001',text='hello',time='2026-11-14T10:00:00.1234567Z') {
  return {id,content:text,messagetype:'Text',composetime:time,from:'https://teams.microsoft.com/api/chatsvc/apac/v1/users/ME/contacts/8:orgid:'+OTHER,imdisplayname:'Other User',clientmessageid:'700'};
@@ -145,4 +146,56 @@ test('profile/cache isolation and logout discard late send callbacks',()=>{
 test('only supported native destinations and chat ids are usable',()=>{
  const h=harness();assert.equal(h.context.serviceFor('https://teams.microsoft.com.evil.invalid/api/csa/apac/api/v2/teams/users/me'),'');assert.equal(h.context.serviceFor('http://teams.microsoft.com/api/csa/apac/api/v2/teams/users/me'),'');assert.equal(h.context.serviceFor('https://teams.microsoft.com/api/csa/bad/api/v2/teams/users/me'),'');
  h.auth();h.api.openChat({id:'../../secret',title:'bad'});assert.equal(h.sent.length,0);
+});
+
+
+test('successful login persists only resumable credentials and public identity; rotated refresh is saved',()=>{
+ let saved='',starts=0;const h=harness({saveSession:s=>{saved=s;return true},startBackground:()=>starts++});h.auth();
+ const session=JSON.parse(saved);assert.equal(session.version,1);assert.equal(session.clientId,h.context.CLIENT_ID);assert.equal(session.refresh,'ROTATED_csa');assert.equal(session.profile.id,USER);assert.equal(starts,1);
+ assert(!saved.includes('access_token'));assert(!saved.includes('TOKEN_csa'));
+});
+test('restore renews credentials and validates services before displaying any cached conversation',()=>{
+ let saved=JSON.stringify({version:1,clientId:'1fec8e78-bce4-4aaf-ab1b-5451cc387264',tenant:'organizations',refresh:'SAVED',profile:{id:USER,tenantId:TENANT}});
+ const h=harness({loadSession:()=>saved,saveSession:s=>{saved=s;return true}});
+ h.api.restoreSession();assert.equal(h.api.state.phase,'connecting');assert.equal(h.api.state.chats.length,0);
+ let r=h.take('/oauth2/v2.0/token');assert(new URLSearchParams(r.body).get('scope').includes('api.spaces.skype.com'));
+ h.reply(r,200,{access_token:jwt(),refresh_token:'NEW_SPACES',expires_in:3600});h.grant('csa');
+ h.reply(h.take('/api/csa/api/'),200,{chats:[chat()]});assert.equal(h.api.state.phase,'ready');assert.equal(h.api.state.chats[0].id,CHAT);assert.equal(JSON.parse(saved).refresh,'ROTATED_csa');
+});
+test('service ownership busy waits without leaking cache; restore retries after handoff',()=>{
+ let stored='{"busy":true}';const h=harness({loadSession:()=>stored});assert(h.api.restoreSession());assert.equal(h.api.state.phase,'waitingSession');assert.equal(h.sent.length,0);
+ stored=JSON.stringify({version:1,clientId:h.context.CLIENT_ID,tenant:'organizations',refresh:'SAVED'});h.api.restoreSession();assert.equal(h.api.state.phase,'connecting');assert.equal(h.sent.length,1);
+});
+test('invalid/revoked sessions require login; transient network error does not erase saved credentials',()=>{
+ for(const code of [400,0]){
+  let clears=0;const session=JSON.stringify({version:1,clientId:'1fec8e78-bce4-4aaf-ab1b-5451cc387264',tenant:'organizations',refresh:'SAVED'});
+  const h=harness({loadSession:()=>session,clearSession:()=>{clears++;return true}});h.api.restoreSession();h.reply(h.take('/oauth2/v2.0/token'),code,{error:'invalid_grant'},code?'':'timeout');
+  assert.equal(h.api.state.phase,'signedOut');assert.equal(clears,code===400?1:0);
+ }
+});
+test('logout deletes persisted session and never reuses late renew responses',()=>{
+ let clears=0;const h=harness({clearSession:()=>{clears++;return true}});h.auth();h.api.signOut();assert.equal(clears,1);assert.equal(h.api.state.phase,'signedOut');
+});
+test('personal-contact MRI resolves via consumer profiles; authenticated photo decorates chat and sender',()=>{
+ const mri='8:live:synthetic-user',c=chat();c.members=[{objectId:USER},{mri}];c.isLastMessageFromMe=true;c.lastMessage.from='8:orgid:'+USER;
+ const h=harness({enrichProfiles:true,avatar:()=> 'file:///placeholder.png'});h.auth([c]);
+ assert.equal(h.api.state.chats[0].title,'Chat riêng');
+ h.reply(h.take('fetchShortProfile'),200,{value:[]});h.reply(h.take('fetchFederated'),200,{value:[]});h.reply(h.take('fetchTflConsumers'),200,{resolvedUsers:[{mri,displayName:'Consumer Friend'}]});
+ assert.equal(h.api.state.chats[0].title,'Consumer Friend');
+ const picture=h.take('/profilepicturev2/');assert.equal(picture.headers.Authorization,'Bearer '+jwt());assert(picture.url.includes(encodeURIComponent(mri)));
+ h.reply(picture,200,{avatar:'file:///private/avatar.png'});assert.equal(h.api.state.chats[0].avatar,'file:///private/avatar.png');
+ const m=message();m.from=mri;m.imdisplayname='';h.open([m]);assert.equal(h.api.state.messages[0].sender,'Consumer Friend');assert.equal(h.api.state.messages[0].avatar,'file:///private/avatar.png');
+});
+test('HTML5 entities, astral emoji and Teams emoji alt render without corrupting literal percent strings',()=>{
+ const h=harness();assert.equal(h.context.plainHtml('<div>A &ndash; B &hellip; &NotEqualTilde; &#x1f600; <emoji alt="&#x1f642;"></emoji> %#c</div>'),'A – B … ≂̸ 😀 🙂 %#c\n');
+ assert.equal(h.context.plainHtml('literal &amp;lt;tag&amp;gt; %20'),'literal &lt;tag&gt; %20');
+ assert.equal(h.context.plainHtml('&unrecognised; &#xD800;'),'&unrecognised; �');
+});
+
+test('handoff without saved credentials returns to usable login instead of waiting forever',()=>{
+ let stored='{"busy":true}';const h=harness({loadSession:()=>stored});h.api.restoreSession();assert.equal(h.api.state.phase,'waitingSession');stored='';assert.equal(h.api.restoreSession(),false);assert.equal(h.api.state.phase,'signedOut');
+});
+test('emoji content wins over alt text, and bare consumer identity normalizes without orgid coercion',()=>{
+ const h=harness();assert.equal(h.context.plainHtml('<emoji alt="smile">🙂</emoji><img alt="[image]" src="x">'),'🙂[image]');
+ const c=chat();c.members=[{objectId:USER},{objectId:'live:synthetic-user',displayName:'Personal Friend'}];h.auth([c]);assert.equal(h.api.state.chats[0].person,'8:live:synthetic-user');assert.equal(h.api.state.chats[0].title,'Personal Friend');
 });

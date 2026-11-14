@@ -23,3 +23,12 @@ if Microsoft or the organization rejects the authentication/access request.
 No tenant-policy bypass, device-compliance claim, calls, realtime Trouter or
 browser embedding is implemented. Upstream source is evidence of a protocol
 approach, not evidence that Teams10 has authenticated successfully on a device.
+
+
+Teams10 1.1.0.5 additionally adapts purple-teams `teams_contacts.c` profile lookup
+(`fetchShortProfile`, `fetchFederated`, `fetchTflConsumers`) and profilepicturev2
+URI/cookie authentication. Only explicit mt region/endpoint paths are allowed;
+no arbitrary image URL from a profile response receives a bearer/cookie. The
+current implementation uses CSA's resolved region, with monogram fallback on
+unsupported routing/privacy/denied photo access. Service polling and local UDS
+notification logic are new native toolkit code, not purple-teams Trouter code.

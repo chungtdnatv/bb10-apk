@@ -1,46 +1,66 @@
-# Teams10 1.0.0.4 — native BB10 Microsoft 365 chat client
+# Teams10 1.1.0.5 — native BB10 Microsoft 365 chat
 
-Independent, unofficial Cascades C++/QML client for work/school Teams accounts.
-No WebView, Teams browser engine or own Entra App Registration is required in
-this version. Authentication/protocol interoperability follows purple-teams and
-squads-app; it is **not an officially supported Microsoft integration**. Microsoft
-or the tenant can reject this client, device-code flow or access to chat services.
+Independent, unofficial Cascades client for work/school accounts. No WebView,
+password input or own Entra App Registration. Device-code/native interoperability
+follows purple-teams and squads-app with the upstream public Teams client ID.
+Microsoft/tenant policies still apply. A user confirmed successful login on
+Passport with 1.0.0.4; the new features below require another device test.
 
-## Implemented
+## Current features
 
-- Microsoft device-code login on another phone/PC; optional tenant/domain.
-- Fixed public Teams client identifier used by upstream compatibility clients.
-  The Microsoft confirmation page may identify Microsoft Teams; this independent
-  program is Teams10, not Microsoft Teams. No client secret or password input.
-- V1 device/resource grant, session refresh-token rotation and separate resource
-  tokens for CSA chat discovery and IC3 message requests. Optional Graph `/me`
-  profile lookup only if account claims aren't available in the initial token.
-- Regional chat discovery (emea/amer/apac), existing private/group/meeting chats,
-  latest-message sorting, readable text/HTML and older message windows.
-- Send escaped plain text to existing chats; duplicate-tap guard and draft retained
-  on failure. Timeout/429/403 never automatically repeats a send. A successful
-  submission is followed by history refresh; no fabricated server message IDs.
-- Manual and foreground 30-second refresh, up to 500 cached messages per chat.
-- Account/tenant/protocol-scoped SQLite cache exposed only after successful service
-  authentication. Explicit logout clears RAM tokens and local cache.
-- Native SDK curl/OpenSSL HTTPS worker, TLS1.2, CA and hostname verification,
-  bounded responses/timeouts, fixed endpoint/method allowlist and no automatic
-  curl redirects. GET regional redirects are validated and rebuilt explicitly.
+- Device-code login on another phone/PC; optional tenant/domain. Separate resource
+  tokens for CSA/IC3 and spaces, refresh rotation, regional allowlisted endpoints.
+- **Remember session:** an encrypted app-private refresh credential is renewed on
+  reopening, without requesting another device code unless Microsoft revokes it.
+  Restored tokens are checked against the service before any cached chat is shown.
+- **Names/photos:** normalized organization/consumer MRIs, batched short/federated/
+  consumer profile lookup; authenticated profile-picture download and circular
+  cache. Directory/photo denials leave a readable fallback/colored monogram.
+  First 24 chat photos and participants in the opened history are requested;
+  history names can also improve otherwise unnamed chats. Chatting with personal
+  contacts is distinct from signing in with a personal account (unsupported).
+- **Text:** HTML5 references, numeric Unicode, Teams emoji/image alt text, literal
+  percent strings; no blanket URL-decoding or guessing of arbitrary mojibake.
+- **UI:** dark blue/cyan design, round avatars, incoming/outgoing message bubbles,
+  shorter rounded bottom bar, search and Tin nhắn / Danh bạ / Profile. Contacts
+  are people from existing 1:1 chats, not a full company directory/new-chat picker.
+- Existing chat history/older windows, text send, duplicate-tap guard and preserved
+  failed drafts. Uncertain send timeout/429/403 never automatically repeats a POST.
+- **Hub:** own UDS account, per-chat latest item, tap-to-open and local read state;
+  standard Hub notifications if UDS registration is denied/unavailable. Dedup
+  watermarks are shared by UI/service; first discovery and own messages don't
+  produce a historical notification flood.
+- **Background:** a separately packaged native `Teams10Service`, started after
+  login and on OS STARTED/UPDATED events, polls latest chat summaries about every
+  30 seconds after the UI exits. No QtScript/QML/TextDocument is used by the
+  service. A process lease gives the UI exclusive token ownership while open;
+  a native QTimer refreshes the UI while minimized if background reception is on.
+  Profile can disable background reception. Service status/heartbeat and errors
+  are visible in diagnostics. This is polling, **not instant push** or Trouter.
 
-## Install
+## Session and data storage
 
-[Download and Vietnamese guide](../../docs/teams10-setup-vi.md).
-Install the BAR as a separate app, select **Đăng nhập Microsoft**, then enter the
-shown code at https://microsoft.com/devicelogin on a supported phone/PC. Tenant
-can be left blank (`organizations`). Tokens stay in RAM: after terminating the
-app, sign in again. Only public tenant/client configuration is saved in settings.
+`SessionStore` stores only refresh credentials + public account metadata in
+`data/teams10-session.enc`: AES-256-CBC encrypt-then-HMAC-SHA256, fresh IV, atomic
+replace and mode 0600. Its random 64-byte key is in a separate mode-0600 sandbox
+file. This is software protection within the app sandbox, **not a hardware key
+store**; root/device-backup access to both files can recover the credential.
+Access tokens stay in RAM. No credentials are saved in QSettings/SQLite/logs.
 
-A tenant policy refusal is shown as an error; the app does not attempt different
-client IDs or forge device compliance. Global Microsoft 365 endpoints only, not
-personal Teams or sovereign clouds. Browser access on another device does not
-prove this authentication flow will be allowed.
+UI and service use the same nonblocking fcntl lease for refresh rotation and
+notification state; a separate service singleton lease prevents duplicate
+processes. On reopening during a network poll, the UI displays the handoff wait
+and retries. Temporary network failure retains the saved session; a revoked
+refresh grant requires sign-in again. Logout removes the saved credential, Hub
+rows, avatar files and local cache. Cache SQLite itself is not encrypted by this
+application; logout deletion is not a forensic secure erase. Static event logs
+are bounded and never contain codes/tokens/message bodies.
 
-## Build and verification
+## Install/build
+
+[Vietnamese installation and device checks](../../docs/teams10-setup-vi.md).
+The BAR has its own package ID and two native entry points; it does not replace
+Zalo or Telega. Keep both entry points when repackaging.
 
 ```sh
 python3 bb10.py build Teams10
@@ -48,58 +68,43 @@ python3 bb10.py test Teams10
 python3 bb10.py verify dist/Teams10-unsigned.bar
 ```
 
-Build uses the toolkit's pinned Docker BB10 SDK. Tests require Node >=18, C++ and
-SQLite development headers. `tests/native-core.test.cjs` runs the actual shipped
-controller with synthetic HTTP/cache/clock responses (23 tests). Native route
-policy is compiled and tested as C++98. Package tests compare shipped assets and
-version and parse the CA store. Historical Graph-only controller/tests remain in
-`compat/` and `tests/core.test.cjs`; that controller is **not shipped or executed**.
-SDK imports/entry/unwind and QML syntax are also checked separately.
+Build: pinned Docker BB10 SDK. Host tests: Python, Node >=18, C++ compiler,
+SQLite and OpenSSL development headers/libraries. Tests run the actual shipped
+JS, actual QML login handler bodies with a modeled QVariant boundary, actual
+C++ crypto/lease/preview/notification policies, and actual BAR/CA contents. The
+native build checks SDK imports, ARM unwind/entry metadata and both entry points.
+These are not a QNX emulator or an authenticated end-to-end test of this release.
 
-These are offline/build checks, not real Microsoft authentication or a BB10
-emulator. No company account has been used in development. Actual Passport
-startup, device login, chat service responses and send/receive remain unverified.
+## Practical limits
 
-## Limits
+Hub UDS and continuous headless operation use restricted BB10 permissions. Merely
+listing them in the BAR does not grant them: the device/installer must allow
+`_sys_access_pim_unified`, `_sys_run_headless`, `_sys_headless_nostop`, normal
+notification and background permissions. Standard notifications are a Hub
+fallback, not a substitute for denied headless execution. OS force-stop, reboot
+startup denial, missing Internet, throttling and tenant policy can delay/stop
+reception. Polling checks the latest summary per conversation, not every
+intermediate event, and does not download all history while closed. Hardware
+validation must include closing the UI and sending a message from another device.
 
-No calls, channels, new-chat creation, media transfers, rich cards, read receipts,
-Hub/headless operation, Trouter realtime events or background notifications.
-Media is a placeholder. Missing member names fall back to chat titles and sender
-names learned from history. Internal Teams endpoints may change without notice.
-Older history uses timestamp windows; edits/deletions outside fetched windows
-aren't guaranteed to update. Sends are capped at 6,000 UTF-16 units and 24,000
-encoded JSON bytes. The cache is not encrypted by this application. Logs contain
-static startup markers only (`data/teams10_startup.log`), no chat/token payloads.
+No calls, channels, new-chat creation, media transfer, read receipts, rich cards,
+Trouter realtime push or sovereign clouds. Up to 500 messages cached per chat;
+text send <=6,000 UTF-16 units and <=24,000 JSON UTF8 bytes. Old edits/deletions
+outside fetched windows aren't guaranteed to update. Internal endpoints may change.
+Avatar/privacy restrictions and unavailable consumer profiles can leave monograms.
+`%#c` by itself is not a valid HTML reference; it is preserved as literal content.
 
-## Sources and licenses
+## UI reference and licensing
 
-This combined app is distributed under GPL-3.0-or-later due to the purple-teams
-protocol/auth adaptation. See [pinned upstream references](../../references/teams-native/README.md),
-`LICENSE`, and `licenses/`. Original toolkit MIT notices and squads-app's MIT
-notice are retained in source and assets. No libpurple, Android runtime or Kotlin
-binary is linked. The geometric T icon is independent of Microsoft's branding.
-Mozilla CA store from certifi 2026.10.19 is MPL2.0 with notice in `assets/certs/`.
-SDK Qt/curl/OpenSSL/SQLite remain system dependencies.
+The user-supplied Telega BAR was inspected/extracted locally. Its QML depends on
+`bb.shared` native rounded widgets and TDLib-specific objects. Teams10 recreates
+the layout concepts with its own Cascades components/paint assets; no Telega
+binary, TDLib, branded icons or extracted QML is shipped. See the
+[inspection report](../../references/bbtelega-ui/README.md).
 
-## Login startup diagnostics (1.0.0.4)
-
-The UI defers controller startup until after creation, retries initialization on
-login tap and surfaces synchronous initialization/login exceptions instead of
-silently losing the action. The clock adapter uses `new Date().getTime()` for old
-script engines. Five tests execute the actual QML handler bodies with the actual
-controller, including missing/failed startup and a Date implementation without
-Date.now. They do not emulate Cascades. The login diagnostic sheet displays status,
-transport information and allowlisted static event markers from the startup log;
-no auth codes, request bodies, tokens or message payloads are logged. The exact
-cause of the reported Passport no-response behavior is not confirmed on hardware.
-
-### Callable-controller boundary fix
-
-The device diagnostic reported controller-start/controller-error before any HTTP
-request; the check found startLogin missing after storing the factory result in a
-QML variant property. QtQuick 1 can convert plain JS objects through QVariantMap,
-losing callable members. The live API now stays in TeamsCore.js, accessed directly
-by main.qml. ChatPage receives the root QML QObject and calls its forwarding methods
-instead of storing the JS API. No live function-bearing API crosses a QML variant
-property. The updated test harness models the lossy conversion and exercises actual
-login handlers and chat forwarding. It does not replace hardware verification.
+Combined app: GPL-3.0-or-later due to purple-teams protocol/auth adaptation.
+[pinned protocol sources](../../references/teams-native/README.md). Original
+MIT toolkit and squads-app notices retained; Python html.entities reference
+names retain the PSF notice. Mozilla CA store from certifi 2026.10.19 is MPL2.0.
+SDK Qt/curl/OpenSSL/SQLite/UDS are system dependencies. Historical Graph-only
+controller/tests in `compat/` are not shipped or executed by the app.

@@ -25,6 +25,14 @@ int main() {
  assert(route("teams.microsoft.com","/api/csa/api/v2/teams/users/me","GET")==ChatAggregate);
  const char *regions[]={"emea","amer","apac"};
  for(int i=0;i<3;++i) {
+   std::string mt="/api/mt/"+std::string(regions[i])+"/beta/users/";
+   assert(route("teams.microsoft.com",mt+"fetchTflConsumers","POST")==Directory);
+   assert(route("teams.microsoft.com",mt+"fetchFederated","POST")==Directory);
+   assert(route("teams.microsoft.com",mt+"fetchShortProfile","POST")==Directory);
+   assert(route("teams.microsoft.com",mt+"fetchShortProfile","GET")==Denied);
+   assert(route("teams.microsoft.com",mt+"self/profilepicturev2/8%3Alive%3Auser","GET")==Photo);
+   assert(route("teams.microsoft.com",mt+"self/profilepicturev2/8%3Alive%3Auser","POST")==Denied);
+   assert(route("teams.microsoft.com",mt+"self/profilepicturev2/../../token","GET")==Denied);
    std::string base="/api/chatsvc/"+std::string(regions[i])+"/v1/users/ME/conversations/";
    assert(route("teams.microsoft.com",base+"19%3Aopaque%2Fid/messages","GET")==ChatService);
    assert(route("teams.microsoft.com",base+"19%3Aopaque%2Fid/messages","POST")==ChatService);

@@ -7,6 +7,10 @@
 #include <QSettings>
 #include <QAtomicInt>
 #include <sqlite3.h>
+#include "SessionStore.hpp"
+#include "TeamsHub.hpp"
+#include <bb/system/InvokeRequest>
+namespace bb { namespace system { class InvokeManager; } }
 
 struct TeamsRequest {
     int id;
@@ -31,6 +35,18 @@ public:
     Q_INVOKABLE void request(int id,const QString &method,const QString &url,const QString &body,const QVariantMap &headers);
     Q_INVOKABLE void abortAll();
     Q_INVOKABLE QString decodeBase64Url(const QString &part) const;
+    Q_INVOKABLE QString loadSession();
+    Q_INVOKABLE bool saveSession(const QString &json);
+    Q_INVOKABLE bool clearSession();
+    void releaseSession();
+    Q_INVOKABLE void observeChat(const QString &account,const QVariantMap &chat,bool visible);
+    Q_INVOKABLE QString cachedAvatar(const QString &url) const;
+    Q_INVOKABLE QString avatar(const QString &name,const QString &source=QString());
+    Q_INVOKABLE void startBackground();
+    Q_INVOKABLE bool backgroundEnabled() const;
+    Q_INVOKABLE void setBackgroundEnabled(bool enabled);
+    Q_INVOKABLE QString pendingChat() const;
+    Q_INVOKABLE void clearPendingChat();
     Q_INVOKABLE QString clientId() const;
     Q_INVOKABLE QString tenant() const;
     Q_INVOKABLE void saveConfig(const QString &client,const QString &tenant);
@@ -41,9 +57,13 @@ public:
     Q_INVOKABLE void recordEvent(const QString &event) const;
     Q_INVOKABLE QString startupLog() const;
 signals:
+    void openConversation();
+    void pollTick();
     void completed(int id,int status,const QString &body,const QString &error,const QVariantMap &headers);
 private slots:
     void finished();
+    void backgroundStarted();
+    void invoked(const bb::system::InvokeRequest &request);
 private:
     void startNext();
     QList<TeamsRequest> m_pending;
@@ -51,5 +71,9 @@ private:
     sqlite3 *m_db;
     QString m_ca;
     QSettings m_settings;
+    SessionStore m_session;
+    TeamsHub m_hub;
+    bb::system::InvokeManager *m_invoke;
+    QString m_pendingChat;
 };
 #endif

@@ -16,7 +16,7 @@ function harness() {
   variantWrites++;legacyVariant=value===null?null:JSON.parse(JSON.stringify(value));
  }});
  const context=vm.createContext({root,tenantField:{text:''},loginTimer:{stop(){},restart(){}},
-  teamsNet:{recordEvent:s=>events.push(s),abortAll(){},saveConfig(){},request:(...args)=>requests.push(args)}});
+  teamsNet:{loadSession:()=>'',saveSession:()=>true,clearSession:()=>true,avatar:()=>'',cachedAvatar:()=>'',observeChat(){},startBackground(){},recordEvent:s=>events.push(s),abortAll(){},saveConfig(){},request:(...args)=>requests.push(args)}});
  vm.runInContext(core+'\nvar Teams={initialize:initialize,controller:controller,releaseController:releaseController};\n'+handlers,context);
  root.initializeService=context.initializeService;
  root.refreshMessages=context.refreshMessages;root.sendMessage=context.sendMessage;

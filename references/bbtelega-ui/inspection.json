@@ -1,0 +1,21 @@
+{
+  "input_file": "BBTelega_1_11_3_774_prod.bar",
+  "sha256": "ee29402f4c9b3cafbfdc3314531dcec610f404dad34becb7a6677caa659d5d4a",
+  "bytes": 28705215,
+  "archive_entries": 401,
+  "qml_files": 218,
+  "inspected": [
+    "native/assets/components/TabBar.qml",
+    "native/assets/components/Avatar.qml",
+    "native/assets/components/ChatListItem.qml",
+    "native/assets/components/MessageBase.qml",
+    "native/assets/components/MessageInput.qml",
+    "native/bar-descriptor.xml"
+  ],
+  "dependencies_observed": [
+    "bb.shared native AdvancedContainer/AdvancedImageView",
+    "TDLib-specific td/app/theme properties",
+    "Cascades 1.4"
+  ],
+  "redistributed_from_bar": []
+}

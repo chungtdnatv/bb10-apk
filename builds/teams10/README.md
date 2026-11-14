@@ -1,18 +1,22 @@
 # Teams10 native test BARs
 
-[Teams10 1.0.0.4](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.0.0.4-native-client-unsigned.bar)
-is the current native work/school Microsoft 365 client: device-code login, existing
-chats, text history/send. No WebView or calls. No own App Registration needed.
+[Teams10 1.1.0.5 — native + Hub](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.0.5-native-hub-unsigned.bar)
+is the current work/school Microsoft 365 build. It adds encrypted session restore,
+consumer/federated name lookup, authenticated circular photos, HTML5 decoding,
+a dark capsule-nav/bubble UI and a separate native Hub/background polling service.
 
-Independent package `com.bb10toolkit.Teams10`, does not replace Zalo. Uses the
-public Teams client ID and native interoperability described by purple-teams and
-squads-app. Microsoft/tenant policy may refuse it. Tokens stay in RAM only.
-[Installation/login guide](../../docs/teams10-setup-vi.md),
-[source, licenses and limits](../../apps/Teams10/README.md).
+Install over Teams10, log in once after upgrading from RAM-only 1.0.0.4, then
+check reopening without another code. In Profile enable background/Hub, close
+the UI, send a new message from another device and check Hub after 30–60 seconds.
+The BAR includes both Teams10 and Teams10Service: do not drop the second entry.
 
-Checksum and build report are adjacent. Unsigned test BAR, using the installation
-method for the other working toolkit BARs. Offline tests/build passed; actual
-company login/send/receive, Passport startup and device TLS remain unverified.
+No calling or WebView. No own App Registration. Public Teams-client compatibility
+can still be denied by Microsoft/tenant. Restricted UDS/headless permissions must
+be granted by the device; listing them in the package isn't a grant. Latest
+summary polling isn't realtime push. Passport login was confirmed by the user on
+1.0.0.4; new session/photo/Hub/service features have not yet been device-tested.
 
-1.0.0.1 is retained as historical Graph-only build; it required an organization-owned
-App Registration. Current instructions and source apply to 1.0.0.4.
+[Guide and diagnostics](../../docs/teams10-setup-vi.md),
+[source/licensing/limits](../../apps/Teams10/README.md), adjacent SHA256/report.
+Independent unsigned test package `com.bb10toolkit.Teams10`, doesn't replace Zalo
+or Telega. Historical 1.0.0.x builds remain available for comparison/rollback.

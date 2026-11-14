@@ -3,19 +3,39 @@
     <id>com.bb10toolkit.Teams10</id>
     <name>Teams10</name>
     <author>BB10 Toolkit</author>
-    <versionNumber>1.0.0</versionNumber>
-    <buildId>4</buildId>
+    <versionNumber>1.1.0</versionNumber>
+    <buildId>5</buildId>
     <description>Native Cascades application</description>
     <configuration id="release" name="Device-Release">
         <entryPointType>Qnx/Cascades</entryPointType>
         <platformArchitecture>armle-v7</platformArchitecture>
-        <asset path="build/native/arm/Teams10.so" entry="true" type="Qnx/Elf">Teams10.so</asset>
+        <asset entryPointId="Teams10" path="build/native/arm/Teams10.so" entry="true" type="Qnx/Elf">Teams10.so</asset>
+        <asset entryPointId="Teams10Service" path="build/native/arm/Teams10Service" type="Qnx/Elf">Teams10Service</asset>
     </configuration>
     <icon><image>icon.png</image></icon>
     <initialWindow><systemChrome>none</systemChrome><autoOrients>true</autoOrients></initialWindow>
     <asset path="icon.png">icon.png</asset>
     <asset path="assets">assets</asset>
     <permission system="true">run_native</permission>
+    <asset path="res_hub" public="true">res_hub</asset>
+    <entryPoint id="Teams10"><name>Teams10</name></entryPoint>
+    <entryPoint id="Teams10Service"><name>Teams10 Service</name><entryPointType>Qnx/Elf</entryPointType><permission system="true">_sys_run_headless</permission><permission system="true">_sys_headless_nostop</permission></entryPoint>
+    <invoke-target id="com.bb10toolkit.Teams10.service">
+        <invoke-target-type>application.headless</invoke-target-type><entry-point-id>Teams10Service</entry-point-id>
+        <filter><action>bb.action.system.STARTED</action><mime-type>application/vnd.blackberry.system.event.STARTED</mime-type><property var="uris" value="data://local" /></filter>
+        <filter><action>bb.action.system.UPDATED</action><mime-type>application/vnd.blackberry.system.event.UPDATED</mime-type><property var="uris" value="data://local" /></filter>
+        <filter><action>com.bb10toolkit.Teams10.RUN</action><mime-type>application/vnd.teams10.background</mime-type><property var="uris" value="headless:" /></filter>
+    </invoke-target>
+    <invoke-target id="com.bb10toolkit.Teams10.open">
+        <invoke-target-type>application</invoke-target-type><entry-point-id>Teams10</entry-point-id>
+        <filter><action>bb.action.OPEN</action><action>bb.action.VIEW</action><mime-type>application/vnd.teams10.chat</mime-type><property var="uris" value="pim:application/vnd.teams10.chat" /></filter>
+        <filter><action>bb.action.OPEN</action><mime-type>application/vnd.teams10.chat</mime-type></filter>
+    </invoke-target>
     <permission>access_internet</permission>
+    <permission>post_notification</permission>
+    <permission>run_when_backgrounded</permission>
+    <permission system="true">_sys_run_headless</permission>
+    <permission system="true">_sys_headless_nostop</permission>
+    <permission system="true">_sys_access_pim_unified</permission>
     <env var="LD_LIBRARY_PATH" value="app/native/lib:/usr/lib/qt4/lib" />
 </qnx>

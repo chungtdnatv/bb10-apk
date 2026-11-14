@@ -1,12 +1,26 @@
 #include "TeamsNative.hpp"
 #include "TeamsRequestPolicy.hpp"
+#include "NotificationCursor.hpp"
 #include <QDir>
 #include <QFileInfo>
 #include <QFile>
 #include <QStringList>
+#include <QtGui/QImage>
+#include <QtGui/QImageReader>
+#include <QBuffer>
+#include <QtGui/QPainter>
+#include <QtGui/QPainterPath>
+#include <QCryptographicHash>
+#include <bb/data/JsonDataAccess>
+#include <bb/system/InvokeManager>
+#include <bb/system/InvokeRequest>
+#include <bb/system/InvokeTargetReply>
+#include <bb/system/InvokeReplyError>
+#include <sys/stat.h>
 #include <QUrl>
 #include <QRegExp>
 #include <QDateTime>
+#include <QTimer>
 #include <curl/curl.h>
 #include <openssl/ssl.h>
 #include <string>
@@ -60,6 +74,16 @@ void TeamsWorker::run() {
     if (!curl) { error="Cannot initialize HTTPS"; return; }
     QByteArray url=request.url.toUtf8(), data=request.body.toUtf8(), ca=caFile.toUtf8();
     struct curl_slist *headers=0;
+    QUrl requestUrl(request.url);
+    bool photo=TeamsRequestPolicy::route(requestUrl.host().toStdString(),requestUrl.encodedPath().constData(),request.method.toStdString())==TeamsRequestPolicy::Photo;
+    if(photo) {
+        QString bearer=request.headers.value("Authorization").toString();
+        if(bearer.startsWith("Bearer ")) {
+            QByteArray cookie="Cookie: authtoken=Bearer%3D"+QUrl::toPercentEncoding(bearer.mid(7))+"%26Origin%3Dhttps%3A%2F%2Fteams.microsoft.com";
+            headers=curl_slist_append(headers,cookie.constData());
+            headers=curl_slist_append(headers,"Referer: https://teams.microsoft.com/");
+        }
+    }
     for (QVariantMap::const_iterator i=request.headers.constBegin();i!=request.headers.constEnd();++i)
         headers=curl_slist_append(headers,(i.key()+": "+i.value().toString()).toUtf8().constData());
     headers=curl_slist_append(headers,"Accept-Encoding: identity");
@@ -68,7 +92,7 @@ void TeamsWorker::run() {
     char errorBuffer[CURL_ERROR_SIZE]={0};
     curl_easy_setopt(curl,CURLOPT_URL,url.constData());
     curl_easy_setopt(curl,CURLOPT_HTTPHEADER,headers);
-    curl_easy_setopt(curl,CURLOPT_USERAGENT,"Teams10/1.0.0.4 (BB10 native)");
+    curl_easy_setopt(curl,CURLOPT_USERAGENT,"Teams10/1.1.0.5 (BB10 native)");
     curl_easy_setopt(curl,CURLOPT_NOSIGNAL,1L);
     curl_easy_setopt(curl,CURLOPT_CONNECTTIMEOUT,15L);
     curl_easy_setopt(curl,CURLOPT_TIMEOUT,40L);
@@ -96,11 +120,29 @@ void TeamsWorker::run() {
     curl_easy_getinfo(curl,CURLINFO_RESPONSE_CODE,&responseCode);
     if (code==CURLE_OK) { status=(int)responseCode; body=QString::fromUtf8(transfer.body.data(),(int)transfer.body.size()); }
     else error=QString::fromLatin1(errorBuffer[0] ? errorBuffer : curl_easy_strerror(code));
+    if(photo && code==CURLE_OK && responseCode==200) {
+        QByteArray bytes(transfer.body.data(),transfer.body.size());QBuffer buffer(&bytes);buffer.open(QIODevice::ReadOnly);QImageReader reader(&buffer);
+        QSize size=reader.size();
+        if(size.width()<1||size.height()<1||size.width()>2048||size.height()>2048) {status=0;body="";error="Invalid avatar size";}
+        else {
+            QImage input=reader.read();
+            if(input.isNull()){status=0;body="";error="Invalid avatar image";}
+            else {
+                QString dir=QDir::homePath()+"/avatars";QDir().mkpath(dir);
+                QString file=dir+"/"+QString::fromLatin1(QCryptographicHash::hash(url,QCryptographicHash::Sha1).toHex())+".png";
+                QImage out(128,128,QImage::Format_ARGB32_Premultiplied);out.fill(0);QPainter painter(&out);painter.setRenderHint(QPainter::Antialiasing);QPainterPath circle;circle.addEllipse(0,0,128,128);painter.setClipPath(circle);QImage scaled=input.scaled(128,128,Qt::KeepAspectRatioByExpanding,Qt::SmoothTransformation);painter.drawImage((128-scaled.width())/2,(128-scaled.height())/2,scaled);painter.end();
+                if(out.save(file,"PNG")) {::chmod(file.toUtf8().constData(),0600);body="{\"avatar\":\""+QUrl::fromLocalFile(file).toString()+"\"}";}else {status=0;body="";error="Avatar cache unavailable";}
+            }
+        }
+    }
     responseHeaders=transfer.headers;
     curl_slist_free_all(headers); curl_easy_cleanup(curl);
 }
 TeamsNative::TeamsNative(QObject *parent):QObject(parent),m_worker(0),m_db(0),m_settings("BB10Toolkit","Teams10") {
     curl_global_init(CURL_GLOBAL_DEFAULT);
+    QTimer *pollTimer=new QTimer(this);connect(pollTimer,SIGNAL(timeout()),this,SIGNAL(pollTick()));pollTimer->start(30000);
+    m_invoke=new bb::system::InvokeManager(this);
+    connect(m_invoke,SIGNAL(invoked(const bb::system::InvokeRequest&)),this,SLOT(invoked(const bb::system::InvokeRequest&)));
     m_ca=QDir::currentPath()+"/app/native/assets/certs/cacert.pem";
     QString path=QDir::homePath()+"/teams10-cache.sqlite";
     if (sqlite3_open(path.toUtf8().constData(),&m_db)!=SQLITE_OK) {
@@ -117,9 +159,16 @@ TeamsNative::~TeamsNative() {
 void TeamsNative::request(int id,const QString &method,const QString &url,const QString &body,const QVariantMap &headers) {
     recordEvent("request-queued");
     TeamsRequest r; r.id=id; r.method=method; r.url=url; r.body=body; r.headers=headers;
-    // Actual validation runs asynchronously so callers have installed their callbacks first.
-    if (m_pending.size()<24) m_pending.append(r);
-    else { r.url="blocked://queue-full"; m_pending.append(r); }
+    // Keep history/auth/send responsive when avatar downloads are queued.
+    QUrl destination(r.url);
+    TeamsRequestPolicy::Service type=TeamsRequestPolicy::route(destination.host().toStdString(),destination.encodedPath().constData(),r.method.toStdString());
+    if(m_pending.size()>=64){emit completed(id,0,QString(),"Request queue full; try refresh",QVariantMap());return;}
+    int position=m_pending.size();
+    if(type!=TeamsRequestPolicy::Photo)for(int i=0;i<m_pending.size();i++){
+        QUrl u(m_pending[i].url);TeamsRequestPolicy::Service queued=TeamsRequestPolicy::route(u.host().toStdString(),u.encodedPath().constData(),m_pending[i].method.toStdString());
+        if(queued==TeamsRequestPolicy::Photo||(queued==TeamsRequestPolicy::Directory&&type!=TeamsRequestPolicy::Directory)){position=i;break;}
+    }
+    m_pending.insert(position,r);
     startNext();
 }
 void TeamsNative::startNext() {
@@ -173,19 +222,76 @@ bool TeamsNative::clearCache() {
     sqlite3_exec(m_db,"VACUUM;",0,0,0);return true;
 }
 QString TeamsNative::diagnostic() const {
+    QSettings settings("BB10Toolkit","Teams10");
     const curl_version_info_data *info=curl_version_info(CURLVERSION_NOW);
-    return QString("HTTPS %1 / %2 | CA %3 | Cache %4").arg(QString::fromLatin1(info->version)).arg(QString::fromLatin1(info->ssl_version ? info->ssl_version : "no TLS")).arg(QFileInfo(m_ca).exists()?"OK":"missing").arg(m_db?"OK":"unavailable");
+    return QString("HTTPS %1 / %2 | CA %3 | Cache %4 | "+m_hub.status()+" | Session: "+QString(QFileInfo(QDir::homePath()+"/teams10-session.enc").exists()?"saved":"none")+" | Service: "+settings.value("serviceStatus","not started").toString()+" @ "+settings.value("serviceHeartbeat").toString()).arg(QString::fromLatin1(info->version)).arg(QString::fromLatin1(info->ssl_version ? info->ssl_version : "no TLS")).arg(QFileInfo(m_ca).exists()?"OK":"missing").arg(m_db?"OK":"unavailable");
 }
 
 void TeamsNative::recordEvent(const QString &event) const {
     const QStringList allowed=QStringList()<<"controller-start"<<"controller-ready"<<"controller-error"<<"login-tapped"<<"login-error"<<"request-queued"<<"http-response"<<"transport-error";
     if(!allowed.contains(event))return;
     QFile file("data/teams10_startup.log");
-    if(file.open(QIODevice::WriteOnly|QIODevice::Append))file.write(("Teams10 1.0.0.4: "+event+"\n").toUtf8());
+    if(file.open(QIODevice::WriteOnly|(file.size()>256*1024?QIODevice::Truncate:QIODevice::Append)))file.write(("Teams10 1.1.0.5: "+event+"\n").toUtf8());
 }
 QString TeamsNative::startupLog() const {
     QFile file("data/teams10_startup.log");
     if(!file.open(QIODevice::ReadOnly))return "Chưa có log startup.";
     if(file.size()>12000)file.seek(file.size()-12000);
     return QString::fromUtf8(file.readAll());
+}
+
+QString TeamsNative::loadSession(){return m_session.load();}
+bool TeamsNative::saveSession(const QString &json){return m_session.save(json);}
+bool TeamsNative::clearSession(){bool ok=m_session.clear();if(ok){m_hub.clear();QDir dir(QDir::homePath()+"/avatars");foreach(QString f,dir.entryList(QDir::Files))dir.remove(f);}return ok;}
+void TeamsNative::releaseSession(){m_session.release();}
+QString TeamsNative::pendingChat() const{return m_pendingChat;}
+void TeamsNative::clearPendingChat(){m_pendingChat.clear();}
+void TeamsNative::invoked(const bb::system::InvokeRequest &request){
+ if(request.mimeType()!="application/vnd.teams10.chat")return;
+ bb::data::JsonDataAccess json;QVariantMap data=json.loadFromBuffer(request.data()).toMap();
+ QString id=data.value("attributes").toMap().value("sourceId").toString();
+ if(id.isEmpty())id=QString::fromUtf8(request.data());
+ if(id.size()>2048||(!id.startsWith("19:")&&!id.startsWith("8:")&&id!="48:notes"))return;
+ m_pendingChat=id;emit openConversation();
+}
+void TeamsNative::observeChat(const QString &account,const QVariantMap &chat,bool visible){
+ QString id=chat.value("id").toString(),stamp=chat.value("stamp").toString();qint64 time=chat.value("timestamp").toLongLong();
+ if(account.isEmpty()||id.isEmpty()||stamp.isEmpty()||time<=0)return;
+ QString resource="observed:"+id,old=loadCache(account,resource);int newline=old.indexOf('\n');
+ qint64 previous=newline>=0?old.left(newline).toLongLong():0;
+ if(previous>time)return;
+ bool shouldNotify=NotificationCursor::notify(previous,old.mid(newline+1).toStdString(),time,stamp.toStdString(),chat.value("own").toBool(),visible);
+ if(shouldNotify||visible){
+  QString title=chat.value("title").toString(),preview=chat.value("preview").toString();
+  m_hub.post(id,title.left(160),preview.left(500),time,!visible);
+ }
+ saveCache(account,resource,QString::number(time)+"\n"+stamp);
+}
+QString TeamsNative::avatar(const QString &name,const QString &source){
+ QString dir=QDir::homePath()+"/avatars";QDir().mkpath(dir);
+ QString key=QString::fromLatin1(QCryptographicHash::hash((name+source).toUtf8(),QCryptographicHash::Sha1).toHex());
+ QString file=dir+"/monogram-"+key+".png";
+ if(!QFileInfo(file).exists()){
+  QImage out(128,128,QImage::Format_ARGB32_Premultiplied);out.fill(0);QPainter p(&out);p.setRenderHint(QPainter::Antialiasing);
+  p.setBrush(QColor::fromHsv(key.left(4).toUInt(0,16)%360,160,205));p.setPen(Qt::NoPen);p.drawEllipse(1,1,126,126);
+  p.setPen(Qt::white);QFont f;f.setPixelSize(56);f.setBold(true);p.setFont(f);p.drawText(QRect(0,0,128,128),Qt::AlignCenter,name.trimmed().left(1).toUpper());p.end();out.save(file,"PNG");::chmod(file.toUtf8().constData(),0600);
+ }return QUrl::fromLocalFile(file).toString();
+}
+
+void TeamsNative::startBackground(){
+ m_hub.init();if(!backgroundEnabled())return;
+ bb::system::InvokeRequest req;req.setTarget("com.bb10toolkit.Teams10.service");req.setAction("com.bb10toolkit.Teams10.RUN");req.setMimeType("application/vnd.teams10.background");req.setUri(QUrl("headless:teams10"));bb::system::InvokeTargetReply *reply=m_invoke->invoke(req);if(reply)connect(reply,SIGNAL(finished()),this,SLOT(backgroundStarted()));
+}
+bool TeamsNative::backgroundEnabled() const{return m_settings.value("backgroundEnabled",true).toBool();}
+void TeamsNative::setBackgroundEnabled(bool enabled){m_settings.setValue("backgroundEnabled",enabled);m_settings.sync();if(enabled)startBackground();}
+
+QString TeamsNative::cachedAvatar(const QString &url) const{
+ QString file=QDir::homePath()+"/avatars/"+QString::fromLatin1(QCryptographicHash::hash(url.toUtf8(),QCryptographicHash::Sha1).toHex())+".png";
+ return QFileInfo(file).exists()?QUrl::fromLocalFile(file).toString():QString();
+}
+
+void TeamsNative::backgroundStarted(){
+ bb::system::InvokeTargetReply *reply=qobject_cast<bb::system::InvokeTargetReply*>(sender());if(!reply)return;
+ if(reply->error()!=bb::system::InvokeReplyError::None){m_settings.setValue("serviceStatus",QString("start error %1").arg((int)reply->error()));m_settings.sync();}
+ reply->deleteLater();
 }

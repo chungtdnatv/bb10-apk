@@ -1,76 +1,81 @@
-# Cài Teams10 native 1.0.0.4
+# Teams10 1.1.0.5 — phiên đăng nhập, avatar và Hub
 
-[Tải BAR Teams10 1.0.0.4](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.0.0.4-native-client-unsigned.bar).
+[Tải BAR 1.1.0.5](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.0.5-native-hub-unsigned.bar).
 
-Bản này là client native độc lập cho Microsoft 365 công ty/trường học, có đăng
-nhập bằng mã, đọc và gửi văn bản trong chat có sẵn. Không có gọi điện. Không dùng
-Teams Web trên trình duyệt Passport. Không cần bạn xin Client ID/App Registration
-riêng như bản 1.0.0.1.
+Cài đè lên Teams10 hiện tại, không cần xóa app. Package riêng
+`com.bb10toolkit.Teams10`, không thay Zalo/Telega. Bản này có **hai entry point**:
+Teams10 và Teams10Service, nên công cụ cài phải giữ nguyên BAR.
 
-## Cài và đăng nhập
+## Đăng nhập và lưu phiên
 
-1. Tải BAR bằng liên kết trên và cài bằng cách đã dùng với BAR Zalo chạy được.
-   Package riêng `com.bb10toolkit.Teams10`, không thay Zalo.
-2. Mở Teams10; để trống **Domain/Tenant**. Chỉ điền domain/Tenant công ty nếu cần.
-3. Bấm **Đăng nhập Microsoft**, đợi mã ngắn xuất hiện.
-4. Trên điện thoại/PC khác, mở https://microsoft.com/devicelogin, nhập đúng mã
-   đang hiển thị trong app và đăng nhập tài khoản công ty/trường học.
-5. Kiểm tra tài khoản và xác nhận yêu cầu. Luồng tương thích dùng Client ID công
-   khai của Teams giống purple-teams; trang Microsoft có thể hiện Microsoft Teams.
-   Teams10 vẫn là app bên thứ ba, không phải ứng dụng do Microsoft phát hành.
-6. Trở lại Passport, chờ xác nhận dịch vụ chat; chọn hội thoại để đọc/gửi văn bản.
+1. Kiểm tra đầu màn hình ghi **1.1.0.5**. Lần đầu nâng cấp từ 1.0.0.4 cần đăng
+   nhập thêm một lần vì bản cũ chỉ giữ token trong RAM, không có phiên để khôi phục.
+2. Để trống Domain/Tenant, bấm **Đăng nhập Microsoft**.
+3. Trên điện thoại/PC khác, mở https://microsoft.com/devicelogin, nhập mã trong
+   app và xác nhận tài khoản công ty/trường học.
+4. Đợi hiện hội thoại. Đóng hẳn Teams10 rồi mở lại: app sẽ làm mới phiên đã lưu,
+   không cần nhập mã mới nếu Microsoft vẫn cho phép.
+5. Nếu mất mạng, kết nối lại rồi bấm **Khôi phục phiên đã lưu**. Nếu hiện thông
+   báo đợi service bàn giao phiên, chờ yêu cầu mạng nền đang chạy kết thúc.
 
-Không nhập mật khẩu vào Teams10 hoặc gửi mật khẩu/token cho người khác. Token chỉ
-ở RAM; đóng hẳn app rồi mở lại cần đăng nhập lại. Cấu hình domain được lưu trên máy.
+Đây là client không chính thức dùng Client ID public của Teams giống purple-teams;
+trang Microsoft có thể ghi Microsoft Teams. Không cần xin App Registration riêng.
+Microsoft/công ty vẫn có thể thu hồi phiên, chặn client hoặc yêu cầu xác nhận lại.
+App không vượt yêu cầu thiết bị/ứng dụng được quản lý.
 
-## Đọc và gửi
+Phiên làm mới được mã hóa trong sandbox bằng khóa cục bộ riêng; access token ở
+RAM. Đây không phải khóa bảo mật phần cứng. Không chia sẻ file phiên, file khóa,
+password, mã đăng nhập hoặc token. **Đăng xuất** xóa phiên đã lưu và cache trên máy.
 
-- Chat riêng, nhóm và meeting chat có sẵn; chưa có channels hoặc tạo chat mới.
-- Bấm **Tin cũ hơn** để đọc lịch sử; tối đa 500 tin được giữ trong mỗi chat/cache.
-- HTML được đổi thành văn bản; ảnh/tệp chỉ có thông báo, chưa tải hoặc gửi media.
-- App làm mới khi foreground mỗi 30 giây hoặc bấm **Làm mới**.
-- Nếu gửi timeout, làm mới lịch sử trước khi gửi lại để tránh trùng tin. Máy chủ
-  nhận yêu cầu gửi chưa đồng nghĩa người nhận đã đọc hoặc tin đã được giao.
-- **Đăng xuất** xóa token RAM và cache trên máy, không xóa dữ liệu trên Teams.
+## Tên, avatar, nội dung và giao diện
 
-## Khi gặp lỗi
+- Tra cứu thêm hồ sơ tổ chức, liên kết ngoài và consumer, nhận diện MRI tài khoản
+  cá nhân; cập nhật lại tiêu đề và tên người gửi. Có thể nhắn với liên hệ cá nhân
+  nếu tenant cho phép, nhưng chưa hỗ trợ đăng nhập bằng tài khoản Teams cá nhân.
+- Avatar tải bằng xác thực Teams, bo tròn và cache; nếu không được trả ảnh thì
+  dùng avatar chữ. Một số hồ sơ bên ngoài vẫn có thể không được phép đọc.
+- Giải mã HTML5 và emoji. Không tự giải mã mọi chuỗi `%...` vì sẽ làm hỏng URL
+  hoặc chữ người gửi; `%#c` đơn lẻ không đủ để xác định một dạng mã hóa khác.
+- UI nền tối xanh, avatar tròn, bong bóng tin, bottom bar ngắn với **Tin nhắn /
+  Danh bạ / Profile**. Danh bạ lấy từ chat riêng đã có; chưa tạo chat mới.
+- Lịch sử tối đa 500 tin/chat; gửi văn bản. Nếu gửi timeout, làm mới trước khi
+  gửi lại để tránh trùng; app không tự lặp lại yêu cầu gửi không chắc kết quả.
 
-- `unauthorized_client`, `invalid_grant`, 401/403 hoặc thông báo tenant từ chối:
-  Microsoft/công ty có thể chặn public client hoặc device-code. App hiển thị lỗi
-  và dừng, không đổi danh tính hay vượt yêu cầu thiết bị/ứng dụng được quản lý.
-  Truy cập Teams trên thiết bị cá nhân khác không đảm bảo luồng này được phép.
-- HTTP429: chờ thời gian được yêu cầu rồi thử lại; không bấm gửi liên tục.
-- HTTP/JSON chưa hỗ trợ: API Teams nội bộ có thể khác theo tenant/vùng hoặc thay
-  đổi. Gửi mã lỗi và nội dung thông báo đã che thông tin cá nhân để kiểm tra.
-- TLS/chứng chỉ: bật ngày giờ tự động trên Passport và kiểm tra Internet. App có
-  CA bundle riêng, chỉ cho TLS1.2, không có tùy chọn tắt xác minh chứng chỉ.
-- Không mở được: lấy `data/teams10_startup.log` trong sandbox Teams10 bằng công
-  cụ truy cập sandbox/development đang dùng. Đây không phải thư mục Documents.
-  Log chỉ chứa mốc startup; không ghi token hay tin nhắn.
+## Hub và nhận tin khi đóng app
 
-## Sửa lỗi khởi tạo 1.0.0.4
+1. Trong **Profile**, bật **Nhận tin nền và Hub**.
+2. Cho phép thông báo/chạy nền trong các mục quyền ứng dụng BB10 nếu được hỏi.
+3. Đóng cửa sổ Teams10, gửi một tin mới vào cuộc hội thoại đã có từ thiết bị khác.
+4. Chờ khoảng 30–60 giây khi mạng ổn định; kiểm tra Hub và chạm thông báo để mở
+   hội thoại. Tin đầu tiên dùng làm mốc nên không báo lại toàn bộ lịch sử cũ.
+5. Mở **Profile → Chẩn đoán phiên và service** để xem heartbeat mới nhất.
 
-Log `controller-start` → `controller-error` kèm “Bộ điều khiển đăng nhập chưa sẵn
-sàng” xảy ra trước yêu cầu mạng. Bản mới giữ bộ điều khiển có hàm trong JavaScript,
-tránh chuyển qua thuộc tính QML variant có thể làm mất hàm trên engine cũ. Trang
-chat cũng dùng cầu nối QML để đọc/gửi thay vì giữ đối tượng JavaScript trong variant.
-Cài đè BAR mới và kiểm tra đầu màn hình ghi **Teams10 1.0.0.4**. Cần xác nhận lại
-trên Passport; HTTPS/CA OK trong log cũ chưa chứng minh đăng nhập mạng đã chạy.
+Service native chạy riêng, kiểm tra khoảng mỗi 30 giây; chưa phải push tức thì.
+UI và service dùng khóa bàn giao để không cùng đổi refresh token. Khi thu nhỏ,
+app dùng QTimer native để làm mới; khi đóng UI, service tiếp tục kiểm tra tóm tắt
+mới nhất của các chat. Service không tải cả lịch sử hoặc phát lại mọi tin trung gian.
 
-## Nếu bấm đăng nhập chưa có mã
+Hub riêng cần quyền hạn chế `_sys_access_pim_unified`. Chạy headless liên tục cần
+`_sys_run_headless` và `_sys_headless_nostop`. Khai báo trong BAR không tự cấp các
+quyền này: thiết bị/cách cài phải cho phép. Nếu UDS không dùng được, app thử thông
+báo Hub thông thường; nếu quyền headless bị từ chối thì không thể nhận khi đóng
+bằng fallback đó. Chưa xác minh các quyền này trên Passport của bạn.
 
-Bản 1.0.0.4 hiển thị phiên bản ngay ở đầu màn hình. Đợi tối đa khoảng 40 giây
-cho yêu cầu HTTPS trả về. Nếu vẫn lỗi, bấm **Chẩn đoán đăng nhập**; chọn/sao chép
-nội dung hoặc chụp màn hình này để gửi lại. Không cần tìm file trong sandbox.
-Các mốc `login-tapped`, `controller-ready`, `request-queued`, `http-response`
-hoặc `transport-error` giúp phân biệt lỗi khởi tạo, nút bấm và kết nối. Log không
-chứa mã đăng nhập/token/tin nhắn; dòng trạng thái có thể chứa tên tenant hoặc
-thông báo Microsoft, hãy che thông tin cá nhân trước khi gửi.
+## Chẩn đoán
 
-## Trạng thái bản thử
+- `Session: saved`: đã có file phiên; `none`: chưa lưu được hoặc đã đăng xuất.
+- `Service: poll OK @ ...`: lần kiểm tra nền gần nhất hoàn tất. Khi UI mở, trạng
+  thái `UI owns session` là bình thường; service đang nhường cho app.
+- `start error ...` hoặc không có heartbeat: yêu cầu mở service có thể bị hệ thống
+  từ chối. Gửi ảnh chẩn đoán để kiểm tra, không gửi file phiên/khóa.
+- `Hub account OK`: đăng ký UDS thành công. `Hub UDS unavailable`: đang dùng thông
+  báo thường; cần kiểm tra quyền Hub nếu muốn có tài khoản riêng.
+- `sign in again`: phiên bị thu hồi hoặc yêu cầu xác nhận lại. `network retry`:
+  service đợi thử lại. HTTP429 phải chờ Microsoft cho phép.
+- TLS: bật ngày giờ tự động, kiểm tra Internet; không tắt xác minh chứng chỉ.
+- Lỗi mở app: file sandbox `data/teams10_startup.log`; không nằm trong Documents.
+  Chẩn đoán trong app cho phép chọn/sao chép log mốc, không ghi token/tin nhắn.
 
-Đã kiểm tra build ARMv7, SDK imports/entry, BAR, QML và các test mô phỏng. Chưa
-thử đăng nhập, đọc/gửi thật bằng tài khoản công ty hoặc chạy trên Passport.
-Đây là BAR thử unsigned như các bản trong repo, không phải bản được Microsoft
-chứng nhận. Không đảm bảo tenant của bạn sẽ chấp nhận client không chính thức.
-Xem [mã nguồn và phạm vi](../apps/Teams10/README.md).
+Đăng nhập bản 1.0.0.4 đã được người dùng xác nhận. Bản 1.1.0.5 đã kiểm tra build,
+BAR, SDK, QML và test mô phỏng/C++ trong cloud; lưu phiên, ảnh và Hub/service mới
+vẫn cần xác nhận trên thiết bị thật. Không có gọi điện.
