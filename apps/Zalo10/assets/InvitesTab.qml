@@ -73,7 +73,7 @@ NavigationPane {
         ]
 
         content: Container {
-            background: Color.White
+            background: Color.create("#142936")
             horizontalAlignment: HorizontalAlignment.Fill
             verticalAlignment: VerticalAlignment.Fill
             layout: StackLayout { orientation: LayoutOrientation.TopToBottom }
@@ -140,6 +140,7 @@ NavigationPane {
                                     Label {
                                         text: ListItemData.name || "Unknown User"
                                         textStyle {
+                                            color: Color.create("#f2f7fa")
                                             base: SystemDefaults.TextStyles.PrimaryText
                                             fontWeight: FontWeight.Bold
                                         }
@@ -150,7 +151,7 @@ NavigationPane {
                                         text: ListItemData.msg || "Wants to be your friend"
                                         textStyle {
                                             base: SystemDefaults.TextStyles.SubtitleText
-                                            color: Color.DarkGray
+                                            color: Color.create("#a4c9da")
                                         }
                                         multiline: false
                                         bottomMargin: ui.du(1)
@@ -198,6 +199,7 @@ NavigationPane {
 
             Label {
                 id: invEmpty
+                textStyle { color: Color.create("#a4c9da") }
                 text: "No friend requests"
                 visible: false
                 horizontalAlignment: HorizontalAlignment.Center

@@ -105,7 +105,7 @@ def patch_assets(original,style_root):
             }
         }'''
         wrapper=f'''content: Container {{
-            background: Color.White
+            background: Color.create("#142936")
             horizontalAlignment: HorizontalAlignment.Fill
             verticalAlignment: VerticalAlignment.Fill
             layout: StackLayout {{ orientation: LayoutOrientation.TopToBottom }}
@@ -151,7 +151,7 @@ def patch_assets(original,style_root):
             text=replace_block(text,'CustomListItem {',f'''CustomListItem {{
                             id: {row}
                             dividerVisible: false
-                            preferredHeight: ui.du(11)
+                            preferredHeight: ui.du(13)
                             ModernConversation {{
                                 displayName: ListItemData.name || ListItemData.displayName || "Không rõ tên"
                                 avatarSource: ListItemData.localAvatar || ""
@@ -167,7 +167,7 @@ def patch_assets(original,style_root):
             text=replace_block(text,'layout: GridListLayout {','layout: StackListLayout {}')
             a=text.index('                            ImageView {',text.index('id: gridCell'))
             b=text.index('                            onTouch:',a)
-            text=text[:a]+'''                            preferredHeight: ui.du(11)
+            text=text[:a]+'''                            preferredHeight: ui.du(13)
                             ModernConversation {
                                 displayName: ListItemData.name || ListItemData.displayName || "Không rõ tên"
                                 avatarSource: ListItemData.localAvatar || ""
@@ -182,6 +182,14 @@ def patch_assets(original,style_root):
             'invitesNav': 'inviteModel.clear(); invitesLoading.visible=true; zService.fetchInvites();'}[nav]
         text=text.replace('    property variant appShell: null','    property variant appShell: null\n    function raiseBottomBar() { if ('+nav+'.count() === 1) bottomNavigation.reveal(); }\n    function refreshList() { '+refresh+' }',1)
         text=text.replace('"No friends found"','"Chưa có cuộc trò chuyện"').replace('"No contacts found"','"Không tìm thấy liên hệ"')
+        if filename=='InvitesTab.qml':
+            text=text.replace('base: SystemDefaults.TextStyles.PrimaryText',
+                'color: Color.create("#f2f7fa")\n                                            base: SystemDefaults.TextStyles.PrimaryText')
+            text=text.replace('color: Color.DarkGray','color: Color.create("#a4c9da")')
+        for empty_id in ('chatsEmpty','contactsEmpty','invEmpty'):
+            marker='id: '+empty_id
+            if marker in text:
+                text=once(text,marker,marker+'\n                textStyle { color: Color.create("#a4c9da") }')
         if filename=='ContactsTab.qml': text=contact_picker(text)
         if filename=='ChatsTab.qml': text=chat_contact_seed(text)
         changed['native/assets/'+filename]=text.encode('utf-8')
@@ -275,7 +283,7 @@ def write_package(original,updates,infos,output,version):
     return report,data
 
 
-def build(input_bar,output,build_id=6):
+def build(input_bar,output,build_id=7):
     input_bar=Path(input_bar); output=Path(output)
     if input_bar.resolve()==output.resolve(): raise ValueError('Output must not overwrite the original BAR')
     if not 1<=build_id<=65535: raise ValueError('Invalid build id')

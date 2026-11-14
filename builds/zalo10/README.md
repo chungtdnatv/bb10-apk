@@ -1,6 +1,12 @@
 # Zalo10 test builds
 
-**Current update to test: `Zalo10-1.5.0.6-ui-only-original-engine-unsigned.bar`.**
+**Current update to test: `Zalo10-1.5.0.7-ui-only-original-engine-unsigned.bar`.**
+Dark navy background, cyan icons, larger conversation rows/avatars/type, larger
+rounded bottom bar with a visible border, following the latest reference photo.
+This retains the original native binaries and the features of 1.5.0.6. Device
+validation of 1.5.0.7 is pending.
+
+**Previous feature update: `Zalo10-1.5.0.6-ui-only-original-engine-unsigned.bar`.**
 Adds direct chat from the + recipient picker, a menu shortcut to existing phone
 message sync with confirmation/progress, and a floating/rising bottom navigation.
 Both original binaries and ChatView/login remain unchanged. Calling is not yet

@@ -106,7 +106,7 @@ NavigationPane {
         ]
 
         content: Container {
-            background: Color.White
+            background: Color.create("#142936")
             horizontalAlignment: HorizontalAlignment.Fill
             verticalAlignment: VerticalAlignment.Fill
             layout: StackLayout { orientation: LayoutOrientation.TopToBottom }
@@ -154,7 +154,7 @@ NavigationPane {
                             verticalAlignment:   VerticalAlignment.Fill
                             layout: DockLayout {}
 
-                            preferredHeight: ui.du(11)
+                            preferredHeight: ui.du(13)
                             ModernConversation {
                                 displayName: ListItemData.name || ListItemData.displayName || "Không rõ tên"
                                 avatarSource: ListItemData.localAvatar || ""
@@ -202,6 +202,7 @@ NavigationPane {
 
             Label {
                 id: contactsEmpty
+                textStyle { color: Color.create("#a4c9da") }
                 text: "Không tìm thấy liên hệ"
                 visible: false
                 horizontalAlignment: HorizontalAlignment.Center

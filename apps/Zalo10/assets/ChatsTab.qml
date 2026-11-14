@@ -91,7 +91,7 @@ NavigationPane {
         ]
 
         content: Container {
-            background: Color.White
+            background: Color.create("#142936")
             horizontalAlignment: HorizontalAlignment.Fill
             verticalAlignment: VerticalAlignment.Fill
             layout: StackLayout { orientation: LayoutOrientation.TopToBottom }
@@ -171,6 +171,7 @@ NavigationPane {
 
             Label {
                 id: chatsEmpty
+                textStyle { color: Color.create("#a4c9da") }
                 text: "Chưa có cuộc trò chuyện"
                 visible: false
                 horizontalAlignment: HorizontalAlignment.Center

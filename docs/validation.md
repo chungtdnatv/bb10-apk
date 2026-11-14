@@ -99,3 +99,16 @@ sequence rollover and tamper rejection. No authenticated call or Swift media tes
 was run. Calling is **not integrated** in 1.5.0.6; see the reference directory for
 specific Node/Apple dependencies requiring a BB10 port. Recipient flow, actual
 phone sync and the new animation still require device testing.
+
+## 1.5.0.7: larger dark home UI
+
+Home screens now use navy #142936, white titles and pale blue previews/timestamps,
+with cyan navigation icons. Rows grow from 11du to 13du, avatars from 8.8du to
+10du, bottom navigation from 11.8du to 14du, and search from 6.8du to 7.8du.
+A generated rounded panel adds a contrasting border; the avatar corner mask
+matches the new background. Geometric assets can be reproduced with
+`apps/Zalo10/scripts/generate-dark-assets.py` (Pillow, generation only).
+The compatibility BAR passes validation, all 31 toolkit/flow tests and existing
+JS checks pass, and generated QML passes syntax lint. Both original binary hashes
+are retained. No BB10 runtime or device visual check was available; the original
+chat, login and settings behavior is retained from the prior compatibility build.

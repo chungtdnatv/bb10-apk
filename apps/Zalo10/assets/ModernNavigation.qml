@@ -4,8 +4,8 @@ Container {
     id: navigation
     property int selectedIndex: 0
     signal sectionSelected(int index)
-    preferredHeight: ui.du(11.8)
-    minHeight: ui.du(11.8)
+    preferredHeight: ui.du(14)
+    minHeight: ui.du(14)
     horizontalAlignment: HorizontalAlignment.Fill
     layout: DockLayout {}
     leftPadding: ui.du(2.4)
@@ -46,7 +46,7 @@ Container {
             bottomPadding: ui.du(1.5)
             layout: DockLayout {}
             ImageView {
-                imageSource: "asset:///images/modern/navigation.png"
+                imageSource: "asset:///images/modern/dark-navigation.png"
                 horizontalAlignment: HorizontalAlignment.Fill
                 verticalAlignment: VerticalAlignment.Fill
                 scalingMethod: ScalingMethod.Fill

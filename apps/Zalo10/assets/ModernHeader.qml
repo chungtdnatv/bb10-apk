@@ -4,13 +4,13 @@ Container {
     id: header
     signal menuRequested()
     property string heading: "Zalo10"
-    preferredHeight: ui.du(8.5)
-    minHeight: ui.du(8.5)
+    preferredHeight: ui.du(9.5)
+    minHeight: ui.du(9.5)
     horizontalAlignment: HorizontalAlignment.Fill
     layout: DockLayout {}
     leftPadding: ui.du(1.8)
     rightPadding: ui.du(1.5)
-    background: Color.White
+    background: Color.create("#142936")
     Container {
         verticalAlignment: VerticalAlignment.Center
         layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
@@ -24,7 +24,7 @@ Container {
             text: header.heading
             leftMargin: ui.du(1.4)
             verticalAlignment: VerticalAlignment.Center
-            textStyle { color: Color.create("#0088cf"); fontSize: FontSize.XLarge; fontWeight: FontWeight.Bold }
+            textStyle { color: Color.create("#00c7ef"); fontSize: FontSize.XLarge; fontWeight: FontWeight.Bold }
         }
     }
     ImageButton {
@@ -32,8 +32,8 @@ Container {
         verticalAlignment: VerticalAlignment.Center
         preferredWidth: ui.du(6)
         preferredHeight: ui.du(6)
-        defaultImageSource: "asset:///images/modern/more.png"
-        pressedImageSource: "asset:///images/modern/more-active.png"
+        defaultImageSource: "asset:///images/modern/dark-more.png"
+        pressedImageSource: "asset:///images/modern/dark-more-active.png"
         accessibility.name: "Mở menu"
         onClicked: header.menuRequested()
     }

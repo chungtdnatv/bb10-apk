@@ -8,7 +8,7 @@ from that exact BAR and changes the home-screen QML/assets and the existing mess
 python3 bb10.py build-zalo-ui /path/to/Zalo1.5.bar
 ```
 
-Output: `dist/Zalo10-1.5.0.6-ui-only-original-engine-unsigned.bar` and a JSON report.
+Output: `dist/Zalo10-1.5.0.7-ui-only-original-engine-unsigned.bar` and a JSON report.
 No Docker, SDK or compiler is required for this compatibility path. It is not a
 native build from source; the ordinary `build Zalo10` workflow remains separate.
 
@@ -43,3 +43,6 @@ This engine does **not** contain the POSIX phase logger added to native diagnost
 1.5.0.3. A shared `zalo10_startup.log` may therefore belong to an older run of 1.5.0.3.
 For these original-engine builds, use menu → Settings → Export Log, or the original sandbox file
 `data/zalo10_runtime.log`. Do not delete the sandbox to install the UI update.
+
+Version 1.5.0.7 adds a dark navy/cyan home theme, larger rows/avatars/text and
+a larger rounded bottom bar with a visible border. Native code remains unchanged.

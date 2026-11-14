@@ -10,7 +10,7 @@ Sheet {
             dismissAction: ActionItem { title: "Đóng"; onTriggered: menu.close() }
         }
         Container {
-            background: Color.White
+            background: Color.create("#142936")
             horizontalAlignment: HorizontalAlignment.Fill
             verticalAlignment: VerticalAlignment.Fill
             topPadding: ui.du(3)

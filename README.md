@@ -65,6 +65,11 @@ Người dùng đã xác nhận **BAR 1.5 gốc mở được trên cùng Passpo
 Cả UI engine và headless giữ nguyên SHA-256 của BAR gốc; chỉ đổi QML/ảnh và tắt
 prewarm tự tạo/hủy ChatView lúc startup. Bản 1.5.0.4 đã mở và chạy tốt trên Passport.
 
+Bản giao diện tối [1.5.0.7](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.7-ui-only-original-engine-unsigned.bar)
+đổi nền xanh đen, chữ trắng/xanh nhạt, tăng kích thước avatar/hàng hội thoại/chữ,
+thêm viền bo tròn và tăng kích thước bottom bar theo ảnh tham khảo mới.
+Giữ engine gốc và các chức năng của 1.5.0.6; chưa test bản tối trên thiết bị.
+
 Bản cập nhật [1.5.0.6](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.6-ui-only-original-engine-unsigned.bar)
 thêm chọn bạn từ dấu + để mở chat trực tiếp, menu đồng bộ tin nhắn từ điện thoại
 và bóng đổ/hiệu ứng trượt lên cho bottom bar. Bản này giữ nguyên hai binary gốc,

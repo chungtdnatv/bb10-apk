@@ -8,11 +8,11 @@ Container {
     function focusSearch() { input.requestFocus(); }
     layout: DockLayout {}
     horizontalAlignment: HorizontalAlignment.Fill
-    preferredHeight: ui.du(6.8)
-    minHeight: ui.du(6.8)
+    preferredHeight: ui.du(7.8)
+    minHeight: ui.du(7.8)
     bottomMargin: ui.du(1)
     ImageView {
-        imageSource: "asset:///images/modern/search-bg.png"
+        imageSource: "asset:///images/modern/dark-search-bg.png"
         horizontalAlignment: HorizontalAlignment.Fill
         verticalAlignment: VerticalAlignment.Fill
         scalingMethod: ScalingMethod.Fill
@@ -24,7 +24,7 @@ Container {
         rightPadding: ui.du(1.5)
         layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
         ImageView {
-            imageSource: "asset:///images/modern/search.png"
+            imageSource: "asset:///images/modern/dark-search.png"
             preferredWidth: ui.du(3.2)
             preferredHeight: ui.du(3.2)
             verticalAlignment: VerticalAlignment.Center
@@ -35,7 +35,7 @@ Container {
             backgroundVisible: false
             verticalAlignment: VerticalAlignment.Center
             layoutProperties: StackLayoutProperties { spaceQuota: 1 }
-            textStyle { color: Color.create("#25282c"); fontSize: FontSize.Medium }
+            textStyle { color: Color.create("#edf6fa"); fontSize: FontSize.Large }
             accessibility.name: search.placeholder
             onTextChanging: search.queryChanged(text)
             onCreationCompleted: {

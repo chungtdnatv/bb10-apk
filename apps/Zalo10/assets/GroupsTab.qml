@@ -251,7 +251,7 @@ NavigationPane {
         ]
 
         content: Container {
-            background: Color.White
+            background: Color.create("#142936")
             horizontalAlignment: HorizontalAlignment.Fill
             verticalAlignment: VerticalAlignment.Fill
             layout: StackLayout { orientation: LayoutOrientation.TopToBottom }
@@ -326,7 +326,7 @@ NavigationPane {
                 visible: false
                 horizontalAlignment: HorizontalAlignment.Center
                 verticalAlignment: VerticalAlignment.Center
-                textStyle { color: Color.create("#7a7d80") }
+                textStyle { color: Color.create("#a4c9da") }
             }
 
             ActivityIndicator {

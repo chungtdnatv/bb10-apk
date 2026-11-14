@@ -14,12 +14,12 @@ Container {
         for (var i = 0; i < displayName.length; ++i) hash = (hash + displayName.charCodeAt(i)) % 5;
         return "asset:///images/modern/avatar-" + names[hash] + ".png";
     }
-    preferredWidth: ui.du(8.8)
-    minWidth: ui.du(8.8)
-    maxWidth: ui.du(8.8)
-    preferredHeight: ui.du(8.8)
-    minHeight: ui.du(8.8)
-    maxHeight: ui.du(8.8)
+    preferredWidth: ui.du(10)
+    minWidth: ui.du(10)
+    maxWidth: ui.du(10)
+    preferredHeight: ui.du(10)
+    minHeight: ui.du(10)
+    maxHeight: ui.du(10)
     layout: DockLayout {}
     ImageView {
         imageSource: avatar.avatarSource.length ? avatar.avatarSource : avatar.colorFile()
@@ -35,7 +35,7 @@ Container {
         textStyle { color: Color.White; fontSize: FontSize.XLarge; fontWeight: FontWeight.Bold }
     }
     ImageView {
-        imageSource: "asset:///images/modern/avatar-mask.png"
+        imageSource: "asset:///images/modern/dark-avatar-mask.png"
         horizontalAlignment: HorizontalAlignment.Fill
         verticalAlignment: VerticalAlignment.Fill
         scalingMethod: ScalingMethod.Fill
