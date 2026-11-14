@@ -19,7 +19,7 @@ file(GLOB XZ_SOURCES CONFIGURE_DEPENDS src/third_party/xz/*.c)
 file(GLOB APP_SOURCES CONFIGURE_DEPENDS src/app/*.cpp)
 set(CORE_HEADERS src/core/ZaloService.hpp src/core/HubIntegration.hpp src/utils/ZaloNetworkManager.hpp)
 qt4_wrap_cpp(CORE_MOC ${CORE_HEADERS})
-qt4_wrap_cpp(UI_MOC src/applicationui.hpp src/ui/ActiveFrameCover.hpp)
+qt4_wrap_cpp(UI_MOC src/applicationui.hpp)
 qt4_wrap_cpp(SERVICE_MOC "${HEADLESS_SOURCE_DIR}/src/core/ServiceController.hpp")
 
 add_library(zalo_core STATIC ${CORE_SOURCES} ${XZ_SOURCES} ${CORE_MOC})
@@ -37,7 +37,7 @@ set(BB10_LIBS bb bbsystem bbplatform bbdevice bbpim unifieddatasourcec
 target_link_libraries(zalo_core PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/src/third_party/webp/lib/libwebpdecoder.a" ${BB10_LIBS} cpp m bps c)
 
-add_library(Zalo10 SHARED src/main.cpp src/utils/StartupTrace.c cmake/qnx-dso.c ${APP_SOURCES} src/ui/ActiveFrameCover.cpp
+add_library(Zalo10 SHARED src/main.cpp src/utils/StartupTrace.c cmake/qnx-dso.c ${APP_SOURCES}
     src/core/ZaloService_ContactPicker.cpp ${UI_MOC})
 target_sources(Zalo10 PRIVATE "$ENV{QNX_TARGET}/armle-v7/lib/crti.o" "$ENV{QNX_TARGET}/armle-v7/lib/crtn.o")
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/bar-descriptor.xml" APP_DESCRIPTOR)

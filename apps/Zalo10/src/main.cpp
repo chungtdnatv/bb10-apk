@@ -16,6 +16,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include <QSocketNotifier>
+#include <QTimer>
 
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
@@ -120,6 +121,7 @@ Q_DECL_EXPORT int main(int argc, char **argv)
     QSocketNotifier termNotifier(g_zalo10TermFd[0], QSocketNotifier::Read);
     QObject::connect(&termNotifier, SIGNAL(activated(int)), &appui, SLOT(onTermSignal(int)));
 
+    QTimer::singleShot(0, &appui, SLOT(onStartupReady()));
     zalo10_startup_stage("entering event loop");
     return Application::exec();
 }

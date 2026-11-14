@@ -1,8 +1,16 @@
 # Zalo10 test builds
 
+**Latest native test: 1.5.0.11, custom active-frame cover removed.**
+Two supplied version-9 runs log SIGSEGV after scene set and before cover ready.
+Version 11 excludes that component from startup, MOC and linked binary, adds
+first-event-loop tracing, and retains the phone-history archive. This is a targeted
+test based on the logged interval, not a proven on-device fix. Original-engine
+recovery 10 remains available. See `docs/zalo11-startup-vi.md`.
+
+
 Current recovery build: **1.5.0.10 UI-only with original native engine**.
 The user reported native **1.5.0.9 crashes immediately on launch on Passport**.
-Its exact failing phase is unknown; no version-9 startup log has been obtained.
+The later supplied log narrows its failure to the scene-set/active-cover interval.
 Do not describe native 9 as working or use it as the preferred device test.
 
 Version 10 preserves both known-working original binary hashes and exactly the
@@ -39,7 +47,7 @@ original runtime log/Settings Export Log for the UI-only build.
 Comparison to the original and SDK packager also found 16-byte test version-ID
 padding in native 1.5.0.1–3 instead of the SDK's 17-byte format. Both builders now
 use 17 bytes and the validator rejects that mistake. Do not use those old BARs as
-the current build. Native source HEAD is 1.5.0.5, still awaiting phone validation.
+the current build. Native source HEAD is 1.5.0.11, still awaiting phone validation.
 
 ## Previous native builds
 The 1.5.0.1 source build was reported to crash on launch on a BlackBerry Passport.

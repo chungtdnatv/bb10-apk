@@ -65,6 +65,7 @@ private slots:
     void onSystemLanguageChanged();
     void onManualExit();
     void onTermSignal(int fd);
+    void onStartupReady();
     void onInvoked(const bb::system::InvokeRequest &request);
     // Foreground/background tracking: avoids duplicate banner dialogs on top of the Hub sound.
     void onAppFullscreen();

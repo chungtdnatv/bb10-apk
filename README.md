@@ -82,13 +82,21 @@ Người dùng đã xác nhận **BAR 1.5 gốc mở được trên cùng Passpo
 Cả UI engine và headless giữ nguyên SHA-256 của BAR gốc; chỉ đổi QML/ảnh và tắt
 prewarm tự tạo/hủy ChatView lúc startup. Bản 1.5.0.4 đã mở và chạy tốt trên Passport.
 
+Bản thử native mới sau khi nhận log: [1.5.0.11 — bỏ custom active-frame cover](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.11-native-no-active-cover-unsigned.bar).
+Hai lần chạy bản 9 đều SIGSEGV sau `scene set`, trước `active frame ready`.
+Bản 11 loại custom cover khỏi startup và binary, giữ kho lịch sử đồng bộ và giao diện
+Cá nhân; thêm mốc log đầu event loop. Chưa có xác nhận bản 11 trên Passport.
+Xem [phân tích log và cách thử bản 11](docs/zalo11-startup-vi.md). Bản 10 dưới đây
+vẫn là lựa chọn engine gốc để quay lại khi cần.
+
 Bản khôi phục hiện tại: [1.5.0.10 — giữ engine gốc](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.10-ui-only-original-engine-unsigned.bar).
 Người dùng đã báo **1.5.0.9 native bị dừng/đóng ngay khi mở trên Passport**;
 không dùng bản 9 để cài thử tiếp khi chưa có chẩn đoán mới. Bản 10 giữ nguyên
 hai binary của BAR gốc và toàn bộ UI của bản 8: nền tối, bottom bar ngắn/cao,
 Tin nhắn chỉ gồm chat/nhóm có lịch sử theo thời gian, và trang Cá nhân.
 Cài cập nhật, **không gỡ app hoặc xóa data**. Bản 10 cần xác nhận lại trên máy;
-đây là quay về engine đã chạy được, chưa xác định nguyên nhân crash native 9.
+đây là quay về engine đã chạy được. Log nhận sau đó khoanh vùng native 9 ở bước
+custom cover; bản 11 thử loại bước này.
 
 Bản 10 dùng lại importer đồng bộ cũ; chưa có sửa lưu/đọc kho lịch sử chưa ghép
 của native 9. Các bảng kho đã tồn tại trong data không bị trình build xóa.

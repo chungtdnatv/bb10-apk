@@ -47,6 +47,7 @@ def check(file):
     if file.suffix=='.so':
         check_cascades(file.read_bytes())
         assert 'main' in definitions(file), 'Cascades entry symbol not exported'
+        assert not any('ActiveFrameCover' in symbol for symbol in definitions(file)), 'Custom active frame must remain excluded after Passport startup SIGSEGV'
         entry = int(re.search(r'Entry point address:\s*(0x[0-9a-fA-F]+)', header).group(1), 16)
         main = next(int(line.split()[0], 16) for line in run('nm','-D','--defined-only',file).splitlines() if line.split()[-1]=='main')
         assert entry != 0 and (entry & ~1) == (main & ~1), 'Cascades ELF entry point must point to main; an exported symbol alone is insufficient'

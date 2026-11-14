@@ -1,7 +1,8 @@
 # Khôi phục Zalo10 1.5.0.10
 
-Bản native 1.5.0.9 đã bị báo dừng và đóng ngay khi mở trên Passport. Chưa có log
-để xác định lỗi xảy ra trước Qt, trong constructor service hay lúc tạo giao diện.
+Bản native 1.5.0.9 đã bị báo dừng và đóng ngay khi mở trên Passport. Tại thời điểm
+làm bản 10 chưa có log. Log nhận sau đó cho thấy lỗi sau scene set, trước active
+cover ready; xem [bản thử native 11](zalo11-startup-vi.md).
 Bản 10 loại bỏ engine native mới khỏi gói cài, quay về hai binary gốc đã chạy được.
 Không coi việc quay về engine cũ là đã sửa/xác định nguyên nhân trong source native.
 

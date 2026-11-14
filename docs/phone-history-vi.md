@@ -2,7 +2,9 @@
 
 **Cập nhật:** người dùng đã báo native 9 đóng ngay khi mở. Không cài bản 9 để
 sử dụng; ưu tiên bản 1.5.0.10 engine gốc theo [hướng dẫn khôi phục](zalo10-recovery-vi.md).
-Các bước native 9 bên dưới chỉ còn là ghi chú thử nghiệm lịch sử, chưa được xác minh.
+Bản thử native 11 bỏ custom cover theo log mới và giữ tính năng kho; xem
+[hướng dẫn bản 11](zalo11-startup-vi.md). Các bước native 9 bên dưới là ghi chú
+thử nghiệm lịch sử; cần dùng BAR bản 11 khi thử lại kho.
 
 ## Bottom bar và Tin nhắn
 

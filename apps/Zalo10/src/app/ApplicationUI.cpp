@@ -82,12 +82,18 @@ ApplicationUI::ApplicationUI() : QObject(), m_zService(NULL), m_updateManager(NU
         fallback->setContent(scroll);
         root = fallback;
     }
+    zalo10_startup_stage("ApplicationUI: before setScene");
     Application::instance()->setScene(root);
     zalo10_startup_stage("ApplicationUI: scene set");
 
-    ActiveFrameCover *cover = new ActiveFrameCover();
-    Application::instance()->setCover(cover);
-    zalo10_startup_stage("ApplicationUI: active frame ready");
+    // Both supplied 1.5.0.9 runs SIGSEGV after scene set, before cover ready.
+    // Do not construct DisplayInfo/SceneCover here. Use the platform default cover.
+    zalo10_startup_stage("ApplicationUI: custom active frame disabled");
+}
+
+void ApplicationUI::onStartupReady()
+{
+    zalo10_startup_stage("first Qt event loop tick reached");
 }
 
 void ApplicationUI::exportStartupLogs()

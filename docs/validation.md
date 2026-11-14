@@ -177,3 +177,27 @@ QML passes syntax lint. All 35 toolkit/flow/storage tests, existing JS UI tests 
 native build separately; they do not turn its reported failure into a success.
 Version 10 needs device retest; binary identity links it to the working engine
 but is not a complete runtime test of the newer home UI.
+
+## 1.5.0.11: supplied startup log narrows failure to active-cover interval
+
+The uploaded log contains two version-9 runs, each completing Application creation,
+ZaloService construction, QML root creation and setScene, then receiving SIGSEGV
+before the next cover-ready marker. This rules out a pre-main or failed-QML-root
+explanation for those two runs. The intervening synchronous source constructs
+ActiveFrameCover (DisplayInfo, Container/ImageView, SceneCover) and installs it.
+Without a stack trace, asynchronous scene work cannot be ruled out; the exact
+faulting instruction and definitive cause are not established.
+
+Native 11 removes custom cover creation and setCover, excludes its source/MOC
+from the target, and keeps the OS default cover. SDK validation checks that no
+ActiveFrameCover symbol is reintroduced. A marker before setScene and a zero-delay
+log-only slot after entry to the Qt loop improve the next diagnostic run. No
+parentless UI page is created/destroyed by that slot. Phone history and UI features
+remain enabled. The original uploaded log is not copied into the public repo.
+
+Build passes SDK metadata/import/unwind checks (104 UI SDK libraries, 704 resolved
+UI imports; 60 headless libraries, 608 imports), all 35 toolkit tests, JS checks
+and 3 package tests. Final BAR has 807 validated assets and syntax-linted QML;
+binary inspection confirms the custom cover is absent and the loop marker exists.
+Native 11 still requires on-device launch/minimize/sync testing. Recovery 10 is
+retained; no success on Passport is inferred from these cloud checks.
