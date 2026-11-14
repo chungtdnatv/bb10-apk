@@ -37,6 +37,7 @@ def check(file):
     for lib in visited.values(): defined.update(definitions(lib))
     imports={line.split()[-1].split('@')[0] for line in run('nm','-D','--undefined-only',file).splitlines()
              if len(line.split())>=2 and line.split()[-2]=='U'}
+    assert not any(re.search(r"QPainter|QFont|QTextDocument",symbol) for symbol in imports), "Unsafe native font/painter imports reintroduced"
     missing=imports-defined
     assert not missing, (str(file),sorted(missing))
     sections=run('readelf','-SW',file)

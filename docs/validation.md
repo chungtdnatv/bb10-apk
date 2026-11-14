@@ -319,3 +319,28 @@ delivery, boot start and continuous closed-app reception remain **unverified on
 hardware**. Restricted BB10 permissions can be denied; metadata alone doesn't
 grant them. The native service can miss intermediate events between summary polls.
 Device checks and service heartbeat/error instructions are in docs/teams10-setup-vi.md.
+
+## Teams10 1.1.1.6 post-login crash recovery
+
+User reports 1.1.0.5 exits after login or loading chats; no crash-site log yet.
+Do not treat the Qt font/painter or Hub paths as a proven diagnosis. This release
+removes direct QPainter/QFont/TextDocument imports and uses bundled monogram PNGs
+with Cascades Labels. Photo masking, when explicitly enabled, uses pixel copies.
+SDK checks reject future direct imports of those native painter/font classes.
+
+Upgrade resets photo downloads and Hub/background switches off; saved credentials,
+names, HTML handling and UI remain. UDS initialization is gated behind explicit
+activation, including observe/cleanup paths. Service reloads preferences before
+each poll. Fatal-signal markers and recovery flag are installed in both entry
+points; a caught crash pauses auto-restore on next UI launch for diagnostics.
+Service must preserve that flag until the UI has seen it. No codes/tokens/bodies
+are added to logs and no stored credential is deleted by recovery.
+
+Passed: 40 toolkit tests, six QML-handler tests (including recovery startup),
+34 controller mocks (including photo-off startup), C++98 runtime helpers (actual
+fork/lease, crypto/tamper checks, notification/text/feature policy and a child
+SIGABRT verifying crash log/flag), one route policy suite, 21 historical Graph
+mocks and two package/CA tests: 105 cases. Both QML syntax checks pass. SDK:
+UI 101 libraries / 304 strong imports; service 52 / 310; zero orphan unwind
+sections. BAR has 32 assets, two ARM binaries/entry points, version 1.1.1.6.
+Post-login stability and opt-in image/Hub operation require Passport validation.

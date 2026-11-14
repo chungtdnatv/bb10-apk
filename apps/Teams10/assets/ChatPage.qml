@@ -55,7 +55,11 @@ Page {
                     Container {
                         horizontalAlignment: ListItemData.mine?HorizontalAlignment.Right:HorizontalAlignment.Left
                         layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
-                        ImageView { visible: !ListItemData.mine;imageSource: ListItemData.avatar||"";preferredWidth: ui.du(4.5);preferredHeight: ui.du(4.5);verticalAlignment: VerticalAlignment.Bottom;scalingMethod: ScalingMethod.AspectFit }
+                        Container {
+                            visible: !ListItemData.mine;preferredWidth: ui.du(4.5);preferredHeight: ui.du(4.5);verticalAlignment: VerticalAlignment.Bottom;layout: DockLayout {}
+                            ImageView { imageSource: ListItemData.avatar||"";horizontalAlignment: HorizontalAlignment.Fill;verticalAlignment: VerticalAlignment.Fill;scalingMethod: ScalingMethod.AspectFit }
+                            Label { visible: String(ListItemData.avatar||"").indexOf("asset:///images/avatar-")===0;text: Teams.initial(ListItemData.sender);textFormat: TextFormat.Plain;horizontalAlignment: HorizontalAlignment.Center;verticalAlignment: VerticalAlignment.Center;textStyle { color: Color.White;fontSize: FontSize.Small } }
+                        }
                         Container {
                             maxWidth: ui.du(65)
                             leftPadding: ui.du(1.4);rightPadding: ui.du(1.4);topPadding: ui.du(1);bottomPadding: ui.du(1)

@@ -32,7 +32,7 @@ hoặc cache build; `toolchains/` chứa source và revision để tái tạo/m�
 ## Teams10 cho Microsoft 365
 
 App native độc lập có đăng nhập device-code, đọc lịch sử và gửi văn bản vào chat có sẵn.
-[Tải Teams10 1.1.0.5 native + Hub](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.0.5-native-hub-unsigned.bar).
+[Tải Teams10 1.1.1.6 native + Hub](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.1.6-recovery-unsigned.bar).
 Không có gọi điện. Không cần App Registration riêng: dùng luồng tương thích
 purple-teams/squads-app và public client ID Teams; Microsoft/tenant vẫn có thể từ chối.
 Không dùng WebView hoặc trình duyệt Passport để mở Teams Web.

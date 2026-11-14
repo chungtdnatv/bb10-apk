@@ -16,7 +16,7 @@ function harness() {
   variantWrites++;legacyVariant=value===null?null:JSON.parse(JSON.stringify(value));
  }});
  const context=vm.createContext({root,tenantField:{text:''},loginTimer:{stop(){},restart(){}},
-  teamsNet:{loadSession:()=>'',saveSession:()=>true,clearSession:()=>true,avatar:()=>'',cachedAvatar:()=>'',observeChat(){},startBackground(){},recordEvent:s=>events.push(s),abortAll(){},saveConfig(){},request:(...args)=>requests.push(args)}});
+  teamsNet:{recoveryMode:()=>false,photosEnabled:()=>false,loadSession:()=>'',saveSession:()=>true,clearSession:()=>true,avatar:()=>'',cachedAvatar:()=>'',observeChat(){},startBackground(){},recordEvent:s=>events.push(s),abortAll(){},saveConfig(){},request:(...args)=>requests.push(args)}});
  vm.runInContext(core+'\nvar Teams={initialize:initialize,controller:controller,releaseController:releaseController};\n'+handlers,context);
  root.initializeService=context.initializeService;
  root.refreshMessages=context.refreshMessages;root.sendMessage=context.sendMessage;
@@ -53,4 +53,9 @@ test('chat calls bridge through QML root methods, without storing JS API on a QM
  assert.deepEqual(calls,[['refresh',true],['send','hello']]);assert.equal(h.variantWrites(),0);
  assert(!/property\s+variant\s+(service|controller)\s*:/.test(qml+'\n'+chatQml));
  assert(qml.includes('page.appRoot=root;'));assert(chatQml.includes('chat.appRoot.sendMessage(draft.text)'));
+});
+
+test('recovery startup leaves diagnostics accessible and does not automatically replay saved-session work',()=>{
+ const h=harness();h.context.teamsNet.recoveryMode=()=>true;let reads=0;h.context.teamsNet.loadSession=()=>{reads++;return ''};
+ assert(h.context.initializeService());assert(h.api());assert.equal(reads,0);assert.equal(h.requests.length,0);assert(h.root.statusText.includes('Chẩn đoán'));
 });

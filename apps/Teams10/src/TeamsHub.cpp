@@ -37,5 +37,5 @@ bool TeamsHub::post(const QString &id,const QString &title,const QString &previe
  uds_inbox_item_data_set_name(item,name.constData());uds_inbox_item_data_set_description(item,body.constData());uds_inbox_item_data_set_icon(item,"ic_hub.png");uds_inbox_item_data_set_mime_type(item,MIME);uds_inbox_item_data_set_category_id(item,1);uds_inbox_item_data_set_timestamp(item,time);uds_inbox_item_data_set_unread_count(item,unread?1:0);uds_inbox_item_data_set_total_count(item,1);uds_inbox_item_data_set_context_state(item,unread?2:1);uds_inbox_item_data_set_notification_state(item,unread);
  int rc=uds_item_updated(m_handle,item);if(rc!=UDS_SUCCESS&&unread)rc=uds_item_added(m_handle,item);uds_inbox_item_data_destroy(item);return rc==UDS_SUCCESS;
 }
-void TeamsHub::clear(){if(init()){uds_account_removed(m_handle,ACCOUNT);uds_context_t h=m_handle;uds_close(&h);}m_handle=0;m_attempted=false;bb::platform::Notification::deleteAllFromInbox();}
+void TeamsHub::clear(){if(m_handle){uds_account_removed(m_handle,ACCOUNT);uds_context_t h=m_handle;uds_close(&h);}m_handle=0;m_attempted=false;bb::platform::Notification::deleteAllFromInbox();}
 QString TeamsHub::status() const{return m_handle?"Hub account OK":m_attempted?"Hub UDS unavailable; standard notifications":"Hub pending";}

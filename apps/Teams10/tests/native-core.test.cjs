@@ -199,3 +199,12 @@ test('emoji content wins over alt text, and bare consumer identity normalizes wi
  const h=harness();assert.equal(h.context.plainHtml('<emoji alt="smile">🙂</emoji><img alt="[image]" src="x">'),'🙂[image]');
  const c=chat();c.members=[{objectId:USER},{objectId:'live:synthetic-user',displayName:'Personal Friend'}];h.auth([c]);assert.equal(h.api.state.chats[0].person,'8:live:synthetic-user');assert.equal(h.api.state.chats[0].title,'Personal Friend');
 });
+
+test('safe photo setting skips image requests without losing names, session persistence or placeholders',()=>{
+ let saved='';const h=harness({enrichProfiles:true,photosEnabled:()=>false,avatar:()=> 'asset:///images/avatar-0.png',saveSession:s=>{saved=s;return true}});h.auth([chat()]);
+ assert.equal(h.api.state.chats[0].avatar,'asset:///images/avatar-0.png');assert(!h.sent.some(r=>r.url.includes('profilepicturev2')));assert(h.sent.some(r=>r.url.includes('fetchShortProfile')));assert(JSON.parse(saved).refresh);
+ h.open([message()]);assert(!h.sent.some(r=>r.url.includes('profilepicturev2')));assert.equal(h.api.state.messages[0].avatar,'asset:///images/avatar-0.png');
+});
+test('Cascades initials preserve astral characters and Vietnamese letters',()=>{
+ const h=harness();assert.equal(h.context.initial(' Nguyễn'),'N');assert.equal(h.context.initial('🙂 Friend'),'🙂');assert.equal(h.context.initial(''),'?' );
+});

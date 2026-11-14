@@ -1,4 +1,5 @@
 #include "TeamsNative.hpp"
+#include "CrashLog.hpp"
 #include <bb/cascades/Application>
 #include <bb/cascades/QmlDocument>
 #include <bb/cascades/AbstractPane>
@@ -10,13 +11,16 @@
 using namespace bb::cascades;
 static void stage(const char *text) {
     FILE *f=fopen("data/teams10_startup.log","a");
-    if(f) { fprintf(f,"Teams10 1.1.0.5: %s\n",text);fclose(f); }
+    if(f) { fprintf(f,"Teams10 1.1.1.6: %s\n",text);fclose(f); }
 }
 Q_DECL_EXPORT int main(int argc,char **argv) {
+    CrashLog::install("Teams10 UI");
     stage("before Application");
     Application app(argc,argv);
     stage("Application created");
+    stage("before native bridge");
     TeamsNative native;
+    stage("native bridge ready");
     QmlDocument *document=QmlDocument::create("asset:///main.qml").parent(&app);
     document->setContextProperty("teamsNet",&native);
     AbstractPane *root=document->createRootObject<AbstractPane>();

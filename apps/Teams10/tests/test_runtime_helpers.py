@@ -11,6 +11,10 @@ class RuntimeHelpers(unittest.TestCase):
 #include "ProcessLease.hpp"
 #include "NotificationCursor.hpp"
 #include "NativeText.hpp"
+#include "FeaturePolicy.hpp"
+#include "CrashLog.hpp"
+#include <sys/resource.h>
+#include <fstream>
 #include <cassert>
 #include <sys/wait.h>
 #include <sys/stat.h>
@@ -46,6 +50,18 @@ int main(int argc,char **argv){
  assert(NativeText::plain("<emoji alt=\"smile\">🙂</emoji>")=="🙂");
  assert(NativeText::decode("&NotEqualTilde; &#xD800; &unknown; %20")=="≂̸ � &unknown; %20");
  assert(NativeText::decode("&amp;lt;tag&amp;gt;")=="&lt;tag&gt;");
+ assert(FeaturePolicy::needsUpgrade(0));assert(FeaturePolicy::needsUpgrade(5));assert(!FeaturePolicy::needsUpgrade(6));
+ assert(!FeaturePolicy::integrations(5,true));assert(!FeaturePolicy::integrations(6,false));assert(FeaturePolicy::integrations(6,true));
+ pid_t crash=::fork();assert(crash>=0);
+ if(crash==0){
+  struct rlimit limits;limits.rlim_cur=limits.rlim_max=0;::setrlimit(RLIMIT_CORE,&limits);
+  std::string folder(argv[1]);folder=folder.substr(0,folder.find_last_of('/'));assert(::chdir(folder.c_str())==0);assert(::mkdir("data",0700)==0);
+  CrashLog::install("synthetic helper test");::raise(SIGABRT);::_exit(3);
+ }
+ int crashed;assert(::waitpid(crash,&crashed,0)==crash);assert(WIFSIGNALED(crashed)&&WTERMSIG(crashed)==SIGABRT);
+ std::string folder(argv[1]);folder=folder.substr(0,folder.find_last_of('/'));
+ std::ifstream marker((folder+"/data/teams10_crash.flag").c_str());std::string markerText;std::getline(marker,markerText);assert(markerText=="synthetic helper test");
+ std::ifstream log((folder+"/data/teams10_startup.log").c_str());std::string logText;std::getline(log,logText);assert(logText.find("1.1.1.6 fatal signal")!=std::string::npos);
  using NotificationCursor::notify;
  assert(!notify(0,"",200,"new",false,false)); // no historical notification flood
  assert(notify(100,"old",200,"new",false,false));

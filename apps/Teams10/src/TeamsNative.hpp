@@ -30,7 +30,7 @@ public:
 class TeamsNative : public QObject {
     Q_OBJECT
 public:
-    explicit TeamsNative(QObject *parent=0);
+    explicit TeamsNative(QObject *parent=0,bool headless=false);
     ~TeamsNative();
     Q_INVOKABLE void request(int id,const QString &method,const QString &url,const QString &body,const QVariantMap &headers);
     Q_INVOKABLE void abortAll();
@@ -39,7 +39,11 @@ public:
     Q_INVOKABLE bool saveSession(const QString &json);
     Q_INVOKABLE bool clearSession();
     void releaseSession();
+    void reloadSettings();
     Q_INVOKABLE void observeChat(const QString &account,const QVariantMap &chat,bool visible);
+    Q_INVOKABLE bool recoveryMode() const;
+    Q_INVOKABLE bool photosEnabled() const;
+    Q_INVOKABLE void setPhotosEnabled(bool enabled);
     Q_INVOKABLE QString cachedAvatar(const QString &url) const;
     Q_INVOKABLE QString avatar(const QString &name,const QString &source=QString());
     Q_INVOKABLE void startBackground();
@@ -75,5 +79,6 @@ private:
     TeamsHub m_hub;
     bb::system::InvokeManager *m_invoke;
     QString m_pendingChat;
+    bool m_recovery;
 };
 #endif

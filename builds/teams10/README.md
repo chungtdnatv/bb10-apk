@@ -1,13 +1,15 @@
 # Teams10 native test BARs
 
-[Teams10 1.1.0.5 — native + Hub](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.0.5-native-hub-unsigned.bar)
+[Teams10 1.1.1.6 — native + Hub](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.1.6-recovery-unsigned.bar)
 is the current work/school Microsoft 365 build. It adds encrypted session restore,
 consumer/federated name lookup, authenticated circular photos, HTML5 decoding,
 a dark capsule-nav/bubble UI and a separate native Hub/background polling service.
 
 Install over Teams10, log in once after upgrading from RAM-only 1.0.0.4, then
-check reopening without another code. In Profile enable background/Hub, close
-the UI, send a new message from another device and check Hub after 30–60 seconds.
+check reopening without another code. First verify basic read/send. This repair defaults photo download and Hub/background
+off; enable each separately in Profile. Then close the UI, send a message from
+another device and check Hub after 30–60 seconds. Native font/painter calls were
+removed; a caught crash pauses automatic restore on the next launch for diagnostics.
 The BAR includes both Teams10 and Teams10Service: do not drop the second entry.
 
 No calling or WebView. No own App Registration. Public Teams-client compatibility

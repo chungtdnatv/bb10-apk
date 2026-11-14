@@ -31,6 +31,7 @@ function timestamp(text) {
     if(m) return Date.UTC(Number(m[1]),Number(m[2])-1,Number(m[3]),Number(m[4]),Number(m[5]),Number(m[6]),Number(((m[7] || "")+"000").slice(0,3)));
     return Date.parse(text) || 0;
 }
+function initial(name) {var s=trim(name)||"?",c=s.charCodeAt(0);return s.substring(0,c>=0xd800&&c<=0xdbff?2:1).toUpperCase();}
 function displayTime(text) { var value=timestamp(text);return value ? new Date(value).toLocaleString() : ""; }
 function mergeMessages(oldRows,newRows) {
     var map={}, rows=[],i;
@@ -279,6 +280,7 @@ function create(io) {
         });
     }
     function loadPhoto(id,name) {
+        if(io.photosEnabled&&!io.photosEnabled())return;
         if(!io.enrichProfiles||!/^8:[^\s<>"']{1,240}$/.test(id)||photoPending["$"+id])return;
         photoPending["$"+id]=true;
         var url=ROOT+"/api/mt/"+region+"/beta/users/"+encodeURIComponent(profile.id)+"/profilepicturev2/"+encodeURIComponent(id)+"?size=HR128x128";
@@ -294,6 +296,7 @@ function create(io) {
         }
     }
     function setChats(raw) {
+        if(io.trace)io.trace("chat-list-start");
         lastRawChats=raw;var rows=[];
         for(var i=0;i<raw.length;++i) {
             var c=raw[i];if(c.isConversationDeleted||!validChatId(c.id))continue;
@@ -309,6 +312,7 @@ function create(io) {
         for(var n=0;n<Math.min(rows.length,24);n++)if(rows[n].person){loadPhoto(rows[n].person,rows[n].title);rows[n].avatar=imageFor(rows[n].person,rows[n].title);}
         state.chats=rows;state.chatsMore="";
         io.saveCache(account,"chats",JSON.stringify(rows));
+        if(io.trace)io.trace("chat-list-ready");
     }
     api.refreshChats=function() {
         if(state.phase!=="ready"||state.loadingChats)return;

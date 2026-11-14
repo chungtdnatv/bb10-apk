@@ -1,10 +1,28 @@
-# Teams10 1.1.0.5 — native BB10 Microsoft 365 chat
+# Teams10 1.1.1.6 — native BB10 Microsoft 365 chat
 
 Independent, unofficial Cascades client for work/school accounts. No WebView,
 password input or own Entra App Registration. Device-code/native interoperability
 follows purple-teams and squads-app with the upstream public Teams client ID.
 Microsoft/tenant policies still apply. A user confirmed successful login on
 Passport with 1.0.0.4; the new features below require another device test.
+
+## Post-login crash repair (1.1.1.6)
+
+The user reported 1.1.0.5 exiting after login/loading the chat list. Exact crash
+site is not yet confirmed by a device log. Native QPainter/font initialization
+in avatar rendering and eager Hub startup were new execution paths at that stage.
+This build removes **all direct QPainter/QFont/TextDocument calls** (also checked
+against actual ARM imports). Placeholder circles are packaged PNGs with ordinary
+Cascades Label initials; opt-in photo masking uses a pixel loop without a painter.
+
+Upgrade explicitly resets Hub/background and photo downloads to off. Names,
+HTML handling, saved-session restore and the rest of the UI remain enabled.
+Enable each experimental feature separately in Profile after checking basic
+read/send. No Hub registration happens through observe/cleanup when disabled.
+A caught fatal signal writes a static marker and crash flag. On the next UI
+launch, integration switches turn off and auto-restore pauses so diagnostics
+remain reachable; the saved session itself is preserved. Boot service startup
+must not consume the UI's crash flag. SIGKILL/OS termination cannot be caught.
 
 ## Current features
 
@@ -16,7 +34,7 @@ Passport with 1.0.0.4; the new features below require another device test.
 - **Names/photos:** normalized organization/consumer MRIs, batched short/federated/
   consumer profile lookup; authenticated profile-picture download and circular
   cache. Directory/photo denials leave a readable fallback/colored monogram.
-  First 24 chat photos and participants in the opened history are requested;
+  When photo downloads are explicitly enabled, first 24 chat photos and participants in the opened history are requested;
   history names can also improve otherwise unnamed chats. Chatting with personal
   contacts is distinct from signing in with a personal account (unsupported).
 - **Text:** HTML5 references, numeric Unicode, Teams emoji/image alt text, literal

@@ -35,7 +35,7 @@ See [evidence and BB10 port requirements](references/zalo-calling/README.md).
 
 ## Teams10
 
-`apps/Teams10` 1.1.0.5 combines native toolkit C++/QML with protocol/auth adaptation
+`apps/Teams10` 1.1.1.6 combines native toolkit C++/QML with protocol/auth adaptation
 from purple-teams (GPL-3.0-or-later) and squads-app (MIT). The combined app is
 GPL-3.0-or-later; original toolkit and squads MIT notices are retained. No libpurple
 or Kotlin binary is linked. Pinned commits and file-level provenance are in

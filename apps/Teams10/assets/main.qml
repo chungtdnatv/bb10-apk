@@ -57,6 +57,8 @@ NavigationPane {
             teamsNet.recordEvent("controller-start");
         Teams.initialize({
             enrichProfiles:true,
+            trace:function(event){teamsNet.recordEvent(event);},
+            photosEnabled:function(){return teamsNet.photosEnabled();},
             loadSession:function(){return teamsNet.loadSession();},
             saveSession:function(json){return teamsNet.saveSession(json);},
             clearSession:function(){return teamsNet.clearSession();},
@@ -80,7 +82,8 @@ NavigationPane {
             if (!Teams.controller() || typeof Teams.controller().startLogin!=="function") throw new Error("Bộ điều khiển đăng nhập chưa sẵn sàng");
             root.render(Teams.controller().state);
             teamsNet.recordEvent("controller-ready");
-            Teams.controller().restoreSession();
+            if(teamsNet.recoveryMode())root.statusText="Lần trước app bị dừng. Mở Chẩn đoán để lấy log; bấm Khôi phục phiên đã lưu khi muốn thử lại.";
+            else Teams.controller().restoreSession();
             return true;
         } catch (e) {
             Teams.releaseController();
@@ -143,7 +146,7 @@ NavigationPane {
                     layoutProperties: StackLayoutProperties { spaceQuota: 1 }
                     textStyle { color: Color.create("#27c5ed"); fontSize: FontSize.XXLarge; fontWeight: FontWeight.Bold }
                 }
-                Label { text: "1.1.0.5"; textStyle { color: Color.create("#809aaf"); fontSize: FontSize.XSmall } verticalAlignment: VerticalAlignment.Center }
+                Label { text: "1.1.1.6"; textStyle { color: Color.create("#809aaf"); fontSize: FontSize.XSmall } verticalAlignment: VerticalAlignment.Center }
             }
             ScrollView {
                 visible: !root.authenticated
@@ -187,7 +190,12 @@ NavigationPane {
                             horizontalAlignment: HorizontalAlignment.Fill
                             topPadding: ui.du(1.5);bottomPadding: ui.du(1.5)
                             layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
-                            ImageView { imageSource: ListItemData.avatar||""; preferredWidth: ui.du(7.5);preferredHeight: ui.du(7.5);scalingMethod: ScalingMethod.AspectFit;verticalAlignment: VerticalAlignment.Center }
+                            Container {
+                                preferredWidth: ui.du(7.5);preferredHeight: ui.du(7.5);verticalAlignment: VerticalAlignment.Center
+                                layout: DockLayout {}
+                                ImageView { imageSource: ListItemData.avatar||"";horizontalAlignment: HorizontalAlignment.Fill;verticalAlignment: VerticalAlignment.Fill;scalingMethod: ScalingMethod.AspectFit }
+                                Label { visible: String(ListItemData.avatar||"").indexOf("asset:///images/avatar-")===0;text: Teams.initial(ListItemData.title);textFormat: TextFormat.Plain;horizontalAlignment: HorizontalAlignment.Center;verticalAlignment: VerticalAlignment.Center;textStyle { color: Color.White;fontSize: FontSize.XLarge;fontWeight: FontWeight.Bold } }
+                            }
                             Container {
                                 leftPadding: ui.du(1.5)
                                 layoutProperties: StackLayoutProperties { spaceQuota: 1 }
@@ -208,10 +216,20 @@ NavigationPane {
                 layoutProperties: StackLayoutProperties { spaceQuota: 1 }
                 Container {
                     topPadding: ui.du(3)
-                    ImageView { imageSource: root.userName?teamsNet.avatar(root.userName,root.userMail):""; preferredWidth: ui.du(12);preferredHeight: ui.du(12);horizontalAlignment: HorizontalAlignment.Center }
+                    Container {
+                        preferredWidth: ui.du(12);preferredHeight: ui.du(12);horizontalAlignment: HorizontalAlignment.Center;layout: DockLayout {}
+                        ImageView { imageSource: root.userName?teamsNet.avatar(root.userName,root.userMail):"";horizontalAlignment: HorizontalAlignment.Fill;verticalAlignment: VerticalAlignment.Fill }
+                        Label { text: Teams.initial(root.userName);horizontalAlignment: HorizontalAlignment.Center;verticalAlignment: VerticalAlignment.Center;textStyle { color: Color.White;fontSize: FontSize.XXLarge;fontWeight: FontWeight.Bold } }
+                    }
                     Label { text: root.userName; textFormat: TextFormat.Plain; textStyle { color: Color.White; fontSize: FontSize.XLarge } horizontalAlignment: HorizontalAlignment.Center }
                     Label { text: root.userMail; textFormat: TextFormat.Plain; multiline: true; textStyle.color: Color.create("#a0bfd2");horizontalAlignment: HorizontalAlignment.Center }
                     Label { text: root.statusText; multiline: true; textFormat: TextFormat.Plain; textStyle { color: Color.create("#8daabd"); fontSize: FontSize.Small } }
+                    Container {
+                        layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
+                        Label { text: "Tải ảnh avatar (thử nghiệm)";textStyle.color: Color.White;layoutProperties: StackLayoutProperties { spaceQuota: 1 } }
+                        ToggleButton { checked: teamsNet.photosEnabled();onCheckedChanged: { teamsNet.setPhotosEnabled(checked);if(root.authenticated&&Teams.controller())Teams.controller().refreshChats(); } }
+                    }
+                    Label { text: "Bản sửa khởi động dùng avatar chữ mặc định. Bật riêng ảnh và Hub sau khi kiểm tra app mở ổn.";multiline: true;textStyle { color: Color.create("#8daabd");fontSize: FontSize.Small } }
                     Container {
                         topPadding: ui.du(2)
                         layout: StackLayout { orientation: LayoutOrientation.LeftToRight }

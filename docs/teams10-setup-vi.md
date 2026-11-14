@@ -1,14 +1,28 @@
-# Teams10 1.1.0.5 — phiên đăng nhập, avatar và Hub
+# Teams10 1.1.1.6 — phiên đăng nhập, avatar và Hub
 
-[Tải BAR 1.1.0.5](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.0.5-native-hub-unsigned.bar).
+[Tải BAR 1.1.1.6](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.1.6-recovery-unsigned.bar).
 
 Cài đè lên Teams10 hiện tại, không cần xóa app. Package riêng
 `com.bb10toolkit.Teams10`, không thay Zalo/Telega. Bản này có **hai entry point**:
 Teams10 và Teams10Service, nên công cụ cài phải giữ nguyên BAR.
 
+## Bản sửa lỗi thoát sau đăng nhập
+
+1.1.1.6 bỏ vẽ chữ/avatar bằng Qt QPainter, chuyển sang PNG và Label Cascades.
+Mặc định tắt **Tải ảnh avatar (thử nghiệm)** và **Nhận tin nền và Hub** khi nâng
+cấp, vì đây là các đường xử lý mới cần kiểm tra riêng trên Passport. Vẫn giữ
+phiên đã lưu, tra cứu tên, nội dung và giao diện; không cần gỡ app/xóa dữ liệu.
+
+Cài đè và thử mở, đọc/gửi một chat trước. Nếu ổn mới vào Profile bật từng tính
+năng riêng. Nếu app lại thoát do signal bắt được, mở lại sẽ vào chế độ chẩn đoán,
+không tự khôi phục phiên ngay. Bấm **Chẩn đoán đăng nhập** và gửi các dòng cuối
+có `1.1.1.6`, đặc biệt `fatal signal`, `chat-list-start/ready`, `session-save/saved`
+hoặc `hub-start/ready`. Không gửi file phiên, khóa hoặc core dump. Sau khi lấy log
+có thể bấm **Khôi phục phiên đã lưu** để thử tiếp.
+
 ## Đăng nhập và lưu phiên
 
-1. Kiểm tra đầu màn hình ghi **1.1.0.5**. Lần đầu nâng cấp từ 1.0.0.4 cần đăng
+1. Kiểm tra đầu màn hình ghi **1.1.1.6**. Lần đầu nâng cấp từ 1.0.0.4 cần đăng
    nhập thêm một lần vì bản cũ chỉ giữ token trong RAM, không có phiên để khôi phục.
 2. Để trống Domain/Tenant, bấm **Đăng nhập Microsoft**.
 3. Trên điện thoại/PC khác, mở https://microsoft.com/devicelogin, nhập mã trong
@@ -22,6 +36,8 @@ Teams10 và Teams10Service, nên công cụ cài phải giữ nguyên BAR.
 trang Microsoft có thể ghi Microsoft Teams. Không cần xin App Registration riêng.
 Microsoft/công ty vẫn có thể thu hồi phiên, chặn client hoặc yêu cầu xác nhận lại.
 App không vượt yêu cầu thiết bị/ứng dụng được quản lý.
+
+Nếu nâng từ 1.1.0.5 và đã có phiên, app thử dùng lại phiên đó.
 
 Phiên làm mới được mã hóa trong sandbox bằng khóa cục bộ riêng; access token ở
 RAM. Đây không phải khóa bảo mật phần cứng. Không chia sẻ file phiên, file khóa,
@@ -43,7 +59,7 @@ password, mã đăng nhập hoặc token. **Đăng xuất** xóa phiên đã lư
 
 ## Hub và nhận tin khi đóng app
 
-1. Trong **Profile**, bật **Nhận tin nền và Hub**.
+1. Sau khi xác nhận app đọc/gửi ổn, trong **Profile** mới bật **Nhận tin nền và Hub**.
 2. Cho phép thông báo/chạy nền trong các mục quyền ứng dụng BB10 nếu được hỏi.
 3. Đóng cửa sổ Teams10, gửi một tin mới vào cuộc hội thoại đã có từ thiết bị khác.
 4. Chờ khoảng 30–60 giây khi mạng ổn định; kiểm tra Hub và chạm thông báo để mở
@@ -76,6 +92,6 @@ bằng fallback đó. Chưa xác minh các quyền này trên Passport của b�
 - Lỗi mở app: file sandbox `data/teams10_startup.log`; không nằm trong Documents.
   Chẩn đoán trong app cho phép chọn/sao chép log mốc, không ghi token/tin nhắn.
 
-Đăng nhập bản 1.0.0.4 đã được người dùng xác nhận. Bản 1.1.0.5 đã kiểm tra build,
+Đăng nhập bản 1.0.0.4 đã được người dùng xác nhận. Bản 1.1.1.6 đã kiểm tra build,
 BAR, SDK, QML và test mô phỏng/C++ trong cloud; lưu phiên, ảnh và Hub/service mới
 vẫn cần xác nhận trên thiết bị thật. Không có gọi điện.

@@ -3,8 +3,8 @@
     <id>com.bb10toolkit.Teams10</id>
     <name>Teams10</name>
     <author>BB10 Toolkit</author>
-    <versionNumber>1.1.0</versionNumber>
-    <buildId>5</buildId>
+    <versionNumber>1.1.1</versionNumber>
+    <buildId>6</buildId>
     <description>Native Cascades application</description>
     <configuration id="release" name="Device-Release">
         <entryPointType>Qnx/Cascades</entryPointType>

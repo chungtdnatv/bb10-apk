@@ -14,7 +14,7 @@ QString field(const QVariantMap &v,const char *a,const char *b){return v.value(a
 qint64 stamp(QString s){s.replace(QRegExp("(\\.\\d{3})\\d+Z$"),"\\1Z");QDateTime t=QDateTime::fromString(s,Qt::ISODate);return t.isValid()?t.toMSecsSinceEpoch():0;}
 bool region(const QString &s){return s=="emea"||s=="amer"||s=="apac";}
 }
-BackgroundService::BackgroundService():m_stage(0),m_serial(0){
+BackgroundService::BackgroundService():m_net(0,true),m_stage(0),m_serial(0){
  m_timer.setSingleShot(true);connect(&m_timer,SIGNAL(timeout()),this,SLOT(poll()));
  connect(&m_net,SIGNAL(completed(int,int,const QString&,const QString&,const QVariantMap&)),this,SLOT(completed(int,int,const QString&,const QString&,const QVariantMap&)));
  m_timer.start(1500);
@@ -24,8 +24,9 @@ void BackgroundService::finish(const QString &status,int delay){
  m_stage=0;m_access.clear();m_session.clear();m_net.releaseSession();m_timer.start(delay);
 }
 void BackgroundService::poll(){
+ m_net.reloadSettings();
  QSettings settings("BB10Toolkit","Teams10");
- if(!settings.value("backgroundEnabled",true).toBool()){finish("disabled",60000);return;}
+ if(!m_net.backgroundEnabled()){finish("disabled",60000);return;}
  QString raw=m_net.loadSession();m_session=decode(raw).toMap();
  if(m_session.value("busy").toBool()){finish("UI owns session",5000);return;}
  if(m_session.value("clientId").toString()!=CLIENT||m_session.value("refresh").toString().isEmpty()){finish("no saved session",60000);return;}
