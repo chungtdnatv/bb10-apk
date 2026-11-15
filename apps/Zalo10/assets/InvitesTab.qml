@@ -77,9 +77,6 @@ NavigationPane {
             horizontalAlignment: HorizontalAlignment.Fill
             verticalAlignment: VerticalAlignment.Fill
             layout: StackLayout { orientation: LayoutOrientation.TopToBottom }
-            ModernHeader {
-                onMenuRequested: { if (invitesNav.appShell) invitesNav.appShell.openModernMenu(); }
-            }
             Container {
                 horizontalAlignment: HorizontalAlignment.Fill
                 leftPadding: ui.du(1.8)

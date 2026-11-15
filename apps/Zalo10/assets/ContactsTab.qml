@@ -110,8 +110,6 @@ NavigationPane {
             horizontalAlignment: HorizontalAlignment.Fill
             verticalAlignment: VerticalAlignment.Fill
             layout: StackLayout { orientation: LayoutOrientation.TopToBottom }
-            ModernHeader { heading: contactsNav.composeMode ? "Tin nhắn mới" : "Zalo10"; onMenuRequested: { if (contactsNav.appShell) contactsNav.appShell.openModernMenu(); }
-            }
             Container {
                 horizontalAlignment: HorizontalAlignment.Fill
                 leftPadding: ui.du(1.8)

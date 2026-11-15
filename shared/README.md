@@ -2,8 +2,11 @@
 
 `ui/` holds the source of the components copied into both apps' assets. RoundPlate
 uses fixed-aspect half-circle end caps at half the measured height, with a separate
-center strip. Rounded ends aren't stretched along with the overall bar. Bottom
-navigation fills its parent width, reserves 16du height and gives icons explicit
+center strip. Rounded ends aren't stretched along with the overall bar.
+The three slices use DockLayout with explicit zero margins; the center extends
+one physical pixel under each cap to cover fractional layout/filtering seams.
+This applies to the bar, selected tab and Zalo search field.
+Bottom navigation fills its parent width, reserves 16du height and gives icons explicit
 minimum sizes. No native QPainter/font code or WebView is used.
 
 `ota/` implements an explicit-user-action updater: HTTPS/TLS1.2 with bundled CA and

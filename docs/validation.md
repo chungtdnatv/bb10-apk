@@ -1,5 +1,21 @@
 # Validation of the toolkit integration
 
+## Teams10 1.1.2.9 / Zalo10 1.5.0.15
+
+Rebuilt both native BARs with the pinned SDK filesystem in the local flattened
+image. The shared RoundPlate replaces the three-slice StackLayout with
+DockLayout, explicit zero margins and a one-pixel center overlap at each cap.
+Home-tab title headers are removed; Teams login diagnostics have an explicit
+button and Zalo's menu remains reachable from Profile.
+
+Passed all 45 toolkit tests, the Teams login/controller/core/runtime/policy and
+package suites, Zalo UI assertions and three package tests. Qt qmllint passed
+syntax checks on all eight changed QML files. SDK closure/unwind/entry-point
+checks and BAR asset/CRC/digest verification passed for both apps. Compared the
+new packages to 1.1.2.8 / 1.5.0.14: app/package identities are unchanged, version
+IDs are fresh and feed hashes match the new BARs. Rendering and installation
+still need verification on Passport; no device/emulator result is claimed.
+
 Validated locally in the managed Linux cloud environment using the SDK image
 pinned in `toolchains/image.txt` (a flattened local copy because Docker uses vfs).
 

@@ -1,4 +1,4 @@
-# Teams10 1.1.2.8 — native BB10 Microsoft 365 chat
+# Teams10 1.1.2.9 — native BB10 Microsoft 365 chat
 
 Independent, unofficial Cascades client for work/school accounts. No WebView,
 password input or own Entra App Registration. Device-code/native interoperability
@@ -23,6 +23,14 @@ A caught fatal signal writes a static marker and crash flag. On the next UI
 launch, integration switches turn off and auto-restore pauses so diagnostics
 remain reachable; the saved session itself is preserved. Boot service startup
 must not consume the UI's crash flag. SIGKILL/OS termination cannot be caught.
+
+## UI update (1.1.2.9)
+
+The shared rounded plates use a DockLayout with zero margins and one pixel of
+center overlap beneath each cap, avoiding gaps at the bar/active-tab joins.
+The home title header is removed. Login diagnostics remain available through an
+explicit login-page button and Profile; OTA remains accessible there. Device
+rendering still needs Passport validation.
 
 ## UI / OTA update (1.1.2.7)
 

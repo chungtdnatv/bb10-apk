@@ -84,7 +84,7 @@ NavigationPane {
             if (!Teams.controller() || typeof Teams.controller().startLogin!=="function") throw new Error("Bộ điều khiển đăng nhập chưa sẵn sàng");
             root.render(Teams.controller().state);
             teamsNet.recordEvent("controller-ready");
-            if(teamsNet.recoveryMode()){root.loginAttempted=true;root.statusText="Lần trước app bị dừng. Giữ tiêu đề Teams10 để mở Chẩn đoán, hoặc bấm đăng nhập bằng code để thử lại.";}
+            if(teamsNet.recoveryMode()){root.loginAttempted=true;root.statusText="Lần trước app bị dừng. Bấm Chẩn đoán đăng nhập, hoặc bấm đăng nhập bằng code để thử lại.";}
             else Teams.controller().restoreSession();
             return true;
         } catch (e) {
@@ -142,17 +142,6 @@ NavigationPane {
             rightPadding: ui.du(2)
             topPadding: ui.du(1)
             Container {
-                layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
-                horizontalAlignment: HorizontalAlignment.Fill
-                Label {
-                    text: root.selectedTab===2&&root.authenticated ? "Profile" : "Teams10"
-                    layoutProperties: StackLayoutProperties { spaceQuota: 1 }
-                    textStyle { color: Color.create("#27c5ed"); fontSize: FontSize.XXLarge; fontWeight: FontWeight.Bold }
-                    gestureHandlers: [LongPressHandler { onLongPressed: root.showDiagnostics() }]
-                }
-                Label { visible: root.authenticated&&root.selectedTab===2;text: typeof ota!=="undefined"?ota.currentVersion:""; textStyle { color: Color.create("#809aaf"); fontSize: FontSize.XSmall } verticalAlignment: VerticalAlignment.Center }
-            }
-            Container {
                 visible: !root.authenticated
                 horizontalAlignment: HorizontalAlignment.Fill
                 layoutProperties: StackLayoutProperties { spaceQuota: 1 }
@@ -162,6 +151,7 @@ NavigationPane {
                     verticalAlignment: VerticalAlignment.Center
                     leftPadding: ui.du(3);rightPadding: ui.du(3)
                     Button { text: "Đăng nhập bằng code";horizontalAlignment: HorizontalAlignment.Fill;enabled: !root.loginBusy;onClicked: root.beginLogin() }
+                    Button { text: "Chẩn đoán đăng nhập";horizontalAlignment: HorizontalAlignment.Fill;onClicked: root.showDiagnostics() }
                     ActivityIndicator { visible: root.loginBusy;running: visible;horizontalAlignment: HorizontalAlignment.Center }
                     Label { visible: root.waiting;text: "microsoft.com/devicelogin";horizontalAlignment: HorizontalAlignment.Center;textStyle { color: Color.White;fontSize: FontSize.Large } }
                     Label { visible: root.waiting;text: root.loginCode;textFormat: TextFormat.Plain;horizontalAlignment: HorizontalAlignment.Center;textStyle { color: Color.create("#27c5ed");fontSize: FontSize.XXLarge;fontWeight: FontWeight.Bold } }

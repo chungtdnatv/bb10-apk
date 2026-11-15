@@ -95,9 +95,6 @@ NavigationPane {
             horizontalAlignment: HorizontalAlignment.Fill
             verticalAlignment: VerticalAlignment.Fill
             layout: StackLayout { orientation: LayoutOrientation.TopToBottom }
-            ModernHeader {
-                onMenuRequested: { if (chatsNav.appShell) chatsNav.appShell.openModernMenu(); }
-            }
             Container {
                 horizontalAlignment: HorizontalAlignment.Fill
                 leftPadding: ui.du(1.8)
