@@ -56,7 +56,9 @@ ApplicationUI::ApplicationUI() : QObject(), m_zService(NULL), m_updateManager(NU
     QmlDocument *qml = QmlDocument::create("asset:///main.qml").parent(this);
     qml->setContextProperty("app",      this);
     qml->setContextProperty("zService", zService);
-    qml->setContextProperty("ota",new OtaUpdater("Zalo10",appVersion(),this));
+    OtaUpdater *updater=new OtaUpdater("Zalo10",appVersion(),this);
+    connect(updater,SIGNAL(installSubmitted()),this,SLOT(onManualExit()));
+    qml->setContextProperty("ota",updater);
 
     AbstractPane *root = qml->createRootObject<AbstractPane>();
     zalo10_startup_stage(root ? "ApplicationUI: QML root created" : "ApplicationUI: QML root failed");

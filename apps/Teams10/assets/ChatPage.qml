@@ -29,7 +29,32 @@ Page {
             scrollPending=true;bottomTimer.restart();
         }
     }
-    titleBar: TitleBar { title: chat.chatTitle }
+    actionBarVisibility: ChromeVisibility.Hidden
+    function requestBack() { if(chat.appRoot)chat.appRoot.pop(); }
+    titleBar: TitleBar {
+        kind: TitleBarKind.FreeForm
+        kindProperties: FreeFormTitleBarKindProperties {
+            content: Container {
+                background: Color.create("#101e2a")
+                horizontalAlignment: HorizontalAlignment.Fill
+                layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
+                Button {
+                    text: "‹"
+                    accessibility.name: "Quay lại"
+                    preferredWidth: ui.du(8);minWidth: ui.du(8);maxWidth: ui.du(8)
+                    verticalAlignment: VerticalAlignment.Center
+                    onClicked: chat.requestBack()
+                }
+                Label {
+                    text: chat.chatTitle
+                    textFormat: TextFormat.Plain
+                    verticalAlignment: VerticalAlignment.Center
+                    layoutProperties: StackLayoutProperties { spaceQuota: 1 }
+                    textStyle { color: Color.White;fontSize: FontSize.Large;fontWeight: FontWeight.Bold }
+                }
+            }
+        }
+    }
     Container {
         background: Color.create("#101e2a")
         horizontalAlignment: HorizontalAlignment.Fill

@@ -6,6 +6,7 @@ import "lists"
 
 NavigationPane {
     id: groupsNav
+    backButtonsVisible: !groupsNav.currentPage||typeof groupsNav.currentPage.requestBack!=="function"
     peekEnabled: false
     property variant appShell: null
     function raiseBottomBar() { if (groupsNav.count() === 1) bottomNavigation.reveal(); }

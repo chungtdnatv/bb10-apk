@@ -2,11 +2,11 @@
 
 Bản hiện tại có OTA native:
 
-- [Teams10 1.1.2.10](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.10-ui-ota-unsigned.bar)
-- [Zalo10 1.5.0.16](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.16-native-ui-ota-unsigned.bar)
+- [Teams10 1.1.2.11](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.11-ui-ota-unsigned.bar)
+- [Zalo10 1.5.0.17](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.17-native-ui-ota-unsigned.bar)
 
-Cài đè BAR đầy đủ này bằng cách đang dùng. Teams10 1.1.2.10 và Zalo10 1.5.0.16
-cập nhật Danh bạ Teams, giao diện chat Zalo, luồng Hub và thông tin người tạo. Các bản trước 1.1.2.7 /
+Cài đè BAR đầy đủ này bằng cách đang dùng. Teams10 1.1.2.11 và Zalo10 1.5.0.17
+cập nhật Back trên cùng, ẩn action bar dưới và nối luồng tải/cài/thoát app. Các bản trước 1.1.2.7 /
 1.5.0.13 chưa có thành phần OTA mới. Gói giữ package ID và cả entry point UI/headless;
 không gỡ app/xóa data. Bản mới cần kiểm tra trên thiết bị.
 UI-only/original-engine chỉ có giao diện mới, không có backend OTA native.
@@ -15,20 +15,25 @@ UI-only/original-engine chỉ có giao diện mới, không có backend OTA nati
 
 1. **Profile → Cập nhật OTA**. Zalo cũng có mục cập nhật trong menu và Giới thiệu.
    Teams mở cập nhật trong Profile sau khi đăng nhập.
-2. App kiểm tra feed của chính nó trong repo. Xem phiên bản và ghi chú; bấm
-   **Tải bản mới**. Nếu đang mới nhất vẫn có thể tải lại BAR hiện tại.
-3. BAR được lưu trong **Downloads** sau khi kiểm tra đúng kích thước, ZIP magic
-   và SHA-256. Nếu tải lỗi/hủy, file tạm bị bỏ, không nhận là bản tải hoàn tất.
-4. Nếu máy hỗ trợ, bấm **Cài trên máy (app có thể đóng)**. App kiểm tra hash lại,
-   đối chiếu package/app/version rồi gửi yêu cầu PPS cho trình cài của firmware.
-5. Hệ thống có thể đóng app để cài đè. Sau đó mở lại và kiểm tra phiên bản.
-   “Đã gửi job” chưa đồng nghĩa cài xong: kết quả cuối do trình cài hệ thống quyết định.
-6. Nếu nút cài trực tiếp không hiện hoặc gửi yêu cầu thất bại, file đã kiểm tra
-   vẫn ở Downloads. Chọn file bằng công cụ BAR Installer/cách cài hiện có; nút
-   mở bằng ứng dụng khác chỉ hoạt động nếu máy có handler BAR đã đăng ký.
+2. App kiểm tra feed. Bấm **Tải và cài cập nhật** để tải, xác minh rồi cài trong
+   cùng luồng. **Chỉ tải BAR** chỉ lưu tệp; **Tải lại BAR hiện tại** không tự cài.
+3. BAR lưu trong Downloads sau khi khớp kích thước, ZIP magic và SHA-256. Tệp đã
+   tải sẵn cũng được kiểm tra lại trước khi cài. Lỗi/hủy tải không gọi installer.
+4. Luồng PPS giữ nguyên giao thức đã được người dùng xác nhận cài được sau khi
+   app đóng. Sau khi gửi yêu cầu, bản mới tự thoát UI sau khoảng 1,5 giây để
+   hệ thống cài đè package. Chờ một lúc rồi mở lại app; không gỡ app/xóa data.
+5. Updater lưu version đã yêu cầu; lần mở sau xác nhận version thực đang chạy.
+   Nếu vẫn là bản cũ, thông báo rõ chưa xác nhận cài xong. Gửi job không đồng
+   nghĩa đã cài xong; không tự đăng nhập hoặc khởi động lại app bằng thủ thuật.
+6. Nếu không có context PPS phù hợp, updater thử handler BAR đã đăng ký. BAR
+   Installer 1.6.127 đã kiểm tra trong repo không đăng ký handler, nên việc cài
+   nó không tạo API tự nhận BAR. Với trường hợp đó, mở BAR Installer và chọn BAR
+   trong Downloads. Tệp vẫn được giữ cho cách cài thủ công.
 
-Chỉ bấm kiểm tra/tải không tự cài. Hai app cập nhật riêng, UI đi kèm trong BAR
-đầy đủ; không tải QML từ mạng rồi thực thi trực tiếp. Bản này vẫn là test BAR unsigned.
+Hai app cập nhật riêng; UI nằm trong BAR đầy đủ, không tải QML từ mạng để thực
+thi. Bản này vẫn là test BAR unsigned. Bản cũ chưa có nút/cơ chế tự thoát mới;
+để cài bản đầu có thay đổi này, có thể gửi cài bằng OTA cũ rồi đóng app như cách
+người dùng đã xác nhận hoạt động, hoặc cài BAR mới bằng công cụ đang dùng.
 
 ## Kết quả đọc BarInstaller.bar
 

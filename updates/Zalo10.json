@@ -3,23 +3,22 @@
   "app": "Zalo10",
   "appId": "com.BerryLife.Zalo10",
   "packageId": "testRel_Life_Zalo108ff545d2",
-  "version": "1.5.0.16",
-  "barUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.16-native-ui-ota-unsigned.bar",
-  "sha256": "3541a7ff4615bec33740115e97c3b86c10efcd6019406bd2d9a72110c1213677",
-  "bytes": 3993951,
+  "version": "1.5.0.17",
+  "barUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.17-native-ui-ota-unsigned.bar",
+  "sha256": "e90543d257a18de78ee750f4444ee26b76fc274dafe4579e8d81adc94064c4da",
+  "bytes": 4004856,
   "minimumOs": "10.3.1",
-  "notes": "UI: Giao diện chat cùng tông Teams; tin gửi bên phải, tin nhận bên trái, thời gian số và nút Gửi trong ô soạn.\nREMOVED: Menu trùng lặp; các thao tác ở Profile.\nFIX: Thông báo khi chat còn mở nhưng app thu nhỏ; đồng bộ trạng thái đã đọc Hub giữa UI/service và giữ yêu cầu mở chat qua đăng nhập.\nINFO: Người tạo Chung, chungtd.natv@gmail.com.\nBUILD: Giữ định danh cập nhật; cần xác nhận Hub và giao diện trên Passport.\n",
-  "latestVersion": "1.5.0.16",
-  "downloadUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.16-native-ui-ota-unsigned.bar",
+  "notes": "UI: Back nằm trên cùng bên trái tên người chat; ẩn thanh action bar dưới, giữ ô soạn tin.\nOTA: Tải và cài trong một luồng; sau khi gửi PPS, app tự thoát để hệ thống cài, kiểm tra version khi mở lại.\nFIX: Thông báo sinh nhật/profile hiện nội dung đọc được thay vì JSON thô trên Hub.\nINFO: Giữ tác giả gốc BBerryLife. Cập nhật giao diện: Chung, chungtd.natv@gmail.com, chỉ ghi trong Giới thiệu.\n",
+  "latestVersion": "1.5.0.17",
+  "downloadUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.17-native-ui-ota-unsigned.bar",
   "changelog": [
     {
-      "version": "1.5.0.16",
+      "version": "1.5.0.17",
       "items": [
-        "UI: Giao diện chat cùng tông Teams; tin gửi bên phải, tin nhận bên trái, thời gian số và nút Gửi trong ô soạn.",
-        "REMOVED: Menu trùng lặp; các thao tác ở Profile.",
-        "FIX: Thông báo khi chat còn mở nhưng app thu nhỏ; đồng bộ trạng thái đã đọc Hub giữa UI/service và giữ yêu cầu mở chat qua đăng nhập.",
-        "INFO: Người tạo Chung, chungtd.natv@gmail.com.",
-        "BUILD: Giữ định danh cập nhật; cần xác nhận Hub và giao diện trên Passport."
+        "UI: Back nằm trên cùng bên trái tên người chat; ẩn thanh action bar dưới, giữ ô soạn tin.",
+        "OTA: Tải và cài trong một luồng; sau khi gửi PPS, app tự thoát để hệ thống cài, kiểm tra version khi mở lại.",
+        "FIX: Thông báo sinh nhật/profile hiện nội dung đọc được thay vì JSON thô trên Hub.",
+        "INFO: Giữ tác giả gốc BBerryLife. Cập nhật giao diện: Chung, chungtd.natv@gmail.com, chỉ ghi trong Giới thiệu."
       ]
     }
   ]

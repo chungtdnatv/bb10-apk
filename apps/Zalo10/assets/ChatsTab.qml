@@ -7,11 +7,19 @@ import "lists"
 NavigationPane {
     id: chatsNav
     peekEnabled: false
+    backButtonsVisible: !chatsNav.activeChatPage||chatsNav.currentPage!==chatsNav.activeChatPage
     property variant appShell: null
     function raiseBottomBar() { if (chatsNav.count() === 1) bottomNavigation.reveal(); }
 
     onPopTransitionEnded: {
-        zService.clearActiveThread();
+        if(page===chatsNav.activeChatPage) {
+            zService.clearActiveThread();
+            chatPageConn.target=null;
+            chatsNav.activeChatPage=null;
+            page.destroy();
+        } else if(chatsNav.activeChatPage) {
+            zService.setActiveThread(chatsNav.activeChatPage.threadId,chatsNav.activeChatPage.isGroup);
+        }
     }
 
     onPushTransitionEnded: {
@@ -232,6 +240,11 @@ NavigationPane {
                 // "Cannot assign to non-existent property" while it is null.
                 id: chatPageConn
                 target: null
+                onPopRequestedChanged: {
+                    if(!chatsNav.activeChatPage||!chatsNav.activeChatPage.popRequested)return;
+                    chatsNav.activeChatPage.popRequested=false;
+                    chatsNav.pop();
+                }
                 onGroupBoardRequestedChanged: {
                     if (!chatsNav.activeChatPage || !chatsNav.activeChatPage.groupBoardRequested) return;
                     chatsNav.activeChatPage.groupBoardRequested = false;

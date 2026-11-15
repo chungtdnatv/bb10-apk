@@ -22,6 +22,7 @@ Q_DECL_EXPORT int main(int argc,char **argv) {
     stage("before native bridge");
     TeamsNative native;
     OtaUpdater ota("Teams10",QString::fromLatin1(TEAMS10_BUILD_VERSION),&app);
+    QObject::connect(&ota,SIGNAL(installSubmitted()),&app,SLOT(quit()));
     stage("native bridge ready");
     QmlDocument *document=QmlDocument::create("asset:///main.qml").parent(&app);
     document->setContextProperty("teamsNet",&native);

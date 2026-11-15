@@ -21,6 +21,22 @@ class ZaloFeatureFlows(unittest.TestCase):
         result = subprocess.run(['node','-e',script],text=True,capture_output=True)
         self.assertEqual(result.returncode,0,result.stderr)
 
+    def test_native_top_back_requests_navigation_pop(self):
+        text=(ROOT/'apps/Zalo10/assets/ChatView.qml').read_text()
+        a,b=block(text,text.index('function requestBack('))
+        self.node("const assert=require('node:assert/strict');const chatViewPage={popRequested:false};"+text[a:b]+"requestBack();assert.equal(chatViewPage.popRequested,true);")
+        text=(ROOT/'apps/Zalo10/assets/ChatsTab.qml').read_text()
+        a,b=block(text,text.index('onPopRequestedChanged:'))
+        handler=text[a:b];handler=handler[handler.index('{')+1:-1]
+        self.node("""const assert=require('node:assert/strict');let pops=0;
+            const chatsNav={activeChatPage:null,pop:()=>pops++};
+            function changed(){"""+handler+"""}
+            changed();assert.equal(pops,0);
+            chatsNav.activeChatPage={popRequested:false};changed();assert.equal(pops,0);
+            chatsNav.activeChatPage.popRequested=true;changed();assert.equal(pops,1);
+            assert.equal(chatsNav.activeChatPage.popRequested,false);
+        """)
+
     def test_chat_timestamp_is_numeric_and_handles_seconds_and_milliseconds(self):
         text = (ROOT/'apps/Zalo10/assets/chat/ChatBubbleItem.qml').read_text()
         a,b = block(text,text.index('function timestampLabel('))

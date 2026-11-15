@@ -1,4 +1,5 @@
 #include "core/websocket/WebSocketCommon.hpp"
+#include "utils/HubPreview.hpp"
 
 void ZaloService::handleWsChatPush(qint32 cmd, const QByteArray &data)
 {
@@ -75,6 +76,20 @@ void ZaloService::handleWsPushedMessage(QVariantMap m, bool isGroup)
         m_seenMsgIds.insert(msgId);
     }
     QString cliMsgId = m["cliMsgId"].toString();
+    // Retain human fields before rich-message normalization replaces the wire payload.
+    QString wireType=m.value("msgType").toString().toLower();
+    bool plainHubText=(wireType=="webchat"||wireType=="1")&&m.value("content").type()!=QVariant::Map;
+    QVariantMap hubCard=m.value("content").toMap();
+    QString hubRaw=m.value("content").toString();
+    if(hubCard.isEmpty()&&hubRaw.trimmed().startsWith("{"))hubCard=jsonToMap(hubRaw.toUtf8());
+    if(hubRaw.isEmpty()&&!hubCard.isEmpty())hubRaw=QString::fromUtf8(mapToJson(hubCard));
+    QString hubAction=hubCard.value("action").toString();
+    if(hubAction.isEmpty()&&hubCard.value("action").type()==QVariant::Map)hubAction=QString::fromUtf8(mapToJson(hubCard.value("action").toMap()));
+    std::string richPreview=HubPreview::rich(hubAction.toUtf8().constData(),
+        hubCard.value("title",hubCard.value("displayName",hubCard.value("name"))).toString().toUtf8().constData(),
+        hubCard.value("description",hubCard.value("desc",hubCard.value("message"))).toString().toUtf8().constData(),
+        hubRaw.toUtf8().constData(),plainHubText);
+
 
     // Tombstone guard (same as the cmd=510 history path): a "delete for me" msgId never reaches
     // UI/DB again, even on duplicate pushes.
@@ -471,7 +486,10 @@ void ZaloService::handleWsPushedMessage(QVariantMap m, bool isGroup)
         } else {
             msgPreview = out["content"].toString().left(80);
         }
-        if (msgPreview.isEmpty()) msgPreview = "[Message]";
+        if(!richPreview.empty())msgPreview=QString::fromUtf8(richPreview.data(),richPreview.size());
+        std::string safePreview=HubPreview::safe(msgPreview.toUtf8().constData(),plainHubText);
+        msgPreview=QString::fromUtf8(safePreview.data(),safePreview.size()).left(200);
+        if (msgPreview.isEmpty()) msgPreview = "[Tin nhắn]";
         bool isGrp = out["isGroup"].toBool();
         QString notifTitle = isGrp ? m_groupNames.value(threadId, "Zalo10") : "Zalo10";
         sendHubNotification(notifTitle, senderName + ": " + msgPreview, threadId, isGrp);

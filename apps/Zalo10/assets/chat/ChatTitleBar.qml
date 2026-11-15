@@ -12,7 +12,9 @@ TitleBar {
             verticalAlignment:   VerticalAlignment.Fill
             layout: DockLayout {}
 
+
             Container {
+                leftPadding: ui.du(8);rightPadding: ui.du(7)
                 visible: !chatViewPage.searchVisible
                 horizontalAlignment: HorizontalAlignment.Fill
                 verticalAlignment:   VerticalAlignment.Fill
@@ -75,8 +77,8 @@ TitleBar {
                 visible: chatViewPage.searchVisible
                 horizontalAlignment: HorizontalAlignment.Fill
                 verticalAlignment:   VerticalAlignment.Center
-                leftPadding: ui.du(1.5)
-                rightPadding: ui.du(1.5)
+                leftPadding: ui.du(8)
+                rightPadding: ui.du(7)
                 layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
 
                 TextField {
@@ -128,6 +130,22 @@ TitleBar {
                         chatViewPage.searchMatchPos = -1;
                     }
                 }
+            }
+            Button {
+                text: "‹"
+                accessibility.name: "Quay lại"
+                preferredWidth: ui.du(8);minWidth: ui.du(8);maxWidth: ui.du(8)
+                horizontalAlignment: HorizontalAlignment.Left
+                verticalAlignment: VerticalAlignment.Center
+                onClicked: chatViewPage.requestBack()
+            }
+            Button {
+                text: "⋮"
+                accessibility.name: "Tùy chọn hội thoại"
+                preferredWidth: ui.du(7);minWidth: ui.du(7);maxWidth: ui.du(7)
+                horizontalAlignment: HorizontalAlignment.Right
+                verticalAlignment: VerticalAlignment.Center
+                onClicked: chatViewPage.openActionMenu()
             }
         }
     }

@@ -61,6 +61,8 @@ Page {
     property real clockOffsetMs: 0
     property bool clockOffsetSet: false
 
+    actionBarVisibility: ChromeVisibility.Hidden
+    function requestBack() { chatViewPage.popRequested=true; }
     titleBar: ChatTitleBar {}
 
     function applyImageUpdate(msgId, localPath, imgWidth, imgHeight) {

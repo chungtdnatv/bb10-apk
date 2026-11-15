@@ -25,6 +25,7 @@ NavigationPane {
     property string chatsMore: ""
     property string chatsSignature: ""
     peekEnabled: false
+    backButtonsVisible: false
     function render(state) {
         if(state.phase!=="signedOut")loginAttempted=true;
         authenticated=state.phase==="ready";
@@ -224,24 +225,9 @@ NavigationPane {
                     Label { text: root.userName; textFormat: TextFormat.Plain; textStyle { color: Color.White; fontSize: FontSize.XLarge } horizontalAlignment: HorizontalAlignment.Center }
                     Label { text: root.userMail; textFormat: TextFormat.Plain; multiline: true; textStyle.color: Color.create("#a0bfd2");horizontalAlignment: HorizontalAlignment.Center }
                     Label { text: root.statusText; multiline: true; textFormat: TextFormat.Plain; textStyle { color: Color.create("#8daabd"); fontSize: FontSize.Small } }
-                    Container {
-                        layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
-                        Label { text: "Tải ảnh avatar (thử nghiệm)";textStyle.color: Color.White;layoutProperties: StackLayoutProperties { spaceQuota: 1 } }
-                        ToggleButton { checked: teamsNet.photosEnabled();onCheckedChanged: { teamsNet.setPhotosEnabled(checked);if(root.authenticated&&Teams.controller())Teams.controller().refreshChats(); } }
-                    }
-                    Label { text: "Bản sửa khởi động dùng avatar chữ mặc định. Bật riêng ảnh và Hub sau khi kiểm tra app mở ổn.";multiline: true;textStyle { color: Color.create("#8daabd");fontSize: FontSize.Small } }
-                    Container {
-                        topPadding: ui.du(2)
-                        layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
-                        Label { text: "Nhận tin nền và Hub"; textStyle.color: Color.White;layoutProperties: StackLayoutProperties { spaceQuota: 1 } }
-                        ToggleButton { checked: teamsNet.backgroundEnabled();onCheckedChanged: teamsNet.setBackgroundEnabled(checked) }
-                    }
-                    Label { text: "Kiểm tra khoảng 30 giây khi app đóng; cần Internet và quyền service nền/Hub của hệ thống. Đây chưa phải push tức thì."; multiline: true;textStyle { color: Color.create("#8daabd");fontSize: FontSize.Small } }
                     Button { text: "Cập nhật OTA";horizontalAlignment: HorizontalAlignment.Fill;onClicked: otaSheet.open() }
                     Button { text: "Làm mới danh sách"; horizontalAlignment: HorizontalAlignment.Fill;onClicked: Teams.controller().refreshChats() }
-                    Label { text: "Người tạo: Chung\nchungtd.natv@gmail.com";multiline: true;textStyle.color: Color.create("#a0bfd2") }
-                    Button { text: "Liên hệ Chung";horizontalAlignment: HorizontalAlignment.Fill;onClicked: Qt.openUrlExternally("mailto:chungtd.natv@gmail.com") }
-                    Button { text: "Hướng dẫn / Giới thiệu"; horizontalAlignment: HorizontalAlignment.Fill;onClicked: setupSheet.open() }
+                    Button { text: "Giới thiệu"; horizontalAlignment: HorizontalAlignment.Fill;onClicked: setupSheet.open() }
                     Button { text: "Đăng xuất"; horizontalAlignment: HorizontalAlignment.Fill;onClicked: logoutDialog.show() }
                 }
             }
@@ -271,7 +257,7 @@ NavigationPane {
         Sheet {
             id: setupSheet
             Page {
-                titleBar: TitleBar { title: "Đăng nhập Teams10 native"; dismissAction: ActionItem { title: "Đóng"; onTriggered: setupSheet.close() } }
+                titleBar: TitleBar { title: "Giới thiệu Teams10"; dismissAction: ActionItem { title: "Đóng"; onTriggered: setupSheet.close() } }
                 ScrollView {
                     Container {
                         leftPadding: ui.du(3);rightPadding: ui.du(3);topPadding: ui.du(3)

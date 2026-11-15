@@ -1,4 +1,4 @@
-# Teams10 1.1.2.10 — native BB10 Microsoft 365 chat
+# Teams10 1.1.2.11 — native BB10 Microsoft 365 chat
 
 Independent, unofficial Cascades client for work/school accounts. No WebView,
 password input or own Entra App Registration. Device-code/native interoperability
@@ -15,20 +15,25 @@ This build removes **all direct QPainter/QFont/TextDocument calls** (also checke
 against actual ARM imports). Placeholder circles are packaged PNGs with ordinary
 Cascades Label initials; opt-in photo masking uses a pixel loop without a painter.
 
-Upgrade explicitly resets Hub/background and photo downloads to off. Names,
-HTML handling, saved-session restore and the rest of the UI remain enabled.
-Enable each experimental feature separately in Profile after checking basic
-read/send. No Hub registration happens through observe/cleanup when disabled.
-A caught fatal signal writes a static marker and crash flag. On the next UI
-launch, integration switches turn off and auto-restore pauses for explicit login; the saved session itself is preserved. Boot service startup
-must not consume the UI's crash flag. SIGKILL/OS termination cannot be caught.
+Avatar downloads and background/Hub are enabled by default, including upgrades;
+there are no Profile switches for them. A crash flag still pauses auto-restore
+for explicit login, but no longer disables those integrations. Boot service
+startup does not consume the UI crash flag. Creator credit is in About.
 
-## Directory and Hub update (1.1.2.10)
+## Top chat navigation and OTA (1.1.2.11)
+
+The back button is in the top title bar; the bottom action bar is hidden while
+the composer remains. OTA's explicit Download and install action chains the
+verified download to submission, then exits via Application.quit so the firmware
+can replace this app. The next UI launch compares the running version with the
+saved request. Submission alone is never called completed installation.
+
+## Directory and Hub update (1.1.2.11)
 
 Contacts lists unique recipients and groups from existing conversations, sorted
 by name and without message previews/timestamps. It does not fetch an entire
 organization address book or create new chats. Session/login diagnostic UI has
-been removed; background service and Hub switches remain because notifications
+been removed; background service and Hub remain enabled because notifications
 use them. Creator: Chung, chungtd.natv@gmail.com.
 
 Hub read state changes only after a successful foreground message page; a stale

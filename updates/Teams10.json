@@ -3,23 +3,21 @@
   "app": "Teams10",
   "appId": "com.bb10toolkit.Teams10",
   "packageId": "testRel_kit_Teams105d440259",
-  "version": "1.1.2.10",
-  "barUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.10-ui-ota-unsigned.bar",
-  "sha256": "fed114117c13a75508e1e1b4d588337ce94574b55c6bf21874f6ed00142d3eca",
-  "bytes": 338638,
+  "version": "1.1.2.11",
+  "barUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.11-ui-ota-unsigned.bar",
+  "sha256": "d1bdfc0d54fe33e403b67d9892b1f5930d475c128e72ff32671b266e6d1ccb3a",
+  "bytes": 339160,
   "minimumOs": "10.3.1",
-  "notes": "FIX: Danh bạ chỉ hiển thị liên lạc/nhóm, sắp theo tên, không hiển thị tin nhắn.\nREMOVED: Chẩn đoán đăng nhập, phiên và service khỏi giao diện.\nFIX: Đổi trạng thái Hub sau khi tải tin đang xem; không đánh dấu nhầm tin mới hơn.\nINFO: Người tạo Chung, chungtd.natv@gmail.com.\nBUILD: Giữ định danh cập nhật; cần xác nhận Hub và giao diện trên Passport.\n",
-  "latestVersion": "1.1.2.10",
-  "downloadUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.10-ui-ota-unsigned.bar",
+  "notes": "UI: Back nằm trên cùng bên trái tên người chat; ẩn thanh action bar dưới, giữ ô soạn tin.\nOTA: Tải và cài trong một luồng; sau khi gửi PPS, app tự thoát để hệ thống cài, kiểm tra version khi mở lại.\nUI: Bật mặc định avatar, service nền và Hub; bỏ hai công tắc Profile. Ghi danh Chung trong Giới thiệu.\n",
+  "latestVersion": "1.1.2.11",
+  "downloadUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.11-ui-ota-unsigned.bar",
   "changelog": [
     {
-      "version": "1.1.2.10",
+      "version": "1.1.2.11",
       "items": [
-        "FIX: Danh bạ chỉ hiển thị liên lạc/nhóm, sắp theo tên, không hiển thị tin nhắn.",
-        "REMOVED: Chẩn đoán đăng nhập, phiên và service khỏi giao diện.",
-        "FIX: Đổi trạng thái Hub sau khi tải tin đang xem; không đánh dấu nhầm tin mới hơn.",
-        "INFO: Người tạo Chung, chungtd.natv@gmail.com.",
-        "BUILD: Giữ định danh cập nhật; cần xác nhận Hub và giao diện trên Passport."
+        "UI: Back nằm trên cùng bên trái tên người chat; ẩn thanh action bar dưới, giữ ô soạn tin.",
+        "OTA: Tải và cài trong một luồng; sau khi gửi PPS, app tự thoát để hệ thống cài, kiểm tra version khi mở lại.",
+        "UI: Bật mặc định avatar, service nền và Hub; bỏ hai công tắc Profile. Ghi danh Chung trong Giới thiệu."
       ]
     }
   ]

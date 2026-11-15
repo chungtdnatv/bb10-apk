@@ -1,5 +1,37 @@
 # Validation of the toolkit integration
 
+## Teams10 1.1.2.11 / Zalo10 1.5.0.17
+
+Chat back controls move to the top, to the left of the conversation title.
+Both chat pages hide the bottom action bar; navigation-pane back buttons are
+also disabled while those pages are active. Zalo keeps overflow actions through
+the top options button and restores the active thread when returning from a
+subpage. Composers remain visible.
+
+The user confirmed that the existing PPS update applies after closing the app.
+The PPS script/protocol is unchanged. The new explicit Download and install
+action chains a verified download (including a verified cached BAR) to submission.
+After successful submission, the UI exits through its normal application cleanup
+path. A saved requested version is compared to the running version on next launch;
+submission itself is never reported as completed installation. Download-only
+and cancellation remain separate, and failure details/handler errors are shown.
+
+Teams avatar/background/Hub are enabled by default and their Profile switches
+are removed. Its credit is in About. Zalo restores BerryLife's package author and
+BBerryLife's original About material, adding only UI-update credit for Chung in
+About. Its birthday/profile previews use human title/description fields; unknown
+structured payloads get a readable label, while explicit plain-text JSON and
+media labels remain text rather than being blanket-filtered.
+
+Passed 49 toolkit tests, including production C++ birthday/profile preview tests
+and top-back navigation mocks; all Teams suites (8 login/navigation, 2 directory,
+38 native-controller, runtime/policy, 21 Graph, 2 package) and Zalo UI/3 package
+checks passed. Changed QML passed syntax lint, both native SDK builds passed
+closure/unwind/entry-point checks, and final BAR payloads/identities/feed hashes
+were checked. Teams has 47 assets; Zalo has 826. New top-bar rendering, automatic
+exit/update and birthday formatting still require Passport confirmation; the
+user-confirmed old PPS behavior is not claimed as a device test of this build.
+
 ## Teams10 1.1.2.10 / Zalo10 1.5.0.16
 
 Teams' directory is now a separate, name-sorted projection of contacts/groups

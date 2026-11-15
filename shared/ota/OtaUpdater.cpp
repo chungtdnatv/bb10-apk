@@ -9,6 +9,8 @@
 #include <QProcess>
 #include <QStringList>
 #include <QVariantMap>
+#include <QSettings>
+#include <QTimer>
 #include <bb/data/JsonDataAccess>
 #include <bb/system/InvokeManager>
 #include <bb/system/InvokeRequest>
@@ -53,44 +55,71 @@ void OtaTransfer::run(){
  if(::rename(file.fileName().toUtf8().constData(),destination.toUtf8().constData())!=0){error=QString::fromUtf8("Không lưu được BAR đã kiểm tra.");return;}
  resultPath=destination;success=true;
 }
-OtaUpdater::OtaUpdater(const QString &app,const QString &current,QObject *parent):QObject(parent),m_app(app),m_current(current),m_status(""),m_bytes(0),m_busy(false),m_download(false),m_progress(0),m_worker(0),m_installer(0){curl_global_init(CURL_GLOBAL_DEFAULT);}
+OtaUpdater::OtaUpdater(const QString &app,const QString &current,QObject *parent):QObject(parent),m_app(app),m_current(current),m_status(""),m_bytes(0),m_busy(false),m_download(false),m_installAfterDownload(false),m_progress(0),m_worker(0),m_installer(0),m_invoke(new bb::system::InvokeManager(this)){
+ curl_global_init(CURL_GLOBAL_DEFAULT);
+ QSettings settings("BB10Toolkit",m_app+"OTA");QString requested=settings.value("requestedVersion").toString();
+ if(!requested.isEmpty()) {
+  if(!OtaPolicy::newer(requested.toStdString(),m_current.toStdString())) {
+   m_installNotice=QString::fromUtf8("Đã xác nhận app đang chạy bản cập nhật: ")+m_current;
+   settings.remove("requestedVersion");settings.sync();
+  } else m_installNotice=QString::fromUtf8("Lần trước đã yêu cầu cài ")+requested+QString::fromUtf8(" nhưng app vẫn đang chạy ")+m_current+QString::fromUtf8(". Chưa xác nhận cập nhật thành công; có thể thử lại hoặc cài BAR từ Downloads bằng BAR Installer.");
+ }
+}
 OtaUpdater::~OtaUpdater(){if(m_worker){m_worker->cancelled.fetchAndStoreOrdered(1);m_worker->wait();delete m_worker;}curl_global_cleanup();}
 bool OtaUpdater::available()const{return !m_url.isEmpty()&&OtaPolicy::newer(m_latest.toStdString(),m_current.toStdString());}
 void OtaUpdater::check(){
- if(m_busy)return;m_busy=true;m_download=false;m_latest.clear();m_notes.clear();m_url.clear();m_local.clear();m_progress=0;m_status=QString::fromUtf8("Đang kiểm tra phiên bản…");emit changed();
+ if(m_busy)return;m_busy=true;m_download=false;m_installAfterDownload=false;m_latest.clear();m_notes.clear();m_url.clear();m_local.clear();m_progress=0;m_status=QString::fromUtf8("Đang kiểm tra phiên bản…");emit changed();
  m_worker=new OtaTransfer;m_worker->url="https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/updates/"+m_app+".json";
  m_worker->ca=QDir::currentPath()+"/app/native/assets/certs/cacert.pem";connect(m_worker,SIGNAL(finished()),this,SLOT(finished()));m_worker->start();
 }
+void OtaUpdater::update(){
+ if(m_busy||!available())return;
+ m_installAfterDownload=true;download();
+}
+void OtaUpdater::rememberInstall(){
+ if(!available())return;
+ QSettings settings("BB10Toolkit",m_app+"OTA");settings.setValue("requestedVersion",m_latest);settings.sync();
+}
 void OtaUpdater::download(){
- if(m_busy||!downloadable())return;
- QString directory="/accounts/1000/shared/downloads";if(!QDir(directory).exists()){m_status=QString::fromUtf8("Downloads chưa truy cập được. Cho phép quyền tệp dùng chung rồi thử lại.");emit changed();return;}
+ if(m_busy||!downloadable()){m_installAfterDownload=false;return;}
+ QString directory="/accounts/1000/shared/downloads";if(!QDir(directory).exists()){m_installAfterDownload=false;m_status=QString::fromUtf8("Downloads chưa truy cập được. Cho phép quyền tệp dùng chung rồi thử lại.");emit changed();return;}
  QString path=directory+"/"+QFileInfo(QUrl(m_url).path()).fileName();
- if(QFileInfo(path).size()==m_bytes&&hashFile(path)==m_hash){m_local=path;m_status=QString::fromUtf8("BAR đã có và SHA-256 hợp lệ. Có thể mở trình cài.");emit changed();return;}
+ if(QFileInfo(path).size()==m_bytes&&hashFile(path)==m_hash){m_local=path;m_status=QString::fromUtf8("BAR đã có và SHA-256 hợp lệ. Có thể mở trình cài.");bool install=m_installAfterDownload;m_installAfterDownload=false;emit changed();if(install)installOnDevice();return;}
  m_busy=true;m_download=true;m_progress=0;m_status=QString::fromUtf8("Đang tải BAR…");emit changed();m_worker=new OtaTransfer;
  m_worker->url=m_url;m_worker->destination=path;m_worker->expectedHash=m_hash;m_worker->expectedBytes=m_bytes;m_worker->ca=QDir::currentPath()+"/app/native/assets/certs/cacert.pem";
  connect(m_worker,SIGNAL(finished()),this,SLOT(finished()));connect(m_worker,SIGNAL(progress(int)),this,SLOT(transferProgress(int)));m_worker->start();
 }
 void OtaUpdater::transferProgress(int percent){m_progress=percent;emit changed();}
-void OtaUpdater::cancel(){if(m_worker)m_worker->cancelled.fetchAndStoreOrdered(1);}
+void OtaUpdater::cancel(){m_installAfterDownload=false;if(m_worker)m_worker->cancelled.fetchAndStoreOrdered(1);}
 void OtaUpdater::finished(){
  OtaTransfer *done=qobject_cast<OtaTransfer*>(sender());if(!done||done!=m_worker)return;m_worker=0;m_busy=false;
+ bool install=m_download&&done->success&&m_installAfterDownload;m_installAfterDownload=false;
  if(!done->success)m_status=done->error;
- else if(m_download){m_local=done->resultPath;m_progress=100;m_status=QString::fromUtf8("Đã tải và xác minh SHA-256. Bấm mở trình cài để tiếp tục.");}
+ else if(m_download){m_local=done->resultPath;m_progress=100;m_status=QString::fromUtf8("Đã tải và xác minh SHA-256. Có thể cài bản đã tải.");}
  else {
   bb::data::JsonDataAccess json;QVariantMap data=json.loadFromBuffer(done->response).toMap();QString version=data.value("version").toString(),url=data.value("barUrl").toString(),hash=data.value("sha256").toString();qint64 bytes=data.value("bytes").toLongLong();
   QString id=m_app=="Teams10"?"com.bb10toolkit.Teams10":"com.BerryLife.Zalo10";
-  if(data.value("schema").toInt()!=1||data.value("app").toString()!=m_app||data.value("appId").toString()!=id||!OtaPolicy::artifact(m_app.toStdString(),version.toStdString(),url.toStdString())||!OtaPolicy::digest(hash.toStdString())||bytes<1024||bytes>64*1024*1024)m_status=QString::fromUtf8("Thông tin cập nhật không hợp lệ. Không tải bản này.");
+  if(data.value("schema").toInt()!=1||data.value("app").toString()!=m_app||data.value("appId").toString()!=id||data.value("packageId").toString()!=(m_app=="Teams10"?"testRel_kit_Teams105d440259":"testRel_Life_Zalo108ff545d2")||!OtaPolicy::artifact(m_app.toStdString(),version.toStdString(),url.toStdString())||!OtaPolicy::digest(hash.toStdString())||bytes<1024||bytes>64*1024*1024)m_status=QString::fromUtf8("Thông tin cập nhật không hợp lệ. Không tải bản này.");
   else {m_latest=version;m_url=url;m_hash=hash;m_bytes=bytes;m_notes=data.value("notes").toString();m_status=available()?QString::fromUtf8("Có bản mới để tải."):QString::fromUtf8("Bạn đang dùng bản mới nhất.");}
  }
- done->deleteLater();emit changed();
+ done->deleteLater();emit changed();if(install)installOnDevice();
 }
 void OtaUpdater::openInstaller(){
  if(m_busy||m_local.isEmpty())return;
  if(QFileInfo(m_local).size()!=m_bytes||hashFile(m_local)!=m_hash){m_local.clear();m_status=QString::fromUtf8("BAR đã bị thay đổi. Cần tải lại.");emit changed();return;}
- bb::system::InvokeManager *manager=new bb::system::InvokeManager(this);bb::system::InvokeRequest request;request.setAction("bb.action.OPEN");request.setMimeType("application/vnd.rim.bar");request.setUri(QUrl::fromLocalFile(m_local));
- bb::system::InvokeTargetReply *reply=manager->invoke(request);if(reply)connect(reply,SIGNAL(finished()),this,SLOT(invoked()));m_status=QString::fromUtf8("Đang yêu cầu mở trình cài BAR…");emit changed();
+ bb::system::InvokeRequest request;request.setAction("bb.action.OPEN");request.setMimeType("application/vnd.rim.bar");request.setUri(QUrl::fromLocalFile(m_local));
+ rememberInstall();m_busy=true;
+ bb::system::InvokeTargetReply *reply=m_invoke->invoke(request);
+ if(reply){connect(reply,SIGNAL(finished()),this,SLOT(invoked()));m_status=QString::fromUtf8("Đang yêu cầu mở trình xử lý BAR đã đăng ký…");}
+ else {m_busy=false;m_status=QString::fromUtf8("Không gửi được yêu cầu mở BAR. Mở BAR Installer và chọn tệp trong Downloads.");}
+ emit changed();
 }
-void OtaUpdater::invoked(){bb::system::InvokeTargetReply *reply=qobject_cast<bb::system::InvokeTargetReply*>(sender());if(!reply)return;m_status=reply->error()==bb::system::InvokeReplyError::None?QString::fromUtf8("Đã mở trình xử lý BAR; hãy xác nhận trong trình cài."):QString::fromUtf8("Máy chưa có trình xử lý BAR phù hợp. Dùng công cụ cài BB10 với file trong Downloads.");reply->deleteLater();emit changed();}
+void OtaUpdater::invoked(){
+ bb::system::InvokeTargetReply *reply=qobject_cast<bb::system::InvokeTargetReply*>(sender());if(!reply)return;
+ m_busy=false;
+ m_status=reply->error()==bb::system::InvokeReplyError::None?QString::fromUtf8("Đã chuyển BAR tới trình xử lý. Xác nhận cài trong ứng dụng đó; chưa xác nhận cài xong."):QString::fromUtf8("Không có ứng dụng đăng ký nhận BAR qua OPEN. BAR Installer có thể đã cài nhưng không cung cấp API này. Mở BAR Installer và chọn tệp trong Downloads.");
+ reply->deleteLater();emit changed();
+}
 
 bool OtaUpdater::downloadable()const{return !m_url.isEmpty()&&!OtaPolicy::newer(m_current.toStdString(),m_latest.toStdString());}
 bool OtaUpdater::directInstallAvailable()const{
@@ -98,22 +127,24 @@ bool OtaUpdater::directInstallAvailable()const{
  for(unsigned i=0;i<sizeof(paths)/sizeof(paths[0]);i++)if(QFileInfo(paths[i]).isExecutable())return true;return QFileInfo("/pps/system/installer/upd/current").isWritable();
 }
 void OtaUpdater::installOnDevice(){
- if(m_busy||m_local.isEmpty()||!directInstallAvailable())return;
+ if(m_busy||m_local.isEmpty())return;
+ if(!directInstallAvailable()){openInstaller();return;}
  if(QFileInfo(m_local).size()!=m_bytes||hashFile(m_local)!=m_hash){m_status=QString::fromUtf8("BAR đã thay đổi. Hãy tải lại.");m_local.clear();emit changed();return;}
  QString script=QDir::currentPath()+"/app/native/assets/ota-install.sh";
  if(!QFileInfo(script).isFile()){m_status=QString::fromUtf8("Thiếu thành phần cài OTA.");emit changed();return;}
- m_busy=true;m_status=QString::fromUtf8("Đang gửi yêu cầu cài. Hệ thống có thể đóng app để cập nhật; sau đó mở lại app.");emit changed();
+ rememberInstall();m_busy=true;m_status=QString::fromUtf8("Đang gửi yêu cầu cài. Hệ thống có thể đóng app để cập nhật; sau đó mở lại app.");emit changed();
  m_installer=new QProcess(this);connect(m_installer,SIGNAL(finished(int,QProcess::ExitStatus)),this,SLOT(installFinished(int)));connect(m_installer,SIGNAL(error(QProcess::ProcessError)),this,SLOT(installFailed()));
  m_installer->start("/bin/sh",QStringList()<<script<<m_local<<(m_app=="Teams10"?"com.bb10toolkit.Teams10":"com.BerryLife.Zalo10")<<m_latest);
 }
 void OtaUpdater::installFinished(int exitCode){
  QProcess *process=qobject_cast<QProcess*>(sender());if(!process)return;if(process!=m_installer){process->deleteLater();return;}
- QByteArray out=process->readAllStandardOutput();m_busy=false;
- m_status=exitCode==0&&out.contains("INSTALL_REQUEST_SUBMITTED")?QString::fromUtf8("Đã gửi job cài tới hệ thống. Chưa xác nhận cài xong; app có thể đóng."):QString::fromUtf8("Hệ thống không nhận yêu cầu cài trực tiếp. Dùng công cụ cài BAR với file trong Downloads.");
+ QByteArray out=process->readAllStandardOutput(),error=process->readAllStandardError();m_busy=false;
+ m_status=exitCode==0&&out.contains("INSTALL_REQUEST_SUBMITTED")?QString::fromUtf8("Đã gửi yêu cầu cài. App sẽ đóng để hệ thống cập nhật; chờ rồi mở lại app."):QString::fromUtf8("Không cài được trực tiếp. Chi tiết: ")+QString::fromUtf8((out+error).right(1200))+QString::fromUtf8("\nCó thể mở BAR Installer và chọn BAR trong Downloads.");
  m_installer=0;process->deleteLater();emit changed();
+ if(exitCode==0&&out.contains("INSTALL_REQUEST_SUBMITTED"))QTimer::singleShot(1500,this,SIGNAL(installSubmitted()));
 }
 void OtaUpdater::installFailed(){
  QProcess *process=qobject_cast<QProcess*>(sender());if(!process||process!=m_installer)return;
- m_status=QString::fromUtf8("Không chạy được trình cài trên firmware này.");
+ m_status=QString::fromUtf8("Không chạy được thành phần cài: ")+process->errorString();
  if(process->error()==QProcess::FailedToStart){m_busy=false;m_installer=0;process->deleteLater();}emit changed();
 }

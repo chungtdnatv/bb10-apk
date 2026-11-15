@@ -50,8 +50,7 @@ int main(int argc,char **argv){
  assert(NativeText::plain("<emoji alt=\"smile\">🙂</emoji>")=="🙂");
  assert(NativeText::decode("&NotEqualTilde; &#xD800; &unknown; %20")=="≂̸ � &unknown; %20");
  assert(NativeText::decode("&amp;lt;tag&amp;gt;")=="&lt;tag&gt;");
- assert(FeaturePolicy::needsUpgrade(0));assert(FeaturePolicy::needsUpgrade(5));assert(!FeaturePolicy::needsUpgrade(6));
- assert(!FeaturePolicy::integrations(5,true));assert(!FeaturePolicy::integrations(6,false));assert(FeaturePolicy::integrations(6,true));
+ assert(FeaturePolicy::photosEnabled());assert(FeaturePolicy::backgroundEnabled());
  pid_t crash=::fork();assert(crash>=0);
  if(crash==0){
   struct rlimit limits;limits.rlim_cur=limits.rlim_max=0;::setrlimit(RLIMIT_CORE,&limits);

@@ -82,7 +82,7 @@ TabbedPane {
         else if (action === "about") aboutSheet.open();
         else if (action === "ota") otaSheet.open();
         else if (action === "markRead") chatsTabContent.markAllRead();
-        else if (action === "feedback") app.invokeEmail("chungtd.natv@gmail.com", "Zalo10 Feedback");
+        else if (action === "feedback") app.invokeEmail("Berrylife2025@gmail.com", "Zalo10 Feedback");
     }
 
     function startLogin() {

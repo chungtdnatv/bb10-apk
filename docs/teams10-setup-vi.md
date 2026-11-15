@@ -1,6 +1,6 @@
-# Teams10 1.1.2.10
+# Teams10 1.1.2.11
 
-[Tải BAR đầy đủ](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.10-ui-ota-unsigned.bar).
+[Tải BAR đầy đủ](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.11-ui-ota-unsigned.bar).
 Cài đè bản trong repo, giữ nguyên data; không cần gỡ app. Hai entry point Teams10
 và Teams10Service phải được giữ trong BAR.
 
@@ -31,11 +31,11 @@ phép, nhưng chưa hỗ trợ đăng nhập bằng tài khoản Teams cá nhân
 
 ## Ảnh avatar / Hub
 
-Hai phần này vẫn bật riêng trong Profile sau khi kiểm tra đọc/gửi ổn. Hub và
-service có thể cần restricted permissions của firmware; chỉ khai báo quyền trong
-BAR không đồng nghĩa được cấp. Service kiểm tra khoảng 30 giây, không phải push
-tức thì. Service nhường phiên cho UI khi app mở. Máy từ chối UDS sẽ dùng thông báo thường nếu được phép; máy từ
-chối headless sẽ không nhận khi đóng UI bằng fallback đó.
+Hai tính năng tải avatar và nhận tin nền/Hub được bật mặc định, không còn hai
+công tắc trong Profile. Hub/service vẫn phụ thuộc quyền firmware. Service kiểm
+tra khoảng 30 giây; chưa phải push tức thì. Khi UI mở, service nhường phiên cho
+UI. Nếu UDS bị từ chối, app dùng thông báo thường khi được phép; fallback này
+không thay thế service nền nếu firmware từ chối chạy service.
 
 ## Danh bạ, thông tin người tạo và OTA
 
@@ -43,7 +43,7 @@ Danh bạ liệt kê liên lạc/nhóm từ các hội thoại có sẵn, sắp 
 nội dung/thời gian tin nhắn. Chạm một mục để mở hội thoại; chưa phải toàn bộ
 address book của tổ chức và chưa tạo chat mới.
 
-Người tạo: **Chung**, **chungtd.natv@gmail.com**. Profile có liên hệ và
+Giới thiệu ghi **Chung**, **chungtd.natv@gmail.com**. Profile có mục Giới thiệu và
 **Cập nhật OTA**; xem [hướng dẫn OTA/cài PPS](ota-vi.md). Các nút/màn hình chẩn đoán
 đăng nhập, phiên và service đã bỏ. Log nội bộ trong sandbox vẫn hỗ trợ sửa lỗi.
 

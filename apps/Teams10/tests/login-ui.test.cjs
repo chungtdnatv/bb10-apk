@@ -74,3 +74,10 @@ test('Hub opens missing-list conversations and waits for an existing page to pop
  context.activeChat=null;context.openPending();assert.equal(opened[0].id,'19:hub@thread.v2');assert.equal(cleared,1);
  context.activeChat={chatId:'19:hub@thread.v2'};context.openPending();assert.equal(refreshes,1);assert.equal(cleared,2);
 });
+
+test('top chat back action pops its owner and tolerates an unassigned owner',()=>{
+ const start=chatQml.indexOf('    function requestBack()'),end=chatQml.indexOf('\n    titleBar:',start);
+ let pops=0;const context=vm.createContext({chat:{appRoot:null}});
+ vm.runInContext(chatQml.slice(start,end),context);context.requestBack();
+ context.chat.appRoot={pop:()=>pops++};context.requestBack();assert.equal(pops,1);
+});

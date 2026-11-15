@@ -144,11 +144,8 @@ void TeamsWorker::run() {
     curl_slist_free_all(headers); curl_easy_cleanup(curl);
 }
 TeamsNative::TeamsNative(QObject *parent,bool headless):QObject(parent),m_worker(0),m_db(0),m_settings("BB10Toolkit","Teams10"),m_recovery(false) {
-    if(FeaturePolicy::needsUpgrade(m_settings.value("integrationRevision",0).toInt())){
-        m_settings.setValue("integrationRevision",6);m_settings.setValue("backgroundEnabled",false);m_settings.setValue("photosEnabledV6",false);m_settings.sync();recordEvent("safe-upgrade");
-    }
     if(QFileInfo("data/teams10_crash.flag").exists()){
-        m_settings.setValue("integrationRevision",6);m_settings.setValue("backgroundEnabled",false);m_settings.setValue("photosEnabledV6",false);m_settings.sync();m_recovery=true;if(!headless)QFile::remove("data/teams10_crash.flag");recordEvent("recovery-mode");
+        m_recovery=true;if(!headless)QFile::remove("data/teams10_crash.flag");recordEvent("recovery-mode");
     }
     curl_global_init(CURL_GLOBAL_DEFAULT);
     QTimer *pollTimer=new QTimer(this);connect(pollTimer,SIGNAL(timeout()),this,SIGNAL(pollTick()));pollTimer->start(30000);
@@ -280,8 +277,7 @@ void TeamsNative::startBackground(){
  recordEvent("hub-start");m_hub.init();recordEvent("hub-ready");
  bb::system::InvokeRequest req;req.setTarget("com.bb10toolkit.Teams10.service");req.setAction("com.bb10toolkit.Teams10.RUN");req.setMimeType("application/vnd.teams10.background");req.setUri(QUrl("headless:teams10"));bb::system::InvokeTargetReply *reply=m_invoke->invoke(req);if(reply)connect(reply,SIGNAL(finished()),this,SLOT(backgroundStarted()));
 }
-bool TeamsNative::backgroundEnabled() const{return FeaturePolicy::integrations(m_settings.value("integrationRevision",0).toInt(),m_settings.value("backgroundEnabled",false).toBool());}
-void TeamsNative::setBackgroundEnabled(bool enabled){m_settings.setValue("integrationRevision",6);m_settings.setValue("backgroundEnabled",enabled);m_settings.sync();if(enabled)startBackground();}
+bool TeamsNative::backgroundEnabled() const{return FeaturePolicy::backgroundEnabled();}
 
 QString TeamsNative::cachedAvatar(const QString &url) const{
  QString file=QDir::homePath()+"/avatars/"+QString::fromLatin1(QCryptographicHash::hash(url.toUtf8(),QCryptographicHash::Sha1).toHex())+".png";
@@ -294,8 +290,8 @@ void TeamsNative::backgroundStarted(){
  reply->deleteLater();
 }
 
-bool TeamsNative::photosEnabled() const{return m_settings.value("photosEnabledV6",false).toBool();}
-void TeamsNative::setPhotosEnabled(bool enabled){m_settings.setValue("photosEnabledV6",enabled);m_settings.sync();}
+bool TeamsNative::photosEnabled() const{return FeaturePolicy::photosEnabled();}
+
 
 bool TeamsNative::recoveryMode() const{return m_recovery;}
 

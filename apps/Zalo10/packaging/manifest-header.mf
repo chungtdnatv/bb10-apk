@@ -2,7 +2,7 @@ Archive-Manifest-Version: 1.5
 Archive-Created-By: Zalo10 source BAR builder 1.0
 
 Package-Type: application
-Package-Author: Chung
+Package-Author: BerryLife
 Package-Author-Id: testQmVycnlMaWZlICAgICAgICA
 Package-Name: com.BerryLife.Zalo10
 Package-Id: testRel_Life_Zalo108ff545d2
