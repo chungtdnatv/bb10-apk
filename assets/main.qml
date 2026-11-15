@@ -5,47 +5,29 @@ import QtQuick 1.0
 TabbedPane {
     id: root
     showTabsOnActionBar: false
-    sidebarState: SidebarState.VisibleCompact
-    
+    sidebarState: SidebarState.Hidden
+
+    property string pendingHubThread: ""
+    property bool pendingHubGroup: false
+    function openPendingHubThread() {
+        if(!zService.loggedIn||!pendingHubThread)return;
+        root.activeTab=chatsTab;
+        if(chatsTabContent.openThread(pendingHubThread,pendingHubGroup)!==false)pendingHubThread="";
+    }
+
     property string selfName: "Me"
     property int chatsUnreadCount: 0
-    property int groupsUnreadCount: 0
-    
+
     onChatsUnreadCountChanged: {
         chatsTab.title = chatsUnreadCount > 0
         ? "Chats (" + chatsUnreadCount + ")"
         : "Chats";
     }
-    onGroupsUnreadCountChanged: {
-        groupsTab.title = groupsUnreadCount > 0
-        ? "Groups (" + groupsUnreadCount + ")"
-        : "Groups";
-    }
+
     onActiveTabChanged: {
         if (activeTab === chatsTab)  root.chatsUnreadCount  = 0;
-        if (activeTab === groupsTab) root.groupsUnreadCount = 0;
     }
-    
-    Menu.definition: MenuDefinition {
-        actions: [
-            ActionItem {
-                title: "About"
-                imageSource: "asset:///images/ic_info.png"
-                onTriggered: { aboutSheet.open(); }
-            },
-            ActionItem {
-                title: "Settings"
-                imageSource: "asset:///images/ic_settings.png"
-                onTriggered: { settingsSheet.open(); }
-            },
-            ActionItem {
-                title: "Feedback"
-                imageSource: "asset:///images/ic_mail.png"
-                onTriggered: { app.invokeEmail("Berrylife2025@gmail.com", "Zalo10 Feedback"); }
-            }
-        ]
-    }
-    
+
     function formatTime(timestamp) {
         if (!timestamp || timestamp === "") return "";
         var date = new Date(timestamp * 1);
@@ -62,7 +44,46 @@ TabbedPane {
         var mon = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][date.getMonth()];
         return mon + " " + date.getDate();
     }
-    
+
+    function selectSection(index) {
+        contactsTabContent.composeMode = false;
+        contactsTabContent.composeOpening = false;
+        if (index === 0) { root.activeTab = chatsTab; chatsTabContent.raiseBottomBar(); }
+        else if (index === 1) { root.activeTab = contactsTab; contactsTabContent.raiseBottomBar(); }
+        else if (index === 2) { root.activeTab = profileTab; profileTabContent.raiseBottomBar(); }
+    }
+    function openComposer() {
+        contactsTabContent.beginCompose();
+        root.activeTab = contactsTab;
+        contactsTabContent.raiseBottomBar();
+    }
+    function composeConversation(contact) {
+        var threadId = (contact.threadId || contact.uid || "").toString();
+        if (threadId.length === 0) return false;
+        var previousTab = root.activeTab;
+        root.activeTab = chatsTab;
+        if (chatsTabContent.openThread(threadId, false, contact) === false) {
+            root.activeTab = previousTab;
+            return false;
+        }
+        contactsTabContent.composeMode = false;
+        return true;
+    }
+
+    function profileAction(action) {
+        if (action === "refresh") {
+        if (root.activeTab === invitesTab) zService.fetchInvites();
+        else if (root.activeTab === contactsTab) zService.fetchFriends();
+        else chatsTabContent.refreshList();
+        } else if (action === "invites") root.activeTab = invitesTab;
+        else if (action === "phoneSync") settingsSheet.startPhoneSyncFlow();
+        else if (action === "settings") settingsSheet.open();
+        else if (action === "about") aboutSheet.open();
+        else if (action === "ota") aboutSheet.openSoftwareUpdate();
+        else if (action === "markRead") chatsTabContent.markAllRead();
+        else if (action === "feedback") app.invokeEmail("Berrylife2025@gmail.com", "Zalo10 Feedback");
+    }
+
     function startLogin() {
         if (!zService.loadSession()) {
             loginSheet.open();
@@ -77,55 +98,56 @@ TabbedPane {
             tosTimer.start();
         }
     }
-    
+
     Tab {
         id: chatsTab
-        title: "Chats"
+        title: "Tin nhắn"
         description: "Messages"
         imageSource: "asset:///images/ic_bbm.png"
         ChatsTab {
             id: chatsTabContent
+            appShell: root
             onOnUnreadMessage: {
                 if (root.activeTab !== chatsTab)
                     root.chatsUnreadCount++;
             }
         }
     }
-    
+
     Tab {
         id: contactsTab
-        title: "Contacts"
+        title: "Danh bạ"
         description: "Friends"
         imageSource: "asset:///images/ic_contact.png"
         ContactsTab {
             id: contactsTabContent
+            appShell: root
         }
     }
-    
+
     Tab {
-        id: groupsTab
-        title: "Groups"
-        description: "Group chats"
-        imageSource: "asset:///images/ic_groups_white.png"
-        GroupsTab {
-            id: groupsTabContent
-            onOnUnreadMessage: {
-                if (root.activeTab !== groupsTab)
-                    root.groupsUnreadCount++;
-            }
+        id: profileTab
+        title: "Profile"
+        imageSource: "asset:///images/ic_contact.png"
+        ModernProfile {
+            id: profileTabContent
+            appShell: root
+            accountName: root.selfName
+            onActionRequested: root.profileAction(action)
         }
     }
-    
+
     Tab {
         id: invitesTab
-        title: "Invites"
+        title: "Lời mời"
         description: "Friend requests"
         imageSource: "asset:///images/ic_add_contact.png"
         InvitesTab {
             id: invitesTabContent
+            appShell: root
         }
     }
-    
+
     attachedObjects: [
         Sheet {
             id: loginSheet
@@ -140,19 +162,19 @@ TabbedPane {
                 onLoginSuccessful: { loginSheet.close(); }
             }
         },
-        
+
         SettingsSheet { id: settingsSheet },
         AboutSheet    { id: aboutSheet },
-        
+
         Connections {
             target: zService
             onSessionExpired: { loginSheet.needsQR = true; loginSheet.open(); }
             onLoginFailed:    { loginSheet.needsQR = true; loginSheet.open(); }
             onLoginSuccess: {
+                root.openPendingHubThread();
                 if (typeof displayName !== "undefined" && displayName.length > 0) {
                     root.selfName = displayName;
                     chatsTabContent.selfName    = displayName;
-                    groupsTabContent.selfName   = displayName;
                     contactsTabContent.selfName = displayName;
                 }
             }
@@ -161,13 +183,7 @@ TabbedPane {
         Connections {
             target: app
             onOpenThreadRequested: {
-                if (isGroup) {
-                    root.activeTab = groupsTab;
-                    groupsTabContent.openThread(threadId, isGroup);
-                } else {
-                    root.activeTab = chatsTab;
-                    chatsTabContent.openThread(threadId, isGroup);
-                }
+                root.pendingHubThread=threadId;root.pendingHubGroup=isGroup;root.openPendingHubThread();
             }
             onEventCreated: {
                 eventResultDialog.body = success

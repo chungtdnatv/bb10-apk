@@ -23,7 +23,6 @@ Container {
                 onTapped: {
                     chatViewPage.pendingAttachPath = "";
                     chatViewPage.pendingAttachName = "";
-                    sendAction.enabled = (inputField.text.trim().length > 0);
                 }
             }
         ]

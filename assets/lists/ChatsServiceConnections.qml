@@ -5,17 +5,21 @@ import QtQuick 1.0
 Connections {
     target: zService
 
+    onConversationsReady: {
+        chatsNav.lastGroups = threads;
+        chatsNav.buildFriends(chatsNav.lastFriends, true);
+    }
     onFriendsReady: {
         chatsNav.lastFriends = friends;
         chatsNav.buildFriends(friends, false);
     }
 
     onHistorySynced: {
-        if (chatsNav.lastFriends && chatsNav.lastFriends.length > 0)
+        if (chatsNav.lastFriends)
             chatsNav.buildFriends(chatsNav.lastFriends, true);
     }
     onPinnedChanged: {
-        if (chatsNav.lastFriends && chatsNav.lastFriends.length > 0)
+        if (chatsNav.lastFriends)
             chatsNav.buildFriends(chatsNav.lastFriends, true);
     }
 
@@ -41,6 +45,7 @@ Connections {
     }
 
     onLoginSuccess: {
+        zService.fetchConversations();
         if (typeof displayName !== "undefined" && displayName.length > 0)
             chatsNav.selfName = displayName;
         if (friendModel.size() === 0) {
@@ -52,28 +57,14 @@ Connections {
     }
 
     onNewMessage: {
-        var tid = threadId;
-        var snippet = (message.msgType === 2 || message.msgType === "2")
-            ? "[Photo]" : chatsNav.msgSnippet(message.msgType, message.content);
-        var isMine = (message.isMine === true || message.isMine === "true" || message.isMine === 1);
-        var senderName = message.dName || "";
-        if (!isMine) chatsNav.onUnreadMessage();
-        for (var i = 0; i < friendModel.size(); i++) {
-            var d = friendModel.value(i);
-            if ((d.threadId || d.uid || "") === tid) {
-                d.lastMessage    = snippet;
-                d.lastMsgIsMine  = isMine;
-                d.lastMsgId      = message.msgId || "";
-                d.lastMsgState   = isMine ? 1 : 0;
-                d.lastSenderName = senderName;
-                d.hasUnread      = !isMine && !zService.isActiveThread(tid);
-                zService.setThreadUnread(tid, d.hasUnread);
-                if (message.ts) d.lastTime = chatsNav.formatTime(message.ts);
-                friendModel.removeAt(i);
-                friendModel.insert(d.isPinned ? 0 : chatsNav.firstUnpinnedIndex(), d);
-                return;
-            }
-        }
+        var mine=(message.isMine === true || message.isMine === 1 || message.isMine === "true");
+        if (!mine) chatsNav.onUnreadMessage();
+        zService.setThreadUnread(threadId, !mine && !zService.isActiveThread(threadId));
+        var fresh={};
+        for (var key in message) fresh[key]=message[key];
+        fresh.isGroup=message.isGroup === true;
+        chatsNav.recentMessages[threadId]=fresh;
+        chatsNav.buildFriends(chatsNav.lastFriends,true);
     }
 
     onThreadRead: {
@@ -162,6 +153,7 @@ Connections {
                 d.hasUnread      = false;
                 zService.setThreadUnread(threadId, false);
                 friendModel.replace(i, d);
+                chatsNav.filterList();
                 return;
             }
         }

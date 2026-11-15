@@ -1,3 +1,4 @@
+import "ModernFormat.js" as ModernFormat
 import bb.cascades 1.4
 import bb.system 1.0
 import QtQuick 1.0
@@ -6,9 +7,19 @@ import "lists"
 NavigationPane {
     id: chatsNav
     peekEnabled: false
+    backButtonsVisible: !chatsNav.activeChatPage||chatsNav.currentPage!==chatsNav.activeChatPage
+    property variant appShell: null
+    function raiseBottomBar() { if (chatsNav.count() === 1) bottomNavigation.reveal(); }
 
     onPopTransitionEnded: {
-        zService.clearActiveThread();
+        if(page===chatsNav.activeChatPage) {
+            zService.clearActiveThread();
+            chatPageConn.target=null;
+            chatsNav.activeChatPage=null;
+            page.destroy();
+        } else if(chatsNav.activeChatPage) {
+            zService.setActiveThread(chatsNav.activeChatPage.threadId,chatsNav.activeChatPage.isGroup);
+        }
     }
 
     onPushTransitionEnded: {
@@ -39,17 +50,13 @@ NavigationPane {
     Page {
         id: chatsPage
 
-        titleBar: ChatsTitleBar {}
+        actionBarVisibility: ChromeVisibility.Hidden
 
         shortcuts: [
             Shortcut {
                 key: "s"
                 onTriggered: {
-                    chatsNav.searchVisible = !chatsNav.searchVisible;
-                    if (!chatsNav.searchVisible) {
-                        chatsNav.searchText = "";
-                        chatsNav.filterList();
-                    }
+                    chatsSearchField.focusSearch();
                 }
             }
         ]
@@ -74,11 +81,7 @@ NavigationPane {
                 imageSource: "asset:///images/ChatsTab/action_icon_search.png"
                 ActionBar.placement: ActionBarPlacement.InOverflow
                 onTriggered: {
-                    chatsNav.searchVisible = !chatsNav.searchVisible;
-                    if (!chatsNav.searchVisible) {
-                        chatsNav.searchText = "";
-                        chatsNav.filterList();
-                    }
+                    chatsSearchField.focusSearch();
                 }
             },
             ActionItem {
@@ -96,6 +99,26 @@ NavigationPane {
         ]
 
         content: Container {
+            background: Color.create("#142936")
+            horizontalAlignment: HorizontalAlignment.Fill
+            verticalAlignment: VerticalAlignment.Fill
+            layout: StackLayout { orientation: LayoutOrientation.TopToBottom }
+            Container {
+                horizontalAlignment: HorizontalAlignment.Fill
+                leftPadding: ui.du(1.8)
+                rightPadding: ui.du(1.8)
+                ModernSearch {
+                    id: chatsSearchField
+                    placeholder: "Tìm kiếm cuộc trò chuyện"
+                    onQueryChanged: {
+                        chatsNav.searchText = query;
+                        chatsNav.searchVisible = query.length > 0;
+                        chatsNav.filterList();
+                    }
+                }
+            }
+            Container {
+            layoutProperties: StackLayoutProperties { spaceQuota: 1 }
             layout: DockLayout {}
             horizontalAlignment: HorizontalAlignment.Fill
             verticalAlignment: VerticalAlignment.Fill
@@ -129,12 +152,10 @@ NavigationPane {
                     if (!page) return;
                     page.threadId   = item.threadId || item.uid || "";
                     page.threadName = item.name || "Chat";
-                    page.isGroup    = false;
+                    page.isGroup    = item.isGroup === true;
                     page.avatarUrl  = item.localAvatar || item.avatar || "";
                     page.selfName   = chatsNav.selfName;
-                    var idx = indexPath[0];
-                    var d = friendModel.value(idx);
-                    if (d) { d.hasUnread = false; friendModel.replace(idx, d); }
+                    chatsNav.markLocalRead(page.threadId);
                     chatsNav.activeChatPage = page;
                     chatPageConn.target = page;
                     var t1 = Date.now();
@@ -155,10 +176,32 @@ NavigationPane {
 
             Label {
                 id: chatsEmpty
-                text: "No friends found"
+                textStyle { color: Color.create("#a4c9da") }
+                text: "Chưa có cuộc trò chuyện"
                 visible: false
                 horizontalAlignment: HorizontalAlignment.Center
                 verticalAlignment: VerticalAlignment.Center
+            }
+
+            Container {
+                horizontalAlignment: HorizontalAlignment.Right
+                verticalAlignment: VerticalAlignment.Bottom
+                rightPadding: ui.du(3)
+                bottomPadding: ui.du(1.2)
+                ImageButton {
+                    preferredWidth: ui.du(9.5)
+                    preferredHeight: ui.du(9.5)
+                    defaultImageSource: "asset:///images/modern/compose-button.png"
+                    pressedImageSource: "asset:///images/modern/compose-button-pressed.png"
+                    accessibility.name: "Soạn tin nhắn mới"
+                    onClicked: { if (chatsNav.appShell) chatsNav.appShell.openComposer(); }
+                }
+            }
+        }
+            ModernNavigation {
+                id: bottomNavigation
+                selectedIndex: 0
+                onSectionSelected: { if (chatsNav.appShell) chatsNav.appShell.selectSection(index); }
             }
         }
 
@@ -197,6 +240,11 @@ NavigationPane {
                 // "Cannot assign to non-existent property" while it is null.
                 id: chatPageConn
                 target: null
+                onPopRequestedChanged: {
+                    if(!chatsNav.activeChatPage||!chatsNav.activeChatPage.popRequested)return;
+                    chatsNav.activeChatPage.popRequested=false;
+                    chatsNav.pop();
+                }
                 onGroupBoardRequestedChanged: {
                     if (!chatsNav.activeChatPage || !chatsNav.activeChatPage.groupBoardRequested) return;
                     chatsNav.activeChatPage.groupBoardRequested = false;
@@ -232,10 +280,55 @@ NavigationPane {
         ]
     }
 
+    function markLocalRead(threadId) {
+        for (var idx = 0; idx < friendModel.size(); ++idx) {
+            var item = friendModel.value(idx);
+            if ((item.threadId || item.uid || "") === threadId) {
+                item.hasUnread = false;
+                friendModel.replace(idx, item);
+                break;
+            }
+        }
+        chatsNav.filterList();
+    }
+
+    function refreshList() {
+        if (refreshCooldown) return;
+        refreshCooldown = true;
+        chatsRefreshCooldownTimer.restart();
+        chatsLoading.visible = true;
+        chatsEmpty.visible = false;
+        zService.fetchFriends();
+        zService.fetchConversations();
+    }
+    function markAllRead() { markAllReadDialog.show(); }
+
     property string selfName: ""
     signal onUnreadMessage()
 
     property variant lastFriends: []
+    property variant lastGroups: []
+    property variant recentMessages: ({})
+    function inboxCandidates(friends, groups, lastMsgs) {
+        var byId = {}, result = [];
+        var all = [];
+        for (var f=0; f<(friends || []).length; ++f) all.push(friends[f]);
+        for (var g=0; g<(groups || []).length; ++g) all.push(groups[g]);
+        for (var i=0; i<all.length; ++i) {
+            var source=all[i], id=(source.threadId || source.uid || source.groupId || "").toString();
+            if (id.length) byId[id]=source;
+        }
+        for (var tid in lastMsgs) {
+            var original=byId[tid] || {}, item={};
+            for (var key in original) item[key]=original[key];
+            item.threadId=tid;
+            item.name=item.name || item.displayName || "Hội thoại " + tid;
+            item.isGroup=(item.isGroup === true || item.isGroup === 1 || item.isGroup === "true" || lastMsgs[tid].isGroup === true);
+            result.push(item);
+        }
+        return result;
+    }
+
 
     function buildFriends(friends, restoreAvatars) {
         chatsLoading.visible = false;
@@ -252,6 +345,11 @@ NavigationPane {
         for (var pn = 0; pn < pinnedIds.length; pn++) pinMap[pinnedIds[pn]] = true;
         friendModel.clear();
         var lastMsgs = zService.getThreadLastMessages();
+        for (var recentId in chatsNav.recentMessages) {
+            var recent=chatsNav.recentMessages[recentId], saved=lastMsgs[recentId];
+            if (!saved || Number(recent.ts || 0) >= Number(saved.ts || 0)) lastMsgs[recentId]=recent;
+        }
+        friends = inboxCandidates(friends, chatsNav.lastGroups, lastMsgs);
         var unreadIds = zService.unreadThreadIds();
         var unreadMap = {};
         for (var u = 0; u < unreadIds.length; u++) unreadMap[unreadIds[u]] = true;
@@ -298,7 +396,7 @@ NavigationPane {
             if (out.lastTime && out.lastTime !== "") {
                 var ts = parseInt(out.lastTime);
                 if (!isNaN(ts)) {
-                    out.sortTs = ts;
+                    out.sortTs = ts < 1000000000000 ? ts * 1000 : ts;
                     out.lastTime = chatsNav.formatTime(ts);
                 }
             }
@@ -317,7 +415,7 @@ NavigationPane {
             if (furl.length > 0 && ftid.length > 0 && !(restoreAvatars && ff.localAvatar))
                 zService.downloadAvatar(ftid, furl);
         }
-        chatsEmpty.visible = (outArr.length === 0);
+        chatsNav.filterList();
 
     }
 
@@ -341,15 +439,16 @@ NavigationPane {
                 if (name.indexOf(q) !== -1) searchModel.append(f);
             }
         }
-        chatsEmpty.visible = (friendModel.size() === 0);
+        chatsEmpty.visible = !chatsLoading.visible && (chatsNav.searchVisible ? searchModel.size() : friendModel.size()) === 0;
+        chatsEmpty.text = chatsNav.searchVisible ? "Không tìm thấy cuộc trò chuyện" : "Chưa có cuộc trò chuyện";
     }
 
-    function openThread(threadId, isGroup) {
+    function openThread(threadId, isGroup, contact) {
         while (chatsNav.count() > 1) {
             chatsNav.pop();
         }
         var page = chatsDef.createObject();
-        if (!page) return;
+        if (!page) return false;
         var threadName = "Chat";
         var avatarUrl  = "";
         for (var i = 0; i < friendModel.size(); i++) {
@@ -361,6 +460,10 @@ NavigationPane {
                 break;
             }
         }
+        if (contact) {
+            threadName = contact.name || contact.displayName || threadName;
+            avatarUrl = contact.localAvatar || contact.avatar || avatarUrl;
+        }
         page.threadId   = threadId;
         page.threadName = threadName;
         page.isGroup    = isGroup;
@@ -370,24 +473,10 @@ NavigationPane {
         chatPageConn.target = page;
         chatsNav.push(page);
         page.startChat();
+        return true;
     }
 
-    function formatTime(timestamp) {
-        if (!timestamp || timestamp === "") return "";
-        var date = new Date(timestamp * 1);
-        var now  = new Date();
-        if (date.toDateString() === now.toDateString()) {
-            var h = date.getHours(), m = date.getMinutes();
-            var ampm = h >= 12 ? "PM" : "AM";
-            h = h % 12 || 12;
-            return h + ":" + (m < 10 ? "0" : "") + m + " " + ampm;
-        }
-        if ((now - date) < 7 * 24 * 60 * 60 * 1000) {
-            return ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][date.getDay()];
-        }
-        var mon = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][date.getMonth()];
-        return mon + " " + date.getDate();
-    }
+    function formatTime(timestamp) { return ModernFormat.formatTime(timestamp, new Date()); }
 
     function extractFileName(content) {
         var c = content || "";

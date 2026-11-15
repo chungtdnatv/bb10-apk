@@ -4,6 +4,8 @@ import QtQuick 1.0
 NavigationPane {
     id: invitesNav
     peekEnabled: false
+    property variant appShell: null
+    function raiseBottomBar() { if (invitesNav.count() === 1) bottomNavigation.reveal(); }
 
     property bool searchVisible: false
     property string searchText: ""
@@ -21,75 +23,17 @@ NavigationPane {
                 if (name.indexOf(q) !== -1) searchModel.append(inv);
             }
         }
-        invEmpty.visible = (!invitesNav.searchVisible && inviteModel.size() === 0);
+        invEmpty.visible = !invitesLoading.visible && (invitesNav.searchVisible ? searchModel.size() : inviteModel.size()) === 0;
     }
 
     Page {
-        titleBar: TitleBar {
-            kind: TitleBarKind.FreeForm
-            kindProperties: FreeFormTitleBarKindProperties {
-                content: Container {
-                    background: Color.create("#2575fc")
-                    horizontalAlignment: HorizontalAlignment.Fill
-                    verticalAlignment: VerticalAlignment.Fill
-                    layout: DockLayout {}
-                    leftPadding: ui.du(2.5)
-                    rightPadding: ui.du(2.5)
-                    Label {
-                        text: "Friend Requests"
-                        textStyle {
-                            color: Color.White
-                            base: SystemDefaults.TextStyles.TitleText
-                            fontWeight: FontWeight.Bold
-                        }
-                        verticalAlignment: VerticalAlignment.Center
-                        horizontalAlignment: HorizontalAlignment.Left
-                        visible: !invitesNav.searchVisible
-                    }
-                    Container {
-                        visible: invitesNav.searchVisible
-                        horizontalAlignment: HorizontalAlignment.Fill
-                        verticalAlignment: VerticalAlignment.Center
-                        layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
-                        TextField {
-                            id: invitesSearchField
-                            hintText: "Search requests..."
-                            verticalAlignment: VerticalAlignment.Center
-                            textStyle { color: Color.White }
-                            layoutProperties: StackLayoutProperties { spaceQuota: 1 }
-                            onTextChanging: {
-                                invitesNav.searchText = text;
-                                invitesNav.filterList();
-                            }
-                            onCreationCompleted: {
-                                inputMode.type = TextInputFlag.AutoCapitalizationOff | TextInputFlag.AutoCorrectionOff | TextInputFlag.SpellCheckOff | TextInputFlag.PredictionOff;
-                            }
-                        }
-                        Button {
-                            text: "Cancel"
-                            preferredWidth: ui.du(14)
-                            verticalAlignment: VerticalAlignment.Center
-                            onClicked: {
-                                invitesSearchField.text = "";
-                                invitesNav.searchText = "";
-                                invitesNav.searchVisible = false;
-                                invitesNav.filterList();
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        actionBarVisibility: ChromeVisibility.Hidden
 
         shortcuts: [
             Shortcut {
                 key: "s"
                 onTriggered: {
-                    invitesNav.searchVisible = !invitesNav.searchVisible;
-                    if (!invitesNav.searchVisible) {
-                        invitesNav.searchText = "";
-                        invitesNav.filterList();
-                    }
+                    invitesSearchField.focusSearch();
                 }
             }
         ]
@@ -110,11 +54,7 @@ NavigationPane {
                 imageSource: "asset:///images/InvitesTab/action_icon_search.png"
                 ActionBar.placement: ActionBarPlacement.InOverflow
                 onTriggered: {
-                    invitesNav.searchVisible = !invitesNav.searchVisible;
-                    if (!invitesNav.searchVisible) {
-                        invitesNav.searchText = "";
-                        invitesNav.filterList();
-                    }
+                    invitesSearchField.focusSearch();
                 }
             },
             ActionItem {
@@ -133,6 +73,26 @@ NavigationPane {
         ]
 
         content: Container {
+            background: Color.create("#142936")
+            horizontalAlignment: HorizontalAlignment.Fill
+            verticalAlignment: VerticalAlignment.Fill
+            layout: StackLayout { orientation: LayoutOrientation.TopToBottom }
+            Container {
+                horizontalAlignment: HorizontalAlignment.Fill
+                leftPadding: ui.du(1.8)
+                rightPadding: ui.du(1.8)
+                ModernSearch {
+                    id: invitesSearchField
+                    placeholder: "Tìm kiếm lời mời"
+                    onQueryChanged: {
+                        invitesNav.searchText = query;
+                        invitesNav.searchVisible = query.length > 0;
+                        invitesNav.filterList();
+                    }
+                }
+            }
+            Container {
+            layoutProperties: StackLayoutProperties { spaceQuota: 1 }
             layout: DockLayout {}
             horizontalAlignment: HorizontalAlignment.Fill
             verticalAlignment: VerticalAlignment.Fill
@@ -177,6 +137,7 @@ NavigationPane {
                                     Label {
                                         text: ListItemData.name || "Unknown User"
                                         textStyle {
+                                            color: Color.create("#f2f7fa")
                                             base: SystemDefaults.TextStyles.PrimaryText
                                             fontWeight: FontWeight.Bold
                                         }
@@ -187,7 +148,7 @@ NavigationPane {
                                         text: ListItemData.msg || "Wants to be your friend"
                                         textStyle {
                                             base: SystemDefaults.TextStyles.SubtitleText
-                                            color: Color.DarkGray
+                                            color: Color.create("#a4c9da")
                                         }
                                         multiline: false
                                         bottomMargin: ui.du(1)
@@ -235,10 +196,17 @@ NavigationPane {
 
             Label {
                 id: invEmpty
+                textStyle { color: Color.create("#a4c9da") }
                 text: "No friend requests"
                 visible: false
                 horizontalAlignment: HorizontalAlignment.Center
                 verticalAlignment: VerticalAlignment.Center
+            }
+        }
+            ModernNavigation {
+                id: bottomNavigation
+                selectedIndex: 1
+                onSectionSelected: { if (invitesNav.appShell) invitesNav.appShell.selectSection(index); }
             }
         }
 
@@ -263,7 +231,7 @@ NavigationPane {
                             zService.downloadAvatar(tid, url);
                     }
                     invitesNav.allInvites = arr;
-                    invEmpty.visible = (invites.length === 0);
+                    invitesNav.filterList();
                 }
 
                 onFriendRequestResponded: {
@@ -274,7 +242,7 @@ NavigationPane {
                                 break;
                             }
                         }
-                        invEmpty.visible = (inviteModel.size() === 0);
+                        invitesNav.filterList();
                     }
                 }
 

@@ -1,95 +1,24 @@
 import bb.cascades 1.4
-import bb.system 1.0
-import QtQuick 1.0
-
-TitleBar {
-    scrollBehavior: TitleBarScrollBehavior.Sticky
-    kind: TitleBarKind.FreeForm
-    kindProperties: FreeFormTitleBarKindProperties {
-        content: Container {
-            background: Color.create("#2575fc")
-            horizontalAlignment: HorizontalAlignment.Fill
-            verticalAlignment:   VerticalAlignment.Fill
-            layout: DockLayout {}
-
-            Container {
-                visible: !chatViewPage.searchVisible
-                horizontalAlignment: HorizontalAlignment.Fill
-                verticalAlignment:   VerticalAlignment.Fill
-                layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
-
-                Container {
-                    id: avatarBlock
-                    verticalAlignment: VerticalAlignment.Fill
-                    layout: DockLayout {}
-                    preferredWidth: titleBarLUH.layoutFrame.height > 0 ? titleBarLUH.layoutFrame.height : ui.du(7)
-                    minWidth:       titleBarLUH.layoutFrame.height > 0 ? titleBarLUH.layoutFrame.height : ui.du(7)
-
-                    ImageView {
-                        horizontalAlignment: HorizontalAlignment.Fill
-                        verticalAlignment:   VerticalAlignment.Fill
-                        scalingMethod: ScalingMethod.AspectFill
-                        imageSource: chatViewPage.avatarUrl
-                        visible: chatViewPage.avatarUrl.length > 0
-                    }
-                    Container {
-                        horizontalAlignment: HorizontalAlignment.Fill
-                        verticalAlignment:   VerticalAlignment.Fill
-                        background: Color.create("#1a5fc8")
-                        layout: DockLayout {}
-                        visible: chatViewPage.avatarUrl.length === 0
-                        Label {
-                            text: chatViewPage.threadName.length > 0 ? chatViewPage.threadName.charAt(0).toUpperCase() : "?"
-                            horizontalAlignment: HorizontalAlignment.Center
-                            verticalAlignment:   VerticalAlignment.Center
-                            textStyle { color: Color.White; fontSize: FontSize.XXLarge; fontWeight: FontWeight.Bold }
-                        }
-                    }
-                    attachedObjects: [ LayoutUpdateHandler { id: titleBarLUH } ]
-                }
-
-                Container {
-                    verticalAlignment: VerticalAlignment.Center
-                    leftPadding: ui.du(1.5)
-                    layoutProperties: StackLayoutProperties { spaceQuota: 1 }
-                    Label {
-                        text: chatViewPage.threadName.length > 0 ? chatViewPage.threadName : "..."
-                        textStyle { color: Color.White; base: SystemDefaults.TextStyles.TitleText; fontWeight: FontWeight.Bold }
-                        topMargin: 0; bottomMargin: 0
-                    }
-                    Label {
-                        text: chatViewPage.isGroup ? "Group" : "Zalo Contact"
-                        textStyle { color: Color.create("#b3d4ff"); fontSize: FontSize.XSmall }
-                        topMargin: ui.du(0.2); bottomMargin: 0
-                    }
-                }
-
-                ImageButton {
-                    verticalAlignment: VerticalAlignment.Center
-                    preferredWidth: ui.du(8); preferredHeight: ui.du(8)
-                    defaultImageSource: "asset:///images/ChatView/ic_bbm_voice_answer.png"
-                    pressedImageSource: "asset:///images/ChatView/ic_bbm_voice_answer.png"
-                    rightMargin: ui.du(0.8)
-                    onClicked: { voiceCallUnderDevDialog.show() }
-                }
-                ImageButton {
-                    verticalAlignment: VerticalAlignment.Center
-                    preferredWidth: ui.du(8); preferredHeight: ui.du(8)
-                    defaultImageSource: "asset:///images/ChatView/ic_bbm_video_answer.png"
-                    pressedImageSource: "asset:///images/ChatView/ic_bbm_video_answer.png"
-                    onClicked: { videoCallUnderDevDialog.show() }
-                }
-                Container {
-                    preferredWidth: ui.du(0.2)
-                }
-            }
-
+import ".."
+Container {
+    horizontalAlignment: HorizontalAlignment.Fill
+    preferredHeight: ui.du(10);minHeight: ui.du(10);maxHeight: ui.du(10)
+    layout: DockLayout {}
+    ChatTopBar {
+        visible: !chatViewPage.searchVisible
+        title: chatViewPage.threadName
+        subtitle: chatViewPage.isGroup?"Nhóm Zalo":"Trò chuyện Zalo"
+        avatar: chatViewPage.avatarUrl
+        onBackRequested: chatViewPage.requestBack()
+        onCallRequested: voiceCallUnderDevDialog.show()
+        onMoreRequested: chatViewPage.openActionMenu()
+    }
             Container {
                 visible: chatViewPage.searchVisible
                 horizontalAlignment: HorizontalAlignment.Fill
                 verticalAlignment:   VerticalAlignment.Center
-                leftPadding: ui.du(1.5)
-                rightPadding: ui.du(1.5)
+                leftPadding: ui.du(9)
+                rightPadding: ui.du(1)
                 layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
 
                 TextField {
@@ -142,6 +71,10 @@ TitleBar {
                     }
                 }
             }
-        }
+    ChatIconButton {
+        visible: chatViewPage.searchVisible
+        icon: "back";hint: "Đóng tìm kiếm";surface: true;size: ui.du(8)
+        verticalAlignment: VerticalAlignment.Center
+        onClicked: {chatViewPage.searchVisible=false;chatViewPage.searchText="";chatViewPage.searchMatches=[];chatViewPage.searchMatchPos=-1;}
     }
 }

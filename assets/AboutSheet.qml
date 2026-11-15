@@ -6,6 +6,19 @@ Sheet {
     id: aboutSheetRoot
     property variant zService: null
 
+    function openSoftwareUpdate() {
+        aboutSheetRoot.open();
+        checkSoftwareUpdate();
+    }
+    function checkSoftwareUpdate() {
+        if (!updateBtn.enabled) return;
+        updateBtn.enabled = false;
+        updateCheckingToast.show();
+        aboutNav.pendingManifestAction = "update";
+        manifestTimeoutTimer.restart();
+        manifestFetcher.url = manifestFetcher.manifestUrl + "?t=" + new Date().getTime();
+    }
+
     NavigationPane {
         id: aboutNav
 
@@ -176,6 +189,8 @@ Sheet {
                             Label { text: "Zalo10"; textStyle.base: SystemDefaults.TextStyles.BigText }
                             Label { text: "Version: " + app.appVersion(); textStyle.color: Color.Gray; topMargin: 4 }
                             Label { text: "Developed by BBerryLife© 2026"; textStyle.color: Color.Gray; topMargin: 4 }
+                            Label { text: "Cập nhật giao diện: Chung"; textStyle.color: Color.Gray; topMargin: 4 }
+                            Label { text: "chungtd.natv@gmail.com"; textStyle.color: Color.Gray; topMargin: 4 }
                         }
 
                         ImageView {
@@ -205,17 +220,10 @@ Sheet {
 
                         Button {
                             id: updateBtn
-                            text: "Update"
+                            text: "Cập nhật phần mềm"
                             layoutProperties: StackLayoutProperties { spaceQuota: 1 }
                             rightMargin: ui.du(0.8)
-                            onClicked: {
-                                updateBtn.enabled = false;
-                                updateCheckingToast.show();
-                                aboutNav.pendingManifestAction = "update";
-                                manifestTimeoutTimer.restart();
-                                // Cache-bust: jsDelivr sends a long max-age, so a changing query string avoids a stale copy.
-                                manifestFetcher.url = manifestFetcher.manifestUrl + "?t=" + new Date().getTime();
-                            }
+                            onClicked: aboutSheetRoot.checkSoftwareUpdate()
                         }
 
                         Button {

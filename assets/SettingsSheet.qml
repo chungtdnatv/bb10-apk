@@ -5,6 +5,18 @@ import QtQuick 1.0
 
 Sheet {
     id: settingsSheetRoot
+    property bool syncInProgress: false
+    function startPhoneSyncFlow() {
+        if (!zService.loggedIn) { syncLoginToast.show(); return; }
+        if (syncInProgress) { phoneSyncProgressDialog.show(); return; }
+        phoneSyncConfirm.show();
+    }
+    attachedObjects: [
+        SystemToast {
+            id: syncLoginToast
+            body: "Đăng nhập Zalo10 trước khi đồng bộ tin nhắn."
+        }
+    ]
 
     Page {
         id: settingsPage
@@ -186,10 +198,10 @@ Sheet {
                 }
 
                 Button {
-                    text: "Sync Messages from Phone"
+                    text: "Đồng bộ tin nhắn từ điện thoại"
                     horizontalAlignment: HorizontalAlignment.Fill
                     topMargin: 20
-                    onClicked: { phoneSyncConfirm.show() }
+                    onClicked: { settingsSheetRoot.startPhoneSyncFlow(); }
                 }
 
                 Label {
@@ -290,27 +302,29 @@ Sheet {
 
                     SystemDialog {
                         id: phoneSyncConfirm
-                        title: "Sync Messages from Phone"
-                        body: "Your phone's Zalo app will ask you to confirm. Keep Zalo10 open until the sync finishes."
-                        confirmButton.label: "Start"
+                        title: "Đồng bộ tin nhắn"
+                        body: "Mở Zalo trên điện thoại chính và xác nhận yêu cầu đồng bộ. Giữ Zalo10 mở đến khi hoàn tất."
+                        confirmButton.label: "Bắt đầu"
                         cancelButton.label: "Cancel"
                         onFinished: {
-                            if (result !== SystemUiResult.ConfirmButtonSelection) return;
+                            if (phoneSyncConfirm.result !== SystemUiResult.ConfirmButtonSelection || settingsSheetRoot.syncInProgress) return;
+                            if (!zService.loggedIn) { syncLoginToast.show(); return; }
+                            settingsSheetRoot.syncInProgress = true;
                             phoneSyncProgressDialog.progress = 0;
-                            phoneSyncProgressDialog.statusMessage = "Starting…";
+                            phoneSyncProgressDialog.statusMessage = "Đang gửi yêu cầu…";
                             phoneSyncProgressDialog.show();
                             zService.startPhoneSync();
                         }
                     },
                     SystemProgressDialog {
                         id: phoneSyncProgressDialog
-                        title: "Syncing from phone"
+                        title: "Đang đồng bộ từ điện thoại"
                         progress: 0
                         state: SystemUiProgressState.Active
-                        confirmButton.label: "Hide"
-                        cancelButton.label: "Stop"
+                        confirmButton.label: "Ẩn"
+                        cancelButton.label: "Dừng"
                         onFinished: {
-                            if (result === SystemUiResult.CancelButtonSelection) zService.cancelPhoneSync();
+                            if (phoneSyncProgressDialog.result === SystemUiResult.CancelButtonSelection && settingsSheetRoot.syncInProgress) zService.cancelPhoneSync();
                         }
                     },
                     SystemToast {
@@ -325,6 +339,7 @@ Sheet {
                             phoneSyncProgressDialog.statusMessage = text;
                         }
                         onPhoneSyncFinished: {
+                            settingsSheetRoot.syncInProgress = false;
                             phoneSyncProgressDialog.cancel();
                             phoneSyncDoneToast.body = message;
                             phoneSyncDoneToast.show();

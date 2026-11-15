@@ -5,6 +5,25 @@ import QtQuick 1.0
 NavigationPane {
     id: contactsNav
     peekEnabled: false
+    property variant appShell: null
+    property bool composeMode: false
+    property bool composeOpening: false
+    function beginCompose() {
+        composeMode = true;
+        composeOpening = false;
+        searchText = "";
+        searchVisible = false;
+        contactsSearchField.text = "";
+        filterList();
+        if (contactsNav.count() > 1) contactsNav.pop();
+    }
+    onPopTransitionEnded: {
+        if (composeMode) {
+            if (contactsNav.count() > 1) contactsNav.pop();
+            else raiseBottomBar();
+        }
+    }
+    function raiseBottomBar() { if (contactsNav.count() === 1) bottomNavigation.reveal(); }
 
     property string selfName: ""
     onSelfNameChanged: contactsPage.selfName = selfName
@@ -25,7 +44,7 @@ NavigationPane {
                 if (name.indexOf(q) !== -1) searchModel.append(f);
             }
         }
-        contactsEmpty.visible = (contactModel.size() === 0);
+        contactsEmpty.visible = !contactsLoading.visible && (contactsNav.searchVisible ? searchModel.size() : contactModel.size()) === 0;
     }
 
     attachedObjects: [
@@ -42,71 +61,13 @@ NavigationPane {
         property bool populated: false
         property string selfName: contactsNav.selfName
 
-        titleBar: TitleBar {
-            kind: TitleBarKind.FreeForm
-            kindProperties: FreeFormTitleBarKindProperties {
-                content: Container {
-                    background: Color.create("#2575fc")
-                    horizontalAlignment: HorizontalAlignment.Fill
-                    verticalAlignment:   VerticalAlignment.Fill
-                    layout: DockLayout {}
-                    leftPadding: ui.du(2.5)
-                    rightPadding: ui.du(2.5)
-                    Label {
-                        text: "Contacts"
-                        textStyle {
-                            color: Color.White
-                            base: SystemDefaults.TextStyles.TitleText
-                            fontWeight: FontWeight.Bold
-                        }
-                        verticalAlignment:   VerticalAlignment.Center
-                        horizontalAlignment: HorizontalAlignment.Left
-                        visible: !contactsNav.searchVisible
-                    }
-                    Container {
-                        visible: contactsNav.searchVisible
-                        horizontalAlignment: HorizontalAlignment.Fill
-                        verticalAlignment: VerticalAlignment.Center
-                        layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
-                        TextField {
-                            id: contactsSearchField
-                            hintText: "Search contacts..."
-                            verticalAlignment: VerticalAlignment.Center
-                            textStyle { color: Color.White }
-                            layoutProperties: StackLayoutProperties { spaceQuota: 1 }
-                            onTextChanging: {
-                                contactsNav.searchText = text;
-                                contactsNav.filterList();
-                            }
-                            onCreationCompleted: {
-                                inputMode.type = TextInputFlag.AutoCapitalizationOff | TextInputFlag.AutoCorrectionOff | TextInputFlag.SpellCheckOff | TextInputFlag.PredictionOff;
-                            }
-                        }
-                        Button {
-                            text: "Cancel"
-                            preferredWidth: ui.du(14)
-                            verticalAlignment: VerticalAlignment.Center
-                            onClicked: {
-                                contactsSearchField.text = "";
-                                contactsNav.searchText = "";
-                                contactsNav.searchVisible = false;
-                                contactsNav.filterList();
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        actionBarVisibility: ChromeVisibility.Hidden
 
         shortcuts: [
             Shortcut {
                 key: "s"
                 onTriggered: {
-                    contactsNav.searchVisible = !contactsNav.searchVisible;
-                    if (!contactsNav.searchVisible) {
-                        contactsNav.searchText = "";
-                        contactsNav.filterList();
-                    }
+                    contactsSearchField.focusSearch();
                 }
             }
         ]
@@ -133,11 +94,7 @@ NavigationPane {
                 imageSource: "asset:///images/ContactsTab/action_icon_search.png"
                 ActionBar.placement: ActionBarPlacement.InOverflow
                 onTriggered: {
-                    contactsNav.searchVisible = !contactsNav.searchVisible;
-                    if (!contactsNav.searchVisible) {
-                        contactsNav.searchText = "";
-                        contactsNav.filterList();
-                    }
+                    contactsSearchField.focusSearch();
                 }
             },
             ActionItem {
@@ -148,7 +105,27 @@ NavigationPane {
             }
         ]
 
-        Container {
+        content: Container {
+            background: Color.create("#142936")
+            horizontalAlignment: HorizontalAlignment.Fill
+            verticalAlignment: VerticalAlignment.Fill
+            layout: StackLayout { orientation: LayoutOrientation.TopToBottom }
+            Container {
+                horizontalAlignment: HorizontalAlignment.Fill
+                leftPadding: ui.du(1.8)
+                rightPadding: ui.du(1.8)
+                ModernSearch {
+                    id: contactsSearchField
+                    placeholder: contactsNav.composeMode ? "Tìm người nhận tin nhắn" : "Tìm kiếm bạn bè"
+                    onQueryChanged: {
+                        contactsNav.searchText = query;
+                        contactsNav.searchVisible = query.length > 0;
+                        contactsNav.filterList();
+                    }
+                }
+            }
+            Container {
+            layoutProperties: StackLayoutProperties { spaceQuota: 1 }
             layout: DockLayout {}
             horizontalAlignment: HorizontalAlignment.Fill
             verticalAlignment:   VerticalAlignment.Fill
@@ -158,10 +135,7 @@ NavigationPane {
                 horizontalAlignment: HorizontalAlignment.Fill
                 verticalAlignment:   VerticalAlignment.Fill
 
-                layout: GridListLayout {
-                    columnCount: 4
-                    headerMode: ListHeaderMode.None
-                }
+                layout: StackListLayout {}
 
                 property variant profileDef: contactsProfileDef
                 property variant navPane:    contactsNav
@@ -178,37 +152,24 @@ NavigationPane {
                             verticalAlignment:   VerticalAlignment.Fill
                             layout: DockLayout {}
 
-                            ImageView {
-                                imageSource: (ListItemData.localAvatar && ListItemData.localAvatar.length > 0)
-                                    ? ListItemData.localAvatar
-                                    : "asset:///images/ChatView/default_caller.png"
-                                horizontalAlignment: HorizontalAlignment.Fill
-                                verticalAlignment:   VerticalAlignment.Fill
-                                scalingMethod: ScalingMethod.AspectFill
+                            preferredHeight: ui.du(13)
+                            ModernConversation {
+                                displayName: ListItemData.name || ListItemData.displayName || "Không rõ tên"
+                                avatarSource: ListItemData.localAvatar || ""
+                                preview: gridCell.ListItem.view.navPane.composeMode ? "Chạm để nhắn tin" : "Chạm để xem hồ sơ"
                             }
 
-                            Container {
-                                preferredHeight: ui.du(5)
-                                background: Color.create("#99000000")
-                                verticalAlignment:   VerticalAlignment.Bottom
-                                horizontalAlignment: HorizontalAlignment.Fill
-                                layout: DockLayout {}
-                                Label {
-                                    text: {
-                                        var n = ListItemData.name || ListItemData.displayName || "?"
-                                        return n.length > 9 ? n.substring(0, 8) + "…" : n
-                                    }
-                                    textStyle { fontSize: FontSize.XXSmall; color: Color.White }
-                                    horizontalAlignment: HorizontalAlignment.Center
-                                    verticalAlignment:   VerticalAlignment.Center
-                                    multiline: false
-                                }
-                            }
-
-                            onTouch: {
-                                if (event.isUp()) {
+                            gestureHandlers: [TapHandler { onTapped: {
                                     var item = ListItemData
                                     var lv   = gridCell.ListItem.view
+                                    if (lv.navPane.composeOpening) return;
+                                    if (lv.navPane.composeMode) {
+                                        if (!lv.navPane.appShell) return;
+                                        lv.navPane.composeOpening = true;
+                                        if (!lv.navPane.appShell.composeConversation(item))
+                                            lv.navPane.composeOpening = false;
+                                        return;
+                                    }
                                     var page = lv.profileDef.createObject()
                                     if (!page) return
                                     page.contactId      = item.threadId || item.uid || ""
@@ -220,8 +181,8 @@ NavigationPane {
                                     page.selfName       = lv.selfNameProp
                                     page.navigationPane = lv.navPane
                                     lv.navPane.push(page)
-                                }
-                            }
+
+                            } }]
                         }
                     }
                 ]
@@ -239,10 +200,17 @@ NavigationPane {
 
             Label {
                 id: contactsEmpty
-                text: "No contacts found"
+                textStyle { color: Color.create("#a4c9da") }
+                text: "Không tìm thấy liên hệ"
                 visible: false
                 horizontalAlignment: HorizontalAlignment.Center
                 verticalAlignment:   VerticalAlignment.Center
+            }
+        }
+            ModernNavigation {
+                id: bottomNavigation
+                selectedIndex: 1
+                onSectionSelected: { if (contactsNav.appShell) contactsNav.appShell.selectSection(index); }
             }
         }
 
@@ -281,7 +249,7 @@ NavigationPane {
                                 zService.downloadAvatar("bg_" + tid, f.bgavatar)
                         }
                     }
-                    contactsEmpty.visible = (friends.length === 0)
+                    contactsNav.filterList()
                 }
 
                 onAvatarReady: {

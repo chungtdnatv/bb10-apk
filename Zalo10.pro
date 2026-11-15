@@ -166,3 +166,18 @@ OTHER_FILES += \
     assets/lists/GroupsListItem.qml \
     assets/lists/GroupsServiceConnections.qml \
     assets/lists/GroupsTitleBar.qml
+
+# Rounded navigation, chat and Profile UI components.
+OTHER_FILES += \
+    assets/BottomNavItem.qml \
+    assets/BottomNavigation.qml \
+    assets/ChatIconButton.qml \
+    assets/ChatTopBar.qml \
+    assets/ModernAvatar.qml \
+    assets/ModernConversation.qml \
+    assets/ModernFormat.js \
+    assets/ModernNavigation.qml \
+    assets/ModernProfile.qml \
+    assets/ModernSearch.qml \
+    assets/ProfileAction.qml \
+    assets/RoundPlate.qml
