@@ -151,88 +151,91 @@ NavigationPane {
             background: Color.create("#101e2a")
             horizontalAlignment: HorizontalAlignment.Fill
             verticalAlignment: VerticalAlignment.Fill
-            leftPadding: ui.du(2)
-            rightPadding: ui.du(2)
-            topPadding: ui.du(1)
+            bottomPadding: ui.du(1)
+            layout: DockLayout {}
             Container {
-                visible: !root.authenticated
                 horizontalAlignment: HorizontalAlignment.Fill
-                layoutProperties: StackLayoutProperties { spaceQuota: 1 }
+                verticalAlignment: VerticalAlignment.Fill
+                leftPadding: ui.du(2);rightPadding: ui.du(2);topPadding: ui.du(1)
+                bottomPadding: root.authenticated?ui.du(17):0
                 layout: DockLayout {}
                 Container {
+                    visible: !root.authenticated
+                    verticalAlignment: VerticalAlignment.Fill
                     horizontalAlignment: HorizontalAlignment.Fill
-                    verticalAlignment: VerticalAlignment.Center
-                    leftPadding: ui.du(3);rightPadding: ui.du(3)
-                    Button { text: "Đăng nhập bằng code";horizontalAlignment: HorizontalAlignment.Fill;enabled: !root.loginBusy;onClicked: root.beginLogin() }
-                    ActivityIndicator { visible: root.loginBusy;running: visible;horizontalAlignment: HorizontalAlignment.Center }
-                    Label { visible: root.waiting;text: "microsoft.com/devicelogin";horizontalAlignment: HorizontalAlignment.Center;textStyle { color: Color.White;fontSize: FontSize.Large } }
-                    Label { visible: root.waiting;text: root.loginCode;textFormat: TextFormat.Plain;horizontalAlignment: HorizontalAlignment.Center;textStyle { color: Color.create("#27c5ed");fontSize: FontSize.XXLarge;fontWeight: FontWeight.Bold } }
-                    Label { visible: root.loginAttempted&&root.statusText.length>0;text: root.statusText;textFormat: TextFormat.Plain;multiline: true;textStyle { color: Color.create("#a9c9db");fontSize: FontSize.Small } }
-                }
-            }
-            Container {
-                visible: root.authenticated&&root.selectedTab!==2
-                layoutProperties: StackLayoutProperties { spaceQuota: 1 }
-                horizontalAlignment: HorizontalAlignment.Fill
-                TextField { id: chatSearch;hintText: root.selectedTab===1?"Tìm liên lạc và nhóm":"Tìm kiếm cuộc trò chuyện"; onTextChanging: {root.searchQuery=text;root.rebuildChats();} }
-                Label { visible: root.statusText.indexOf("HTTP")!==-1||root.statusText.indexOf("Lỗi")!==-1;text: root.statusText;textFormat: TextFormat.Plain;multiline: true;textStyle { color: Color.create("#86a7bb");fontSize: FontSize.XSmall } }
-                ActivityIndicator { running: root.loadingChats; visible: running; horizontalAlignment: HorizontalAlignment.Center }
-                ListView {
-                    property bool directoryMode: root.selectedTab===1
-                    layoutProperties: StackLayoutProperties { spaceQuota: 1 }
-                    dataModel: ArrayDataModel { id: chatsModel }
-                    listItemComponents: [ListItemComponent {
-                        type: ""
-                        Container {
-                            id: chatRow
-                            property bool directoryMode: ListItem.view.directoryMode
-                            background: Color.create("#101e2a")
-                            horizontalAlignment: HorizontalAlignment.Fill
-                            topPadding: ui.du(1.5);bottomPadding: ui.du(1.5)
-                            layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
-                            Container {
-                                preferredWidth: ui.du(7.5);preferredHeight: ui.du(7.5);verticalAlignment: VerticalAlignment.Center
-                                layout: DockLayout {}
-                                ImageView { imageSource: ListItemData.avatar||"";horizontalAlignment: HorizontalAlignment.Fill;verticalAlignment: VerticalAlignment.Fill;scalingMethod: ScalingMethod.AspectFit }
-                                Label { visible: String(ListItemData.avatar||"").indexOf("asset:///images/avatar-")===0;text: Teams.initial(ListItemData.title);textFormat: TextFormat.Plain;horizontalAlignment: HorizontalAlignment.Center;verticalAlignment: VerticalAlignment.Center;textStyle { color: Color.White;fontSize: FontSize.XLarge;fontWeight: FontWeight.Bold } }
-                            }
-                            Container {
-                                leftPadding: ui.du(1.5)
-                                layoutProperties: StackLayoutProperties { spaceQuota: 1 }
-                                Container {
-                                    layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
-                                    Label { text: ListItemData.title; textFormat: TextFormat.Plain; layoutProperties: StackLayoutProperties { spaceQuota: 1 } textStyle { color: Color.White; fontSize: FontSize.Large; fontWeight: FontWeight.Bold } }
-                                }
-                                Label { visible: chatRow.directoryMode;text: ListItemData.directoryLabel||"";textStyle { color: Color.create("#b4d2e2");fontSize: FontSize.Small } }
-                                Label { visible: !chatRow.directoryMode;text: ListItemData.preview||"Chạm để đọc tin nhắn"; textFormat: TextFormat.Plain; multiline: false; textStyle { color: Color.create("#b4d2e2"); fontSize: FontSize.Small } }
-                                Label { visible: !chatRow.directoryMode;text: ListItemData.time?Teams.displayTime(ListItemData.time):""; textStyle { color: Color.create("#7998ae"); fontSize: FontSize.XSmall } }
-                            }
-                        }
-                    }]
-                    onTriggered: root.openChat(dataModel.data(indexPath))
-                }
-            }
-            ScrollView {
-                visible: root.authenticated&&root.selectedTab===2
-                layoutProperties: StackLayoutProperties { spaceQuota: 1 }
-                Container {
-                    topPadding: ui.du(3)
+                    layout: DockLayout {}
                     Container {
-                        preferredWidth: ui.du(12);preferredHeight: ui.du(12);horizontalAlignment: HorizontalAlignment.Center;layout: DockLayout {}
-                        ImageView { imageSource: root.userName?teamsNet.avatar(root.userName,root.userMail):"";horizontalAlignment: HorizontalAlignment.Fill;verticalAlignment: VerticalAlignment.Fill }
-                        Label { text: Teams.initial(root.userName);horizontalAlignment: HorizontalAlignment.Center;verticalAlignment: VerticalAlignment.Center;textStyle { color: Color.White;fontSize: FontSize.XXLarge;fontWeight: FontWeight.Bold } }
+                        horizontalAlignment: HorizontalAlignment.Fill
+                        verticalAlignment: VerticalAlignment.Center
+                        leftPadding: ui.du(3);rightPadding: ui.du(3)
+                        Button { text: "Đăng nhập bằng code";horizontalAlignment: HorizontalAlignment.Fill;enabled: !root.loginBusy;onClicked: root.beginLogin() }
+                        ActivityIndicator { visible: root.loginBusy;running: visible;horizontalAlignment: HorizontalAlignment.Center }
+                        Label { visible: root.waiting;text: "microsoft.com/devicelogin";horizontalAlignment: HorizontalAlignment.Center;textStyle { color: Color.White;fontSize: FontSize.Large } }
+                        Label { visible: root.waiting;text: root.loginCode;textFormat: TextFormat.Plain;horizontalAlignment: HorizontalAlignment.Center;textStyle { color: Color.create("#27c5ed");fontSize: FontSize.XXLarge;fontWeight: FontWeight.Bold } }
+                        Label { visible: root.loginAttempted&&root.statusText.length>0;text: root.statusText;textFormat: TextFormat.Plain;multiline: true;textStyle { color: Color.create("#a9c9db");fontSize: FontSize.Small } }
                     }
-                    Label { text: root.userName; textFormat: TextFormat.Plain; textStyle { color: Color.White; fontSize: FontSize.XLarge } horizontalAlignment: HorizontalAlignment.Center }
-                    Label { text: root.userMail; textFormat: TextFormat.Plain; multiline: true; textStyle.color: Color.create("#a0bfd2");horizontalAlignment: HorizontalAlignment.Center }
-                    Label { text: root.statusText; multiline: true; textFormat: TextFormat.Plain; textStyle { color: Color.create("#8daabd"); fontSize: FontSize.Small } }
-                    Button { text: "Cập nhật OTA";horizontalAlignment: HorizontalAlignment.Fill;onClicked: otaSheet.open() }
-                    Button { text: "Làm mới danh sách"; horizontalAlignment: HorizontalAlignment.Fill;onClicked: Teams.controller().refreshChats() }
-                    Button { text: "Giới thiệu"; horizontalAlignment: HorizontalAlignment.Fill;onClicked: setupSheet.open() }
-                    Button { text: "Đăng xuất"; horizontalAlignment: HorizontalAlignment.Fill;onClicked: logoutDialog.show() }
                 }
-            }
-            BottomNavigation { visible: root.authenticated;selectedIndex: root.selectedTab;onSectionSelected: root.selectedTab=index }
+                Container {
+                    visible: root.authenticated&&root.selectedTab!==2
+                    verticalAlignment: VerticalAlignment.Fill
+                    horizontalAlignment: HorizontalAlignment.Fill
+                    TextField { id: chatSearch;hintText: root.selectedTab===1?"Tìm liên lạc và nhóm":"Tìm kiếm cuộc trò chuyện"; onTextChanging: {root.searchQuery=text;root.rebuildChats();} }
+                    Label { visible: root.statusText.indexOf("HTTP")!==-1||root.statusText.indexOf("Lỗi")!==-1;text: root.statusText;textFormat: TextFormat.Plain;multiline: true;textStyle { color: Color.create("#86a7bb");fontSize: FontSize.XSmall } }
+                    ActivityIndicator { running: root.loadingChats; visible: running; horizontalAlignment: HorizontalAlignment.Center }
+                    ListView {
+                        property bool directoryMode: root.selectedTab===1
+                        layoutProperties: StackLayoutProperties { spaceQuota: 1 }
+                        dataModel: ArrayDataModel { id: chatsModel }
+                        listItemComponents: [ListItemComponent {
+                            type: ""
+                            Container {
+                                id: chatRow
+                                property bool directoryMode: ListItem.view.directoryMode
+                                background: Color.create("#101e2a")
+                                horizontalAlignment: HorizontalAlignment.Fill
+                                topPadding: ui.du(1.5);bottomPadding: ui.du(1.5)
+                                layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
+                                Container {
+                                    preferredWidth: ui.du(7.5);preferredHeight: ui.du(7.5);verticalAlignment: VerticalAlignment.Center
+                                    layout: DockLayout {}
+                                    ImageView { imageSource: ListItemData.avatar||"";horizontalAlignment: HorizontalAlignment.Fill;verticalAlignment: VerticalAlignment.Fill;scalingMethod: ScalingMethod.AspectFit }
+                                    Label { visible: String(ListItemData.avatar||"").indexOf("asset:///images/avatar-")===0;text: Teams.initial(ListItemData.title);textFormat: TextFormat.Plain;horizontalAlignment: HorizontalAlignment.Center;verticalAlignment: VerticalAlignment.Center;textStyle { color: Color.White;fontSize: FontSize.XLarge;fontWeight: FontWeight.Bold } }
+                                }
+                                Container {
+                                    leftPadding: ui.du(1.5)
+                                    layoutProperties: StackLayoutProperties { spaceQuota: 1 }
+                                    Container {
+                                        layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
+                                        Label { text: ListItemData.title; textFormat: TextFormat.Plain; layoutProperties: StackLayoutProperties { spaceQuota: 1 } textStyle { color: Color.White; fontSize: FontSize.Large; fontWeight: FontWeight.Bold } }
+                                    }
+                                    Label { visible: chatRow.directoryMode;text: ListItemData.directoryLabel||"";textStyle { color: Color.create("#b4d2e2");fontSize: FontSize.Small } }
+                                    Label { visible: !chatRow.directoryMode;text: ListItemData.preview||"Chạm để đọc tin nhắn"; textFormat: TextFormat.Plain; multiline: false; textStyle { color: Color.create("#b4d2e2"); fontSize: FontSize.Small } }
+                                    Label { visible: !chatRow.directoryMode;text: ListItemData.time?Teams.displayTime(ListItemData.time):""; textStyle { color: Color.create("#7998ae"); fontSize: FontSize.XSmall } }
+                                }
+                            }
+                        }]
+                        onTriggered: root.openChat(dataModel.data(indexPath))
+                    }
+                }
+                TeamsProfile {
+                    visible: root.authenticated&&root.selectedTab===2
+                    displayName: root.userName;email: root.userMail
+                    avatar: root.userName?teamsNet.avatar(root.userName,root.userMail):""
+                    version: typeof ota!=="undefined"?ota.currentVersion:""
+                    conversationCount: root.chatCount;refreshing: root.loadingChats
+                    onUpdateRequested: otaSheet.open()
+                    onRefreshRequested: { if(Teams.controller())Teams.controller().refreshChats(); }
+                    onAboutRequested: setupSheet.open()
+                    onLogoutRequested: logoutDialog.show()
+                }
 
+            }
+            BottomNavigation {
+                visible: root.authenticated
+                verticalAlignment: VerticalAlignment.Bottom
+                selectedIndex: root.selectedTab
+                onSectionSelected: root.selectedTab=index
+            }
         }
     }
     attachedObjects: [

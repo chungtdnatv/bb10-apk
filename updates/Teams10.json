@@ -3,22 +3,21 @@
   "app": "Teams10",
   "appId": "com.bb10toolkit.Teams10",
   "packageId": "testRel_kit_Teams105d440259",
-  "version": "1.1.2.12",
-  "barUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.12-ui-ota-unsigned.bar",
-  "sha256": "e56489efb3a94e539fff0b0d2859b4c3f5d8e9802010492e6447e1017c8971ab",
-  "bytes": 422291,
+  "version": "1.1.2.13",
+  "barUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.13-ui-ota-unsigned.bar",
+  "sha256": "d648b87fc1957ac7cbef1261fdc02c5a76f94f052afb5a7a2e41ac7f511d6af2",
+  "bytes": 440826,
   "minimumOs": "10.3.1",
-  "notes": "UI: Thanh trên theo ảnh: Back tròn, pill avatar/tên, cụm gọi/tùy chọn.\nUI: Ô nhập bo tròn, emoji bên trái, đính kèm và nút xanh chọn ảnh/gửi bên phải.\nNEW: Khay emoji gọn cho tin nhắn Teams. Gọi và gửi ảnh/tệp chưa được hỗ trợ.\nBUILD: Giữ chức năng OTA và ghi danh của bản trước, tăng version để cài đè.\n",
-  "latestVersion": "1.1.2.12",
-  "downloadUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.12-ui-ota-unsigned.bar",
+  "notes": "Sửa Profile: dùng toàn chiều ngang, căn giữa avatar và tài khoản.\nCác hàng thao tác nền tối có icon; thanh điều hướng cố định sát đáy.\nGiữ OTA, làm mới, giới thiệu và xác nhận đăng xuất.\n",
+  "latestVersion": "1.1.2.13",
+  "downloadUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.13-ui-ota-unsigned.bar",
   "changelog": [
     {
-      "version": "1.1.2.12",
+      "version": "1.1.2.13",
       "items": [
-        "UI: Thanh trên theo ảnh: Back tròn, pill avatar/tên, cụm gọi/tùy chọn.",
-        "UI: Ô nhập bo tròn, emoji bên trái, đính kèm và nút xanh chọn ảnh/gửi bên phải.",
-        "NEW: Khay emoji gọn cho tin nhắn Teams. Gọi và gửi ảnh/tệp chưa được hỗ trợ.",
-        "BUILD: Giữ chức năng OTA và ghi danh của bản trước, tăng version để cài đè."
+        "Sửa Profile: dùng toàn chiều ngang, căn giữa avatar và tài khoản.",
+        "Các hàng thao tác nền tối có icon; thanh điều hướng cố định sát đáy.",
+        "Giữ OTA, làm mới, giới thiệu và xác nhận đăng xuất."
       ]
     }
   ]

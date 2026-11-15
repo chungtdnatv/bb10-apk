@@ -1,5 +1,15 @@
 # Validation of the toolkit integration
 
+## Teams10 1.1.2.13 — Profile
+
+Profile uses the viewport width, centered identity, dark action rows with PNG icons,
+and a bottom-docked navigation bar. Actions retain the existing OTA, refresh, About
+and logout-confirmation handlers. Native SDK build passed import/unwind/entry-point
+checks; repackaging verifies 85 assets against current sources. QML syntax lint and
+the Teams/toolkit suites passed. No BB10 runtime or Passport visual test is available
+in this environment. Zalo remains 1.5.0.18. Messenger research is source review,
+not authenticated transport validation; see references/facebook-messenger/README.md.
+
 ## Teams10 1.1.2.12 / Zalo10 1.5.0.18
 
 Chat chrome follows the user-provided screenshot: a separate circular back
