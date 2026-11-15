@@ -1,5 +1,14 @@
 # Validation of the toolkit integration
 
+## Teams10 1.1.2.14 / Zalo10 1.5.0.19
+
+Zalo Profile adopts the Teams dark action rows, centered account identity,
+viewport-width scrolling and bottom-docked navigation. Existing Zalo actions and
+original credits remain. Both apps rename OTA UI to “Cập nhật phần mềm”, remove
+Profile secondary descriptions/counts and the long update instruction paragraph.
+Native SDK builds, QML lint, toolkit/Teams tests, Zalo UI/package tests and OTA
+feed verification passed. Visual rendering still needs a Passport device check.
+
 ## Teams10 1.1.2.13 — Profile
 
 Profile uses the viewport width, centered identity, dark action rows with PNG icons,

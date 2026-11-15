@@ -3,21 +3,20 @@
   "app": "Teams10",
   "appId": "com.bb10toolkit.Teams10",
   "packageId": "testRel_kit_Teams105d440259",
-  "version": "1.1.2.13",
-  "barUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.13-ui-ota-unsigned.bar",
-  "sha256": "d648b87fc1957ac7cbef1261fdc02c5a76f94f052afb5a7a2e41ac7f511d6af2",
-  "bytes": 440826,
+  "version": "1.1.2.14",
+  "barUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.14-ui-ota-unsigned.bar",
+  "sha256": "5dde6c63bad622538d47af153eef948c3d1b30236050b229cf23f3fba97627ef",
+  "bytes": 440455,
   "minimumOs": "10.3.1",
-  "notes": "Sửa Profile: dùng toàn chiều ngang, căn giữa avatar và tài khoản.\nCác hàng thao tác nền tối có icon; thanh điều hướng cố định sát đáy.\nGiữ OTA, làm mới, giới thiệu và xác nhận đăng xuất.\n",
-  "latestVersion": "1.1.2.13",
-  "downloadUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.13-ui-ota-unsigned.bar",
+  "notes": "Đồng bộ giao diện Profile nền tối, avatar căn giữa và thanh điều hướng sát đáy.\nĐổi tên thành Cập nhật phần mềm; bỏ hướng dẫn dài và trạng thái dư thừa trên Profile.\n",
+  "latestVersion": "1.1.2.14",
+  "downloadUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.14-ui-ota-unsigned.bar",
   "changelog": [
     {
-      "version": "1.1.2.13",
+      "version": "1.1.2.14",
       "items": [
-        "Sửa Profile: dùng toàn chiều ngang, căn giữa avatar và tài khoản.",
-        "Các hàng thao tác nền tối có icon; thanh điều hướng cố định sát đáy.",
-        "Giữ OTA, làm mới, giới thiệu và xác nhận đăng xuất."
+        "Đồng bộ giao diện Profile nền tối, avatar căn giữa và thanh điều hướng sát đáy.",
+        "Đổi tên thành Cập nhật phần mềm; bỏ hướng dẫn dài và trạng thái dư thừa trên Profile."
       ]
     }
   ]

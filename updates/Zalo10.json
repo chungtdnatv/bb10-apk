@@ -3,22 +3,20 @@
   "app": "Zalo10",
   "appId": "com.BerryLife.Zalo10",
   "packageId": "testRel_Life_Zalo108ff545d2",
-  "version": "1.5.0.18",
-  "barUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.18-native-ui-ota-unsigned.bar",
-  "sha256": "eb6907d929336ce4a41364f792f0c88dc97c6a9bc413eb3e51ec0114878bfe8a",
-  "bytes": 4064368,
+  "version": "1.5.0.19",
+  "barUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.19-native-ui-ota-unsigned.bar",
+  "sha256": "7b200fa2a5a856ba7d48b72e3fe37b55147282999bedbbf9c24c3c270a120d05",
+  "bytes": 4081502,
   "minimumOs": "10.3.1",
-  "notes": "UI: Thanh trên theo ảnh: Back tròn, pill avatar/tên, cụm gọi/tùy chọn.\nUI: Ô nhập bo tròn, emoji bên trái, đính kèm và nút xanh chọn ảnh/gửi bên phải.\nFIX: Giữ bộ chọn emoji/ảnh/tệp, trả lời và gửi lại; chặn gửi trùng lúc đang chờ kết quả.\nBUILD: Giữ chức năng OTA và ghi danh của bản trước, tăng version để cài đè.\n",
-  "latestVersion": "1.5.0.18",
-  "downloadUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.18-native-ui-ota-unsigned.bar",
+  "notes": "Đồng bộ giao diện Profile nền tối, avatar căn giữa và thanh điều hướng sát đáy.\nĐổi tên thành Cập nhật phần mềm; bỏ hướng dẫn dài và trạng thái dư thừa trên Profile.\n",
+  "latestVersion": "1.5.0.19",
+  "downloadUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.19-native-ui-ota-unsigned.bar",
   "changelog": [
     {
-      "version": "1.5.0.18",
+      "version": "1.5.0.19",
       "items": [
-        "UI: Thanh trên theo ảnh: Back tròn, pill avatar/tên, cụm gọi/tùy chọn.",
-        "UI: Ô nhập bo tròn, emoji bên trái, đính kèm và nút xanh chọn ảnh/gửi bên phải.",
-        "FIX: Giữ bộ chọn emoji/ảnh/tệp, trả lời và gửi lại; chặn gửi trùng lúc đang chờ kết quả.",
-        "BUILD: Giữ chức năng OTA và ghi danh của bản trước, tăng version để cài đè."
+        "Đồng bộ giao diện Profile nền tối, avatar căn giữa và thanh điều hướng sát đáy.",
+        "Đổi tên thành Cập nhật phần mềm; bỏ hướng dẫn dài và trạng thái dư thừa trên Profile."
       ]
     }
   ]

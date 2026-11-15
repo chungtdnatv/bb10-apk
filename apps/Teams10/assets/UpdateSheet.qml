@@ -4,7 +4,7 @@ Sheet {
     property variant backend: typeof ota!=="undefined"?ota:null
     onOpened: {if(backend)backend.check();}
     Page {
-        titleBar: TitleBar { title: "Cập nhật OTA";dismissAction: ActionItem { title: "Đóng";onTriggered: updates.close() } }
+        titleBar: TitleBar { title: "Cập nhật phần mềm";dismissAction: ActionItem { title: "Đóng";onTriggered: updates.close() } }
         ScrollView {
             Container {
                 leftPadding: ui.du(3);rightPadding: ui.du(3);topPadding: ui.du(3)
@@ -23,7 +23,6 @@ Sheet {
                 Button { text: "Mở BAR bằng ứng dụng khác";visible: updates.backend&&updates.backend.localPath.length>0;enabled: updates.backend&&!updates.backend.busy;horizontalAlignment: HorizontalAlignment.Fill;onClicked: updates.backend.openInstaller() }
                 Label { visible: updates.backend&&updates.backend.localPath.length>0;text: updates.backend?updates.backend.localPath:"";textFormat: TextFormat.Plain;multiline: true }
                 Button { text: "Hủy tải";visible: updates.backend&&updates.backend.cancellable;horizontalAlignment: HorizontalAlignment.Fill;onClicked: updates.backend.cancel() }
-                Label { text: "BAR tải từ repo của app qua HTTPS và được kiểm tra SHA-256. Tải và cài sẽ gửi yêu cầu cài sau khi xác minh xong. App tự đóng sau khi gửi yêu cầu để hệ thống cài cập nhật; chờ rồi mở lại app để kiểm tra phiên bản. BAR Installer không có API nhận BAR thì phải mở nó và chọn file trong Downloads.";multiline: true;textStyle.fontSize: FontSize.Small }
             }
         }
     }

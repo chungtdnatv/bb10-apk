@@ -32,7 +32,7 @@ hoặc cache build; `toolchains/` chứa source và revision để tái tạo/m�
 ## Teams10 cho Microsoft 365
 
 App native độc lập có đăng nhập device-code, đọc lịch sử và gửi văn bản vào chat có sẵn.
-[Tải Teams10 1.1.2.13 UI + OTA](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.13-ui-ota-unsigned.bar).
+[Tải Teams10 1.1.2.14 UI + OTA](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.14-ui-ota-unsigned.bar).
 Không có gọi điện. Không cần App Registration riêng: dùng luồng tương thích
 purple-teams/squads-app và public client ID Teams; Microsoft/tenant vẫn có thể từ chối.
 Không dùng WebView hoặc trình duyệt Passport để mở Teams Web.
@@ -47,7 +47,7 @@ Bản 1.0.0.4 đã đăng nhập được trên Passport theo xác nhận của 
 
 ## UI và OTA cho hai app
 
-Teams10 **1.1.2.13** và Zalo10 **1.5.0.18** dùng thanh chat theo ảnh tham khảo:
+Teams10 **1.1.2.14** và Zalo10 **1.5.0.19** dùng thanh chat theo ảnh tham khảo:
 Back tròn riêng; avatar/tên trong pill giữa; gọi/tùy chọn trong pill bên phải.
 Ô soạn bo tròn có emoji bên trái, đính kèm bên phải, nút xanh đổi từ chọn ảnh
 sang gửi khi có nội dung. Hai app dùng cùng component, màu và bộ icon PNG.
@@ -60,14 +60,16 @@ avatar/Hub bật và ghi danh trong Giới thiệu; Zalo giữ tác giả gốc 
 chỉ ghi Chung cập nhật giao diện trong Giới thiệu. Giữ định danh để cài đè giữ data.
 Xem [giao diện chat](docs/chat-ui-reference-vi.md). Cần kiểm tra hiển thị trên Passport.
 
-[Tải Zalo10 1.5.0.18](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.18-native-ui-ota-unsigned.bar).
+[Tải Zalo10 1.5.0.19](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.19-native-ui-ota-unsigned.bar).
 Cả hai app có bottom bar bo tròn bằng end-cap đúng tỉ lệ và **Profile → Cập nhật OTA**.
 Teams thêm màn hình code tối giản, sửa thời gian `%#c` và căn tin gửi/nhận phải/trái.
 Cài trực tiếp dùng PPS trên firmware hỗ trợ, tham khảo script trong BarInstaller
 người dùng gửi; không tự tạo quyền firmware. Xem [hướng dẫn OTA](docs/ota-vi.md)
 và [thay đổi UI](docs/ui-ota-release-vi.md).
 
-Profile Teams mới dùng toàn chiều ngang, avatar/tên căn giữa, các hàng thao tác nền tối và thanh điều hướng sát đáy.
+Profile Teams và Zalo dùng toàn chiều ngang, avatar/tên căn giữa, các hàng thao tác nền tối và thanh điều hướng sát đáy.
+
+Hai app dùng nhãn “Cập nhật phần mềm”; Profile bỏ mô tả phụ và số hội thoại.
 
 Xem [phương án Messenger cá nhân cho BB10](references/facebook-messenger/README.md).
 

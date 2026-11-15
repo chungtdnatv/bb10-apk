@@ -43,15 +43,9 @@ ScrollView {
             topMargin: ui.du(0.7);bottomMargin: 0
             textStyle { color: Color.create("#9fb9ca");fontSize: FontSize.Small;textAlign: TextAlign.Center }
         }
-        Label {
-            text: profile.conversationCount+" hội thoại"
-            horizontalAlignment: HorizontalAlignment.Fill
-            topMargin: ui.du(1);bottomMargin: ui.du(2)
-            textStyle { color: Color.create("#57c9e9");fontSize: FontSize.Small;textAlign: TextAlign.Center }
-        }
-        ProfileAction { title: "Cập nhật OTA";detail: profile.version?"Phiên bản "+profile.version:"Kiểm tra bản mới";icon: "update";onChosen: profile.updateRequested() }
-        ProfileAction { title: profile.refreshing?"Đang làm mới…":"Làm mới danh sách";detail: "Đồng bộ hội thoại và liên lạc";icon: "refresh";enabled: !profile.refreshing;onChosen: profile.refreshRequested() }
-        ProfileAction { title: "Giới thiệu";detail: "Thông tin ứng dụng và người tạo";icon: "info";onChosen: profile.aboutRequested() }
-        ProfileAction { title: "Đăng xuất";detail: "Thoát tài khoản trên thiết bị này";icon: "logout";danger: true;onChosen: profile.logoutRequested() }
+        ProfileAction { title: "Cập nhật phần mềm";icon: "update";onChosen: profile.updateRequested() }
+        ProfileAction { title: profile.refreshing?"Đang làm mới…":"Làm mới danh sách";icon: "refresh";enabled: !profile.refreshing;onChosen: profile.refreshRequested() }
+        ProfileAction { title: "Giới thiệu";icon: "info";onChosen: profile.aboutRequested() }
+        ProfileAction { title: "Đăng xuất";icon: "logout";danger: true;onChosen: profile.logoutRequested() }
     }
 }

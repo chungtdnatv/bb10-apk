@@ -9,44 +9,56 @@ Page {
     function raiseBottomBar() { navigation.reveal(); }
     actionBarVisibility: ChromeVisibility.Hidden
     content: Container {
-    background: Color.create("#142936")
-    horizontalAlignment: HorizontalAlignment.Fill
-    verticalAlignment: VerticalAlignment.Fill
-    ScrollView {
-        layoutProperties: StackLayoutProperties { spaceQuota: 1 }
+        background: Color.create("#101e2a")
         horizontalAlignment: HorizontalAlignment.Fill
+        verticalAlignment: VerticalAlignment.Fill
+        bottomPadding: ui.du(1)
+        layout: DockLayout {}
         Container {
             horizontalAlignment: HorizontalAlignment.Fill
-            leftPadding: ui.du(3)
-            rightPadding: ui.du(3)
-            topPadding: ui.du(2)
-            bottomPadding: ui.du(3)
-            ModernAvatar { displayName: profile.accountName; horizontalAlignment: HorizontalAlignment.Center }
-            Label {
-                text: zService.loggedIn ? (profile.accountName || "Tài khoản Zalo") : "Chưa đăng nhập"
-                horizontalAlignment: HorizontalAlignment.Center
-                textStyle { color: Color.White; fontSize: FontSize.XLarge; fontWeight: FontWeight.Bold }
+            verticalAlignment: VerticalAlignment.Fill
+            bottomPadding: ui.du(17)
+            layout: DockLayout {}
+            ScrollView {
+                id: scroll
+                horizontalAlignment: HorizontalAlignment.Fill
+                verticalAlignment: VerticalAlignment.Fill
+                scrollViewProperties.scrollMode: ScrollMode.Vertical
+                attachedObjects: [LayoutUpdateHandler { id: viewport }]
+                Container {
+                    property real viewportWidth: viewport.layoutFrame.width>0?viewport.layoutFrame.width:ui.du(70)
+                    preferredWidth: viewportWidth;minWidth: viewportWidth;maxWidth: viewportWidth
+                    leftPadding: ui.du(4);rightPadding: ui.du(4)
+                    topPadding: ui.du(4);bottomPadding: ui.du(3)
+                    ModernAvatar {
+                        displayName: profile.accountName
+                        horizontalAlignment: HorizontalAlignment.Center
+                        preferredWidth: ui.du(12);minWidth: ui.du(12);maxWidth: ui.du(12)
+                        preferredHeight: ui.du(12);minHeight: ui.du(12);maxHeight: ui.du(12)
+                    }
+                    Label {
+                        text: zService.loggedIn?(profile.accountName||"Tài khoản Zalo"):"Chưa đăng nhập"
+                        textFormat: TextFormat.Plain;multiline: true
+                        horizontalAlignment: HorizontalAlignment.Fill
+                        topMargin: ui.du(2);bottomMargin: ui.du(2)
+                        textStyle { color: Color.White;fontSize: FontSize.Large;fontWeight: FontWeight.Bold;textAlign: TextAlign.Center }
+                    }
+                    ProfileAction { title: "Cập nhật phần mềm";icon: "update";onChosen: profile.actionRequested("ota") }
+                    ProfileAction { title: "Lời mời kết bạn";icon: "info";onChosen: profile.actionRequested("invites") }
+                    ProfileAction { title: "Đồng bộ tin nhắn";icon: "refresh";onChosen: profile.actionRequested("phoneSync") }
+                    ProfileAction { title: "Lịch sử từ điện thoại";icon: "refresh";visible: profile.supportsArchive;onChosen: profile.actionRequested("phoneArchive") }
+                    ProfileAction { title: "Làm mới danh sách";icon: "refresh";onChosen: profile.actionRequested("refresh") }
+                    ProfileAction { title: "Cài đặt";icon: "info";onChosen: profile.actionRequested("settings") }
+                    ProfileAction { title: "Gửi thư góp ý";icon: "info";onChosen: profile.actionRequested("feedback") }
+                    ProfileAction { title: "Giới thiệu";icon: "info";onChosen: profile.actionRequested("about") }
+                }
             }
-            Label {
-                text: zService.loggedIn ? "ID: "+zService.selfUid : "Đăng nhập để đồng bộ và nhắn tin"
-                multiline: true
-                horizontalAlignment: HorizontalAlignment.Center
-                textStyle { color: Color.create("#b8dce9"); fontSize: FontSize.Small }
-            }
-            Button { text: "Lời mời kết bạn"; horizontalAlignment: HorizontalAlignment.Fill; preferredHeight: ui.du(8); onClicked: profile.actionRequested("invites") }
-            Button { text: "Đồng bộ tin nhắn"; horizontalAlignment: HorizontalAlignment.Fill; preferredHeight: ui.du(8); onClicked: profile.actionRequested("phoneSync") }
-            Button { text: "Lịch sử từ điện thoại"; visible: profile.supportsArchive; horizontalAlignment: HorizontalAlignment.Fill; preferredHeight: ui.du(8); onClicked: profile.actionRequested("phoneArchive") }
-            Button { text: "Làm mới danh sách"; horizontalAlignment: HorizontalAlignment.Fill; preferredHeight: ui.du(8); onClicked: profile.actionRequested("refresh") }
-            Button { text: "Cài đặt"; horizontalAlignment: HorizontalAlignment.Fill; preferredHeight: ui.du(8); onClicked: profile.actionRequested("settings") }
-            Button { text: "Gửi thư góp ý"; horizontalAlignment: HorizontalAlignment.Fill; preferredHeight: ui.du(8); onClicked: profile.actionRequested("feedback") }
-            Button { text: "Cập nhật OTA";horizontalAlignment: HorizontalAlignment.Fill;preferredHeight: ui.du(8);onClicked: profile.actionRequested("ota") }
-            Button { text: "Giới thiệu"; horizontalAlignment: HorizontalAlignment.Fill; preferredHeight: ui.du(8); onClicked: profile.actionRequested("about") }
         }
-    }
-    ModernNavigation {
-        id: navigation
-        selectedIndex: 2
-        onSectionSelected: { if (profile.appShell) profile.appShell.selectSection(index); }
-    }
+        ModernNavigation {
+            id: navigation
+            verticalAlignment: VerticalAlignment.Bottom
+            selectedIndex: 2
+            onSectionSelected: { if(profile.appShell)profile.appShell.selectSection(index); }
+        }
     }
 }

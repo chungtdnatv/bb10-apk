@@ -25,3 +25,7 @@ for name,color in [('update','#4dccf0'),('refresh','#60d2c2'),('info','#bda2f7')
         line([(28,12),(14,12),(14,52),(28,52)]);line([(25,32),(52,32)]);line([(42,22),(52,32),(42,42)])
     else:line([(25,18),(39,32),(25,46)])
     im.resize((96,96),Image.Resampling.LANCZOS).save(root/(name+'.png'))
+
+# Zalo uses the same profile controls.
+import shutil
+shutil.copytree(root, root.parents[3]/"Zalo10/assets/images/profile-ui", dirs_exist_ok=True)
