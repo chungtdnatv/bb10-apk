@@ -1,4 +1,4 @@
-# Teams10 1.1.2.11 — native BB10 Microsoft 365 chat
+# Teams10 1.1.2.12 — native BB10 Microsoft 365 chat
 
 Independent, unofficial Cascades client for work/school accounts. No WebView,
 password input or own Entra App Registration. Device-code/native interoperability
@@ -20,7 +20,7 @@ there are no Profile switches for them. A crash flag still pauses auto-restore
 for explicit login, but no longer disables those integrations. Boot service
 startup does not consume the UI crash flag. Creator credit is in About.
 
-## Top chat navigation and OTA (1.1.2.11)
+## Top chat navigation and OTA (1.1.2.12)
 
 The back button is in the top title bar; the bottom action bar is hidden while
 the composer remains. OTA's explicit Download and install action chains the
@@ -28,7 +28,7 @@ verified download to submission, then exits via Application.quit so the firmware
 can replace this app. The next UI launch compares the running version with the
 saved request. Submission alone is never called completed installation.
 
-## Directory and Hub update (1.1.2.11)
+## Directory and Hub update (1.1.2.12)
 
 Contacts lists unique recipients and groups from existing conversations, sorted
 by name and without message previews/timestamps. It does not fetch an entire

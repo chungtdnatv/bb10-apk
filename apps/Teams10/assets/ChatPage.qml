@@ -1,5 +1,6 @@
 import bb.cascades 1.4
 import QtQuick 1.0
+import bb.system 1.0
 import "TeamsCore.js" as Teams
 
 Page {
@@ -7,6 +8,9 @@ Page {
     property variant appRoot: null
     property string chatId: ""
     property string chatTitle: ""
+    property string chatAvatar: ""
+    property string chatSubtitle: "Trò chuyện Teams"
+    property bool emojiOpen: false
     property string statusText: ""
     property bool sending: false
     property bool loading: false
@@ -15,6 +19,7 @@ Page {
     property bool scrollPending: true
     function render(state) {
         chatTitle=state.chatTitle;
+        for(var c=0;c<state.chats.length;c++)if(state.chats[c].id===chat.chatId)chatAvatar=state.chats[c].avatar||chatAvatar;
         sending=state.sending;loading=state.loadingMessages;hasMore=state.messagesMore.length>0;statusText=state.status;
         var next=JSON.stringify(state.messages);
         if(signature!==next) {
@@ -25,46 +30,36 @@ Page {
     }
     function sent(ok,id,text) {
         if(ok && id===chatId) {
+            chat.emojiOpen=false;
             if(draft.text.replace(/^\s+|\s+$/g, "")===text) draft.text="";
             scrollPending=true;bottomTimer.restart();
         }
     }
+    function submitComposer() {
+        if(chat.sending)return;
+        if(draft.text.replace(/^\s+|\s+$/g,"").length>0)chat.appRoot.sendMessage(draft.text);
+        else {featureToast.body="Teams10 chưa hỗ trợ gửi ảnh; nhập văn bản để gửi tin nhắn.";featureToast.show();}
+    }
     actionBarVisibility: ChromeVisibility.Hidden
     function requestBack() { if(chat.appRoot)chat.appRoot.pop(); }
-    titleBar: TitleBar {
-        kind: TitleBarKind.FreeForm
-        kindProperties: FreeFormTitleBarKindProperties {
-            content: Container {
-                background: Color.create("#101e2a")
-                horizontalAlignment: HorizontalAlignment.Fill
-                layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
-                Button {
-                    text: "‹"
-                    accessibility.name: "Quay lại"
-                    preferredWidth: ui.du(8);minWidth: ui.du(8);maxWidth: ui.du(8)
-                    verticalAlignment: VerticalAlignment.Center
-                    onClicked: chat.requestBack()
-                }
-                Label {
-                    text: chat.chatTitle
-                    textFormat: TextFormat.Plain
-                    verticalAlignment: VerticalAlignment.Center
-                    layoutProperties: StackLayoutProperties { spaceQuota: 1 }
-                    textStyle { color: Color.White;fontSize: FontSize.Large;fontWeight: FontWeight.Bold }
-                }
-            }
-        }
-    }
+
     Container {
         background: Color.create("#101e2a")
         horizontalAlignment: HorizontalAlignment.Fill
         verticalAlignment: VerticalAlignment.Fill
-        leftPadding: ui.du(1.5);rightPadding: ui.du(1.5)
+        leftPadding: 0;rightPadding: 0
+        ChatTopBar {
+            title: chat.chatTitle;subtitle: chat.chatSubtitle;avatar: chat.chatAvatar
+            onBackRequested: chat.requestBack()
+            onCallRequested: { featureToast.body="Teams10 chưa hỗ trợ gọi thoại/video.";featureToast.show(); }
+            onMoreRequested: chat.openActionMenu()
+        }
         Label { visible: chat.statusText.indexOf("Lỗi")!==-1||chat.statusText.indexOf("HTTP")!==-1||chat.statusText.indexOf("Chưa xác định")!==-1;text: chat.statusText;textFormat: TextFormat.Plain;multiline: true;textStyle { color: Color.create("#89adc2");fontSize: FontSize.XSmall } }
         ActivityIndicator { visible: chat.loading; running: visible; horizontalAlignment: HorizontalAlignment.Center }
         ListView {
             id: messageList
-            property real widthHint: listMeasure.layoutFrame.width>0?listMeasure.layoutFrame.width:ui.du(75)
+            leftPadding: ui.du(1.5);rightPadding: ui.du(1.5)
+            property real widthHint: listMeasure.layoutFrame.width>0?listMeasure.layoutFrame.width-ui.du(3):ui.du(75)
             horizontalAlignment: HorizontalAlignment.Fill
             attachedObjects: [
                 LayoutUpdateHandler { id: listMeasure },
@@ -109,14 +104,43 @@ Page {
                 }
             }]
         }
+        TeamsEmojiTray { visible: chat.emojiOpen;onPicked: { draft.text+=value;draft.requestFocus(); } }
         Container {
-            bottomPadding: ui.du(0.7);topPadding: ui.du(0.7)
-            layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
-            TextArea { id: draft;hintText: "Nhập tin nhắn…";preferredHeight: ui.du(7);maxHeight: ui.du(15);enabled: !chat.sending;layoutProperties: StackLayoutProperties { spaceQuota: 1 } }
-            Button { text: chat.sending?"…":"Gửi";preferredWidth: ui.du(12);verticalAlignment: VerticalAlignment.Center;enabled: !chat.sending&&draft.text.replace(/^\s+|\s+$/g,"").length>0;onClicked: chat.appRoot.sendMessage(draft.text) }
+            horizontalAlignment: HorizontalAlignment.Fill
+            preferredHeight: ui.du(10);minHeight: ui.du(10);maxHeight: ui.du(10)
+            leftPadding: ui.du(1);rightPadding: ui.du(1);topPadding: ui.du(0.5);bottomPadding: ui.du(0.5)
+            layout: DockLayout {}
+            RoundPlate { tone: "chat";fallbackHeight: ui.du(9) }
+            Container {
+                horizontalAlignment: HorizontalAlignment.Fill
+                verticalAlignment: VerticalAlignment.Center
+                leftPadding: ui.du(0.7);rightPadding: ui.du(0.7)
+                layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
+                ChatIconButton { icon: chat.emojiOpen?"keyboard":"emoji";hint: "Emoji";muted: true;onClicked: chat.emojiOpen=!chat.emojiOpen }
+                TextArea {
+                    id: draft;hintText: "Nhập tin nhắn…";backgroundVisible: false
+                    preferredHeight: ui.du(7);maxHeight: ui.du(7);minHeight: ui.du(7)
+                    enabled: !chat.sending
+                    verticalAlignment: VerticalAlignment.Center
+                    preferredWidth: 0;minWidth: 0
+                    layoutProperties: StackLayoutProperties { spaceQuota: 1 }
+                    textStyle { color: Color.White;fontSize: FontSize.Medium }
+                }
+                ChatIconButton { icon: "attach";hint: "Đính kèm";muted: true;onClicked: { featureToast.body="Teams10 hiện chỉ gửi văn bản; chưa hỗ trợ gửi ảnh/tệp.";featureToast.show(); } }
+                ChatIconButton {
+                    icon: draft.text.replace(/^\s+|\s+$/g,"").length>0?"send":"camera"
+                    hint: draft.text.replace(/^\s+|\s+$/g,"").length>0?"Gửi tin nhắn":"Ảnh"
+                    surface: true;accent: true;enabled: !chat.sending
+                    onClicked: chat.submitComposer()
+                }
+            }
         }
     }
-    attachedObjects: [Timer {
+    actions: [
+        ActionItem { title: "Làm mới tin nhắn";onTriggered: chat.appRoot.refreshMessages(false) },
+        ActionItem { title: "Tin cũ hơn";enabled: chat.hasMore;onTriggered: chat.appRoot.refreshMessages(true) }
+    ]
+    attachedObjects: [SystemToast { id: featureToast },Timer {
         id: bottomTimer
         interval: 25
         repeat: false

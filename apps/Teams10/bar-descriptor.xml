@@ -4,7 +4,7 @@
     <name>Teams10</name>
     <author>Chung</author>
     <versionNumber>1.1.2</versionNumber>
-    <buildId>11</buildId>
+    <buildId>12</buildId>
     <description>Native Cascades application</description>
     <configuration id="release" name="Device-Release">
         <entryPointType>Qnx/Cascades</entryPointType>

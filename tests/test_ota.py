@@ -30,7 +30,7 @@ int main(){
             subprocess.run([str(out)],check=True)
     def test_shared_ui_payload_and_installer_rejections(self):
         for app in ('Teams10','Zalo10'):
-            for name in ('RoundPlate.qml','BottomNavItem.qml','BottomNavigation.qml'):
+            for name in ('RoundPlate.qml','BottomNavItem.qml','BottomNavigation.qml','ChatIconButton.qml','ChatTopBar.qml'):
                 self.assertEqual((ROOT/'apps'/app/'assets'/name).read_bytes(),(ROOT/'shared/ui'/name).read_bytes())
             for name in ('UpdateSheet.qml','ota-install.sh'):
                 self.assertEqual((ROOT/'apps'/app/'assets'/name).read_bytes(),(ROOT/'shared/ota'/name).read_bytes())
@@ -53,7 +53,7 @@ class OtaPublication(unittest.TestCase):
     def test_end_cap_assets_are_half_circle_aspect_and_source_is_shared(self):
         import struct
         for app in ('Teams10','Zalo10'):
-            for tone in ('bar','active','field'):
+            for tone in ('bar','active','field','chat','chat-accent'):
                 for segment,width in (('left',128),('right',128),('middle',1)):
                     relative=Path('images/plates')/(tone+'-'+segment+'.png')
                     data=(ROOT/'shared/ui'/relative).read_bytes()

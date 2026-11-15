@@ -21,6 +21,18 @@ class ZaloFeatureFlows(unittest.TestCase):
         result = subprocess.run(['node','-e',script],text=True,capture_output=True)
         self.assertEqual(result.returncode,0,result.stderr)
 
+    def test_rounded_composer_dispatches_send_or_image_picker(self):
+        text=(ROOT/'apps/Zalo10/assets/ChatView.qml').read_text()
+        a,b=block(text,text.index('function submitComposer('))
+        self.node("""const assert=require('node:assert/strict');let images=0,sends=0;
+            const sendAction={messageReady:false},imagePicker={open:()=>images++};
+            const chatViewPage={doSend:()=>sends++};
+        """+text[a:b]+"""
+            submitComposer();assert.equal(images,1);assert.equal(sends,0);
+            sendAction.messageReady=true;submitComposer();assert.equal(images,1);assert.equal(sends,1);
+            chatViewPage.sendBusy=true;submitComposer();assert.equal(sends,1);assert.equal(images,1);
+        """)
+
     def test_native_top_back_requests_navigation_pop(self):
         text=(ROOT/'apps/Zalo10/assets/ChatView.qml').read_text()
         a,b=block(text,text.index('function requestBack('))

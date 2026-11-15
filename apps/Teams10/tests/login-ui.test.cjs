@@ -76,8 +76,19 @@ test('Hub opens missing-list conversations and waits for an existing page to pop
 });
 
 test('top chat back action pops its owner and tolerates an unassigned owner',()=>{
- const start=chatQml.indexOf('    function requestBack()'),end=chatQml.indexOf('\n    titleBar:',start);
+ const start=chatQml.indexOf('    function requestBack()'),end=chatQml.indexOf('\n    Container {',start);
  let pops=0;const context=vm.createContext({chat:{appRoot:null}});
  vm.runInContext(chatQml.slice(start,end),context);context.requestBack();
  context.chat.appRoot={pop:()=>pops++};context.requestBack();assert.equal(pops,1);
+});
+
+test('rounded composer sends typed text once, keeps whitespace/camera out of text transport',()=>{
+ const start=chatQml.indexOf('    function submitComposer()'),end=chatQml.indexOf('    actionBarVisibility:',start);
+ const sent=[];let notices=0;
+ const chat={sending:false,appRoot:{sendMessage:text=>sent.push(text)}};
+ const draft={text:'  '},featureToast={body:'',show:()=>notices++};
+ const context=vm.createContext({chat,draft,featureToast});vm.runInContext(chatQml.slice(start,end),context);
+ context.submitComposer();assert.equal(sent.length,0);assert.equal(notices,1);
+ draft.text='hello 😃';context.submitComposer();assert.deepEqual(sent,['hello 😃']);
+ chat.sending=true;context.submitComposer();assert.equal(sent.length,1);
 });

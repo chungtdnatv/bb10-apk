@@ -15,6 +15,7 @@ Page {
     property string avatarUrl:   ""
     property string selfName:    ""
     property string pendingMsg:  ""
+    property bool sendBusy: false
     property bool   initialized: false
     property bool   emojiPanelOpen: false
     property variant emojiPanelRef: null
@@ -63,7 +64,11 @@ Page {
 
     actionBarVisibility: ChromeVisibility.Hidden
     function requestBack() { chatViewPage.popRequested=true; }
-    titleBar: ChatTitleBar {}
+    function submitComposer() {
+        if(chatViewPage.sendBusy)return;
+        if(sendAction.messageReady)chatViewPage.doSend();
+        else imagePicker.open();
+    }
 
     function applyImageUpdate(msgId, localPath, imgWidth, imgHeight) {
         chatViewPage.flushPendingRebuild();
@@ -364,6 +369,8 @@ Page {
         verticalAlignment:   VerticalAlignment.Fill
         background: Color.create("#101e2a")
 
+        ChatTitleBar {}
+
         PinboardBar {
             id: pinboardBar
             items: chatViewPage.boardItems
@@ -537,7 +544,6 @@ Page {
                 chatViewPage.pendingReplyContent    = content || "";
                 chatViewPage.pendingReplyMsgType    = msgType || 0;
                 chatViewPage.pendingReplyTs         = String(ts || "");
-                sendAction.enabled = (inputField.text.trim().length > 0 || chatViewPage.pendingReplyMsgId.length > 0);
                 inputField.requestFocus();
             }
             property variant reactionAssets: ({
@@ -745,94 +751,69 @@ Page {
 
         Container {
             horizontalAlignment: HorizontalAlignment.Fill
-            background: Color.create("#101e2a")
-            topPadding:    ui.du(1.2)
-            bottomPadding: ui.du(1.2)
-            leftPadding:   ui.du(1.0)
-            rightPadding:  ui.du(1.0)
-            layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
-
-            ImageButton {
+            preferredHeight: ui.du(10);minHeight: ui.du(10);maxHeight: ui.du(10)
+            leftPadding: ui.du(1);rightPadding: ui.du(1);topPadding: ui.du(0.5);bottomPadding: ui.du(0.5)
+            layout: DockLayout {}
+            RoundPlate { tone: "chat";fallbackHeight: ui.du(9) }
+            Container {
+                horizontalAlignment: HorizontalAlignment.Fill
                 verticalAlignment: VerticalAlignment.Center
-                preferredWidth: ui.du(5);preferredHeight: ui.du(7)
-                rightMargin: ui.du(0.8)
-                defaultImageSource: chatViewPage.isDark ? "asset:///images/ChatView/attach_icon.png" : "asset:///images/ChatView/ic_attach.png"
-                pressedImageSource: chatViewPage.isDark ? "asset:///images/ChatView/attach_icon.png" : "asset:///images/ChatView/ic_attach.png"
-                onClicked: { attachPickerSheet.open() }
-            }
-
-            TextField {
-                id: inputField
-                layoutProperties: StackLayoutProperties { spaceQuota: 1 }
-                verticalAlignment: VerticalAlignment.Center
-                hintText: "Nhập tin nhắn…"
-                textStyle { color: Color.White;fontSize: FontSize.Medium }
-                inputMode: TextFieldInputMode.Chat
-                minHeight: ui.du(7)
-                backgroundVisible: true
-                clearButtonVisible: false
-                input {
-                    flags: TextInputFlag.SpellCheck | TextInputFlag.WordSubstitution
-                    submitKey: SubmitKey.Send
-                    onSubmitted: { doSend() }
-                }
-                onTextChanging: {
-                    sendAction.enabled = (text.trim().length > 0 || chatViewPage.pendingAttachPath.length > 0);
-                    chatViewPage.refreshQuickMessageSuggestions(text);
-                }
-                onCreationCompleted: {
-                    requestFocus();
-                }
-            }
-
-            ImageButton {
-                verticalAlignment: VerticalAlignment.Center
-                preferredWidth: ui.du(6);preferredHeight: ui.du(7)
-                leftMargin: ui.du(0.6)
-                defaultImageSource: chatViewPage.isDark ? "asset:///images/ChatView/timemesswhite.png" : "asset:///images/ChatView/timemess.png"
-                pressedImageSource: chatViewPage.isDark ? "asset:///images/ChatView/timemesswhite.png" : "asset:///images/ChatView/timemess.png"
-                onClicked: { chatViewPage.qmRequested = true; }
-            }
-
-            ImageButton {
-                id: emoticonBtn
-                verticalAlignment: VerticalAlignment.Center
-                preferredWidth: ui.du(5);preferredHeight: ui.du(7)
-                leftMargin: ui.du(0.5)
-                defaultImageSource: emojiPanelOpen
-                    ? (chatViewPage.isDark ? "asset:///images/ChatView/ic_keyboard_enabled.png" : "asset:///images/ChatView/darkkeyboard.png")
-                    : (chatViewPage.isDark ? "asset:///images/ChatView/ic_emoticon_enabled_white.png" : "asset:///images/ChatView/ic_emoticon_enabled.png")
-                pressedImageSource: emojiPanelOpen
-                    ? (chatViewPage.isDark ? "asset:///images/ChatView/ic_keyboard_enabled.png" : "asset:///images/ChatView/darkkeyboard.png")
-                    : (chatViewPage.isDark ? "asset:///images/ChatView/ic_emoticon_enabled_white.png" : "asset:///images/ChatView/ic_emoticon_enabled.png")
-                onClicked: {
-                    emojiPanelOpen = !emojiPanelOpen;
-                    if (emojiPanelOpen && !chatViewPage.emojiPanelRef) {
-                        var ep = emojiPanelDef.createObject();
-                        ep.isDark = chatViewPage.isDark;
-                        ep.horizontalAlignment = HorizontalAlignment.Fill;
-                        ep.preferredHeight = ui.du(23);
-                        ep.minHeight = ui.du(16);
-                        emojiPanelSlot.add(ep);
-                        emojiSignalCon.target = ep;
-                        chatViewPage.emojiPanelRef = ep;
+                leftPadding: ui.du(0.7);rightPadding: ui.du(0.7)
+                layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
+                ChatIconButton {
+                    id: emoticonBtn
+                    icon: emojiPanelOpen?"keyboard":"emoji";hint: "Emoji";muted: true
+                    onClicked: {
+                        emojiPanelOpen = !emojiPanelOpen;
+                        if (emojiPanelOpen && !chatViewPage.emojiPanelRef) {
+                            var ep = emojiPanelDef.createObject();
+                            ep.isDark = chatViewPage.isDark;
+                            ep.horizontalAlignment = HorizontalAlignment.Fill;
+                            ep.preferredHeight = ui.du(23);
+                            ep.minHeight = ui.du(16);
+                            emojiPanelSlot.add(ep);
+                            emojiSignalCon.target = ep;
+                            chatViewPage.emojiPanelRef = ep;
+                        }
+                        emojiPanelSlot.visible = emojiPanelOpen;
                     }
-                    emojiPanelSlot.visible = emojiPanelOpen;
                 }
-            }
-            Button {
-                id: sendAction
-                text: "Gửi"
-                preferredWidth: ui.du(12)
-                verticalAlignment: VerticalAlignment.Center
-                enabled: false
-                onClicked: doSend()
+                TextField {
+                    id: inputField
+                    layoutProperties: StackLayoutProperties { spaceQuota: 1 }
+                    verticalAlignment: VerticalAlignment.Center
+                    hintText: "Nhập tin nhắn…"
+                    textStyle { color: Color.White;fontSize: FontSize.Medium }
+                    inputMode: TextFieldInputMode.Chat
+                    minHeight: ui.du(7);preferredHeight: ui.du(7)
+                    preferredWidth: 0;minWidth: 0
+                    backgroundVisible: false
+                    clearButtonVisible: false
+                    input {
+                        flags: TextInputFlag.SpellCheck | TextInputFlag.WordSubstitution
+                        submitKey: SubmitKey.Send
+                        onSubmitted: { doSend() }
+                    }
+                    onTextChanging: chatViewPage.refreshQuickMessageSuggestions(text)
+                    onCreationCompleted: requestFocus()
+                }
+                ChatIconButton { icon: "attach";hint: "Đính kèm";muted: true;onClicked: attachPickerSheet.open() }
+                ChatIconButton {
+                    id: sendAction
+                    property bool messageReady: inputField.text.trim().length>0||chatViewPage.pendingAttachPath.length>0
+                    enabled: !chatViewPage.sendBusy
+                    icon: messageReady?"send":"camera"
+                    hint: messageReady?"Gửi tin nhắn":"Chọn ảnh"
+                    surface: true;accent: true
+                    onClicked: chatViewPage.submitComposer()
+                }
             }
         }
 
     }
 
     actions: [
+        ActionItem { title: "Tin nhắn nhanh";onTriggered: chatViewPage.qmRequested=true },
 
         ActionItem {
             id: searchAction
@@ -950,7 +931,7 @@ Page {
         var hasPhoto = (chatViewPage.pendingAttachPath.length > 0);
         if (txt.length === 0 && !hasPhoto) return;
         if (!chatViewPage.threadId || chatViewPage.threadId === "") return;
-        sendAction.enabled = false;
+        chatViewPage.sendBusy = true;
         var caption = txt;
         inputField.text = "";
         chatViewPage.qmMatch = null;
@@ -1432,7 +1413,7 @@ Page {
         msgModel.append(it);
         chatViewPage.rebuildGroups(true);
 
-        sendAction.enabled = false;
+        chatViewPage.sendBusy = true;
         chatViewPage.pendingMsg = it.content || "";
         var isImg = (String(it.msgId).indexOf("local_img_") === 0);
         if (isImg) {
@@ -1675,8 +1656,8 @@ Page {
 
         InfoDialog {
             id: voiceCallUnderDevDialog
-            title: "Voice Call"
-            body: "This feature is still under development."
+            title: "Gọi thoại"
+            body: "Zalo10 chưa hỗ trợ gọi thoại. Bạn vẫn có thể nhắn tin trong hội thoại này."
         },
 
         InfoDialog {
@@ -1755,7 +1736,6 @@ Page {
                 chatViewPage.pendingAttachPath = cachedPath;
                 chatViewPage.pendingAttachName = fname;
                 inputField.requestFocus();
-                sendAction.enabled = true;
             }
         },
 

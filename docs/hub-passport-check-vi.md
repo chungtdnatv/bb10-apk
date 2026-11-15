@@ -1,6 +1,6 @@
 # Kiểm tra Hub trên Passport
 
-Bản kiểm tra: Teams10 1.1.2.11, Zalo10 1.5.0.17. Người tạo: Chung,
+Bản kiểm tra: Teams10 1.1.2.12, Zalo10 1.5.0.18. Người tạo: Chung,
 chungtd.natv@gmail.com. Cài đè bản cũ, giữ dữ liệu và định danh cài đặt.
 
 Teams lấy tin nền mỗi khoảng 30 giây; nhận tin nền/Hub và tải avatar được bật

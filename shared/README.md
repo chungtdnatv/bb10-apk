@@ -9,6 +9,15 @@ This applies to the bar, selected tab and Zalo search field.
 Bottom navigation fills its parent width, reserves 16du height and gives icons explicit
 minimum sizes. No native QPainter/font code or WebView is used.
 
+`ChatTopBar.qml` and `ChatIconButton.qml` provide the shared reference-style
+chat chrome: separate back circle, identity capsule, call/options capsule, line
+glyphs and cyan composer action. Chat surfaces reuse RoundPlate with chat tones.
+Glyph/strip sources can be regenerated with `scripts/generate_chat_ui.py` and
+Pillow; generation is optional and is not part of the device or build workflow.
+Teams' small emoji tray reuses eight upstream Zalo emoji images with a shipped
+provenance notice. Calls and Teams media transfer remain unsupported; controls
+say so rather than inventing those capabilities or presence data.
+
 `ota/` implements an explicit-user-action updater: HTTPS/TLS1.2 with bundled CA and
 hostname verification, fixed repo endpoints, no auth cookies/headers or redirects,
 bounded JSON/BAR responses, checked version/app/package, exact size and SHA256.

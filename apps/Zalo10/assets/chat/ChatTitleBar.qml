@@ -1,84 +1,24 @@
 import bb.cascades 1.4
-import bb.system 1.0
-import QtQuick 1.0
-
-TitleBar {
-    scrollBehavior: TitleBarScrollBehavior.Sticky
-    kind: TitleBarKind.FreeForm
-    kindProperties: FreeFormTitleBarKindProperties {
-        content: Container {
-            background: Color.create("#101e2a")
-            horizontalAlignment: HorizontalAlignment.Fill
-            verticalAlignment:   VerticalAlignment.Fill
-            layout: DockLayout {}
-
-
-            Container {
-                leftPadding: ui.du(8);rightPadding: ui.du(7)
-                visible: !chatViewPage.searchVisible
-                horizontalAlignment: HorizontalAlignment.Fill
-                verticalAlignment:   VerticalAlignment.Fill
-                layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
-
-                Container {
-                    id: avatarBlock
-                    verticalAlignment: VerticalAlignment.Fill
-                    layout: DockLayout {}
-                    preferredWidth: titleBarLUH.layoutFrame.height > 0 ? titleBarLUH.layoutFrame.height : ui.du(7)
-                    minWidth:       titleBarLUH.layoutFrame.height > 0 ? titleBarLUH.layoutFrame.height : ui.du(7)
-
-                    ImageView {
-                        horizontalAlignment: HorizontalAlignment.Fill
-                        verticalAlignment:   VerticalAlignment.Fill
-                        scalingMethod: ScalingMethod.AspectFill
-                        imageSource: chatViewPage.avatarUrl
-                        visible: chatViewPage.avatarUrl.length > 0
-                    }
-                    Container {
-                        horizontalAlignment: HorizontalAlignment.Fill
-                        verticalAlignment:   VerticalAlignment.Fill
-                        background: Color.create("#203d50")
-                        layout: DockLayout {}
-                        visible: chatViewPage.avatarUrl.length === 0
-                        Label {
-                            text: chatViewPage.threadName.length > 0 ? chatViewPage.threadName.charAt(0).toUpperCase() : "?"
-                            horizontalAlignment: HorizontalAlignment.Center
-                            verticalAlignment:   VerticalAlignment.Center
-                            textStyle { color: Color.White; fontSize: FontSize.XXLarge; fontWeight: FontWeight.Bold }
-                        }
-                    }
-                    attachedObjects: [ LayoutUpdateHandler { id: titleBarLUH } ]
-                }
-
-                Container {
-                    verticalAlignment: VerticalAlignment.Center
-                    leftPadding: ui.du(1.5)
-                    layoutProperties: StackLayoutProperties { spaceQuota: 1 }
-                    Label {
-                        text: chatViewPage.threadName.length > 0 ? chatViewPage.threadName : "..."
-                        textStyle { color: Color.White; base: SystemDefaults.TextStyles.TitleText; fontWeight: FontWeight.Bold }
-                        topMargin: 0; bottomMargin: 0
-                    }
-                    Label {
-                        text: chatViewPage.isGroup ? "Group" : "Zalo Contact"
-                        textStyle { color: Color.create("#8fb4c8"); fontSize: FontSize.XSmall }
-                        topMargin: ui.du(0.2); bottomMargin: 0
-                    }
-                }
-
-
-
-                Container {
-                    preferredWidth: ui.du(0.2)
-                }
-            }
-
+import ".."
+Container {
+    horizontalAlignment: HorizontalAlignment.Fill
+    preferredHeight: ui.du(10);minHeight: ui.du(10);maxHeight: ui.du(10)
+    layout: DockLayout {}
+    ChatTopBar {
+        visible: !chatViewPage.searchVisible
+        title: chatViewPage.threadName
+        subtitle: chatViewPage.isGroup?"Nhóm Zalo":"Trò chuyện Zalo"
+        avatar: chatViewPage.avatarUrl
+        onBackRequested: chatViewPage.requestBack()
+        onCallRequested: voiceCallUnderDevDialog.show()
+        onMoreRequested: chatViewPage.openActionMenu()
+    }
             Container {
                 visible: chatViewPage.searchVisible
                 horizontalAlignment: HorizontalAlignment.Fill
                 verticalAlignment:   VerticalAlignment.Center
-                leftPadding: ui.du(8)
-                rightPadding: ui.du(7)
+                leftPadding: ui.du(9)
+                rightPadding: ui.du(1)
                 layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
 
                 TextField {
@@ -131,22 +71,10 @@ TitleBar {
                     }
                 }
             }
-            Button {
-                text: "‹"
-                accessibility.name: "Quay lại"
-                preferredWidth: ui.du(8);minWidth: ui.du(8);maxWidth: ui.du(8)
-                horizontalAlignment: HorizontalAlignment.Left
-                verticalAlignment: VerticalAlignment.Center
-                onClicked: chatViewPage.requestBack()
-            }
-            Button {
-                text: "⋮"
-                accessibility.name: "Tùy chọn hội thoại"
-                preferredWidth: ui.du(7);minWidth: ui.du(7);maxWidth: ui.du(7)
-                horizontalAlignment: HorizontalAlignment.Right
-                verticalAlignment: VerticalAlignment.Center
-                onClicked: chatViewPage.openActionMenu()
-            }
-        }
+    ChatIconButton {
+        visible: chatViewPage.searchVisible
+        icon: "back";hint: "Đóng tìm kiếm";surface: true;size: ui.du(8)
+        verticalAlignment: VerticalAlignment.Center
+        onClicked: {chatViewPage.searchVisible=false;chatViewPage.searchText="";chatViewPage.searchMatches=[];chatViewPage.searchMatchPos=-1;}
     }
 }

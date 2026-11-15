@@ -1,5 +1,30 @@
 # Validation of the toolkit integration
 
+## Teams10 1.1.2.12 / Zalo10 1.5.0.18
+
+Chat chrome follows the user-provided screenshot: a separate circular back
+control, a rounded identity capsule with purple fallback avatar, a call/options
+capsule and a rounded composer with emoji, attachment and cyan camera/send
+action. Both apps ship the same ChatTopBar, ChatIconButton and chat-tone strips.
+Native title-bar slabs are removed from chat content; bottom action bars remain
+hidden. Presence/last-seen is not invented; the subtitle identifies the chat type.
+
+Teams adds a compact PNG emoji tray, with upstream Zalo provenance retained.
+Zalo keeps its full emoji picker, attachments, reply and resend flows; quick
+messages remain in the chat options menu. Composer readiness is derived from
+draft/attachment state, and in-flight sends are guarded independently. Calls
+remain unsupported in both apps; Teams media controls show that its transport
+still supports text only. The design adds no native raster/font startup code.
+
+Passed 50 toolkit tests; Teams' 9 login/navigation/composer, 2 directory,
+38 native-controller, runtime/policy, 21 Graph and 2 package tests; Zalo UI
+assertions and 3 package tests. Changed QML passed syntax lint. Both native SDK
+builds passed import/unwind/entry-point checks. Final packaging uses those native
+outputs plus the latest QML; Teams has 78 assets and Zalo 847, with verified
+CRCs/digests and source agreement. Shared component/strip tests and OTA feed
+validation passed. Icons were inspected as raster assets; no actual BB10 render,
+call/media capability expansion or Passport device validation is claimed.
+
 ## Teams10 1.1.2.11 / Zalo10 1.5.0.17
 
 Chat back controls move to the top, to the left of the conversation title.

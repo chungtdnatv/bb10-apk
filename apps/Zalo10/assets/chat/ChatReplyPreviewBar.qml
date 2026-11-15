@@ -28,7 +28,6 @@ Container {
                     chatViewPage.pendingReplyContent    = "";
                     chatViewPage.pendingReplyMsgType    = 0;
                     chatViewPage.pendingReplyTs         = "";
-                    sendAction.enabled = (inputField.text.trim().length > 0);
                 }
             }
         ]

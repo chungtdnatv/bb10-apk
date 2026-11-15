@@ -130,7 +130,7 @@ NavigationPane {
     function openChat(item) {
         if(root.activeChat||!root.authenticated)return;
         var page=chatDef.createObject();if(!page)return;
-        page.appRoot=root;page.chatId=item.id;page.chatTitle=item.title;
+        page.appRoot=root;page.chatId=item.id;page.chatTitle=item.title;page.chatAvatar=item.avatar||"";page.chatSubtitle=item.type==="group"?"Nhóm Teams":"Trò chuyện Teams";
         root.activeChat=page;root.push(page);Teams.controller().openChat(item);
     }
     function openPending() {

@@ -80,7 +80,7 @@ Connections {
             chatViewPage.removeLocalPlaceholder(chatViewPage.pendingMsg);
         }
         chatViewPage.pendingMsg = "";
-        sendAction.enabled = true;
+        chatViewPage.sendBusy = false;
     }
 
     onNewMessage: {

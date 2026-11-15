@@ -1,6 +1,6 @@
-# Teams10 1.1.2.11
+# Teams10 1.1.2.12
 
-[Tải BAR đầy đủ](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.11-ui-ota-unsigned.bar).
+[Tải BAR đầy đủ](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.12-ui-ota-unsigned.bar).
 Cài đè bản trong repo, giữ nguyên data; không cần gỡ app. Hai entry point Teams10
 và Teams10Service phải được giữ trong BAR.
 

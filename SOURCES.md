@@ -57,6 +57,10 @@ redistributed. Teams10 uses original Cascades components for the analogous layou
 
 `shared/ui` and `shared/ota`: newly authored MIT components/transport/policy.
 Both apps compile the same updater and ship identical shared QML/paint/scripts.
+The reference-style chat glyphs/capsules have a reproducible source in
+`scripts/generate_chat_ui.py`. Eight PNG emoji images in Teams' compact tray are
+copied from the vendored Zalo10 emoji assets; the upstream GPLv3 attribution is
+retained in the shipped `Emoji-Provenance.txt` and the original Zalo10 LICENSE.
 The user-supplied BarInstaller.bar was inspected locally for its PPS shell
 protocol; no uploaded binary/script is redistributed. See
 [inspection/provenance](references/barinstaller/README.md). The implementation
