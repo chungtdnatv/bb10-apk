@@ -57,5 +57,20 @@ test('chat calls bridge through QML root methods, without storing JS API on a QM
 
 test('recovery startup leaves diagnostics accessible and does not automatically replay saved-session work',()=>{
  const h=harness();h.context.teamsNet.recoveryMode=()=>true;let reads=0;h.context.teamsNet.loadSession=()=>{reads++;return ''};
- assert(h.context.initializeService());assert(h.api());assert.equal(reads,0);assert.equal(h.requests.length,0);assert(h.root.statusText.includes('Chẩn đoán'));
+ assert(h.context.initializeService());assert(h.api());assert.equal(reads,0);assert.equal(h.requests.length,0);assert(h.root.statusText.includes('đăng nhập bằng code'));
+});
+
+test('Hub opens missing-list conversations and waits for an existing page to pop',()=>{
+ const start=qml.indexOf('    function openPending()'),end=qml.indexOf('\n    Page {',start);
+ let cleared=0,opened=[],pops=0,refreshes=0;
+ const context=vm.createContext({authenticated:false,activeChat:null,chatRows:[],
+  teamsNet:{pendingChat:()=> '19:hub@thread.v2',clearPendingChat:()=>cleared++},
+  Teams:{controller:()=>({refreshMessages:()=>refreshes++})},
+  root:{pop:()=>pops++},openChat:row=>opened.push(row)});
+ vm.runInContext(qml.slice(start,end),context);
+ context.openPending();assert.equal(cleared,0);assert.equal(opened.length,0);
+ context.authenticated=true;context.activeChat={chatId:'19:other'};
+ context.openPending();assert.equal(pops,1);assert.equal(cleared,0);
+ context.activeChat=null;context.openPending();assert.equal(opened[0].id,'19:hub@thread.v2');assert.equal(cleared,1);
+ context.activeChat={chatId:'19:hub@thread.v2'};context.openPending();assert.equal(refreshes,1);assert.equal(cleared,2);
 });

@@ -365,6 +365,10 @@ function create(io) {
             state.messages=mergeMessages(state.messages,rows);decorateMessages();
             if(more||!hasMessagePage)state.messagesMore=data.messages.length>=50&&oldest>1&&(!oldEnd||oldest<oldEnd)?messagesUrl(id,oldest-1):"";
             hasMessagePage=true;if(state.messages.length>=500)state.messagesMore="";
+            if(!more&&io.markChatRead&&(!io.isForeground||io.isForeground())) {
+                var through=0;for(var r=0;r<rows.length;r++)through=Math.max(through,timestamp(rows[r].time));
+                if(through>0)io.markChatRead(account,id,through);
+            }
             io.saveCache(account,"messages:"+id,JSON.stringify(state.messages));if(lastRawChats.length)setChats(lastRawChats);status("Đã tải "+state.messages.length+" tin.");
         });
     };

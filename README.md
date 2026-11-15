@@ -32,7 +32,7 @@ hoặc cache build; `toolchains/` chứa source và revision để tái tạo/m�
 ## Teams10 cho Microsoft 365
 
 App native độc lập có đăng nhập device-code, đọc lịch sử và gửi văn bản vào chat có sẵn.
-[Tải Teams10 1.1.2.9 UI + OTA](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.9-ui-ota-unsigned.bar).
+[Tải Teams10 1.1.2.10 UI + OTA](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.10-ui-ota-unsigned.bar).
 Không có gọi điện. Không cần App Registration riêng: dùng luồng tương thích
 purple-teams/squads-app và public client ID Teams; Microsoft/tenant vẫn có thể từ chối.
 Không dùng WebView hoặc trình duyệt Passport để mở Teams Web.
@@ -47,14 +47,20 @@ Bản 1.0.0.4 đã đăng nhập được trên Passport theo xác nhận của 
 
 ## UI và OTA cho hai app
 
-Teams10 **1.1.2.9** và Zalo10 **1.5.0.15** sửa chỗ ghép nền bottom bar/tab
-active: dùng DockLayout, margin 0 và mép phủ 1 pixel để tránh vạch sọc ở hai đầu
-bo. Bỏ header tên app/tên màn hình trên các tab chính; menu Zalo ở Profile,
-chẩn đoán Teams có nút riêng trên màn hình đăng nhập và Profile. Giữ nguyên
-app/package ID; cài đè để giữ dữ liệu, không gỡ app hoặc xóa data. Cần xác nhận
-hiển thị thực tế trên Passport.
+Teams10 **1.1.2.10** có tab Danh bạ riêng: liên lạc và nhóm có sẵn, sắp theo tên,
+không hiển thị preview/thời gian tin nhắn. Bỏ màn hình/nút chẩn đoán đăng nhập,
+phiên và service. Zalo10 **1.5.0.16** bỏ menu trùng lặp; thao tác dùng trực tiếp
+trong Profile. Chat Zalo dùng nền và bong bóng như Teams, tin gửi bên phải,
+tin nhận bên trái, thời gian số và nút Gửi cạnh ô nhập. Người tạo: **Chung**,
+**chungtd.natv@gmail.com**. Giữ app/package/author ID để cài cập nhật không xóa dữ liệu.
 
-[Tải Zalo10 1.5.0.15](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.15-native-ui-ota-unsigned.bar).
+Hub Teams chỉ đánh dấu đã đọc sau khi tải thành công trang tin nhắn đang xem;
+không xóa trạng thái tin mới hơn trang vừa đọc. Zalo phân biệt chat đang nhìn
+với chat còn mở lúc thu nhỏ, đọc lại trạng thái Hub từ service khi mở chat và
+đánh dấu đã đọc lúc trở lại app. Luồng mở từ Hub giữ yêu cầu qua đăng nhập.
+Kiểm tra code, test và build không thay thế xác nhận thông báo/chạm/đã đọc trên Passport.
+
+[Tải Zalo10 1.5.0.16](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.16-native-ui-ota-unsigned.bar).
 Cả hai app có bottom bar bo tròn bằng end-cap đúng tỉ lệ và **Profile → Cập nhật OTA**.
 Teams thêm màn hình code tối giản, sửa thời gian `%#c` và căn tin gửi/nhận phải/trái.
 Cài trực tiếp dùng PPS trên firmware hỗ trợ, tham khảo script trong BarInstaller

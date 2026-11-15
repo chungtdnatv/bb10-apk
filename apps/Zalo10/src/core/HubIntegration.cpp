@@ -202,7 +202,7 @@ bool HubIntegration::init()
     uds_item_action_data_t *openAction = uds_item_action_data_create();
     uds_item_action_data_set_action(openAction, "bb.action.OPEN");
     uds_item_action_data_set_target(openAction, HUB_INVOKE_TARGET);
-    uds_item_action_data_set_type(openAction, "service");
+    uds_item_action_data_set_type(openAction, "application");
     uds_item_action_data_set_title(openAction, "Open in Zalo10");
     uds_item_action_data_set_image_source(openAction, HUB_ICON_FILE);
     uds_item_action_data_set_mime_type(openAction, HUB_MIME_TYPE_MESSAGE);
@@ -292,6 +292,8 @@ void HubIntegration::upsertThreadItem(const QString &threadId, bool isGroup,
 void HubIntegration::markThreadRead(const QString &threadId)
 {
     if (threadId.isEmpty() || !m_ready) return;
+    m_threadItemState.remove(threadId);
+    m_unreadCounts.remove(threadId);
     if (!ensureState(threadId)) return;
     if (m_threadItemState[threadId].unread == 0 && m_unreadCounts.value(threadId, 0) == 0)
         return;
@@ -350,6 +352,7 @@ void HubIntegration::saveState(const QString &threadId)
     s.setValue("group", st.isGroup);
     s.setValue("unread", st.unread);
     s.setValue("total", st.total);
+    s.sync();
 }
 
 void HubIntegration::forgetState(const QString &threadId)

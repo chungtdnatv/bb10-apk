@@ -41,6 +41,7 @@ public:
     void releaseSession();
     void reloadSettings();
     Q_INVOKABLE void observeChat(const QString &account,const QVariantMap &chat,bool visible);
+    Q_INVOKABLE void markChatRead(const QString &account,const QString &id,qint64 through);
     Q_INVOKABLE bool recoveryMode() const;
     Q_INVOKABLE bool photosEnabled() const;
     Q_INVOKABLE void setPhotosEnabled(bool enabled);
@@ -57,9 +58,7 @@ public:
     Q_INVOKABLE QString loadCache(const QString &account,const QString &resource);
     Q_INVOKABLE bool saveCache(const QString &account,const QString &resource,const QString &data);
     Q_INVOKABLE bool clearCache();
-    Q_INVOKABLE QString diagnostic() const;
     Q_INVOKABLE void recordEvent(const QString &event) const;
-    Q_INVOKABLE QString startupLog() const;
 signals:
     void openConversation();
     void pollTick();

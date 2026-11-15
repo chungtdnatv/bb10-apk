@@ -7,6 +7,14 @@ TabbedPane {
     showTabsOnActionBar: false
     sidebarState: SidebarState.Hidden
 
+    property string pendingHubThread: ""
+    property bool pendingHubGroup: false
+    function openPendingHubThread() {
+        if(!zService.loggedIn||!pendingHubThread)return;
+        root.activeTab=chatsTab;
+        if(chatsTabContent.openThread(pendingHubThread,pendingHubGroup)!==false)pendingHubThread="";
+    }
+
     property string selfName: "Me"
     property int chatsUnreadCount: 0
 
@@ -18,26 +26,6 @@ TabbedPane {
 
     onActiveTabChanged: {
         if (activeTab === chatsTab)  root.chatsUnreadCount  = 0;
-    }
-
-    Menu.definition: MenuDefinition {
-        actions: [
-            ActionItem {
-                title: "About"
-                imageSource: "asset:///images/ic_info.png"
-                onTriggered: { aboutSheet.open(); }
-            },
-            ActionItem {
-                title: "Settings"
-                imageSource: "asset:///images/ic_settings.png"
-                onTriggered: { settingsSheet.open(); }
-            },
-            ActionItem {
-                title: "Feedback"
-                imageSource: "asset:///images/ic_mail.png"
-                onTriggered: { app.invokeEmail("Berrylife2025@gmail.com", "Zalo10 Feedback"); }
-            }
-        ]
     }
 
     function formatTime(timestamp) {
@@ -81,7 +69,21 @@ TabbedPane {
         contactsTabContent.composeMode = false;
         return true;
     }
-    function openModernMenu() { modernMenu.open(); }
+
+    function profileAction(action) {
+        if (action === "refresh") {
+        if (root.activeTab === invitesTab) zService.fetchInvites();
+        else if (root.activeTab === contactsTab) zService.fetchFriends();
+        else chatsTabContent.refreshList();
+        } else if (action === "invites") root.activeTab = invitesTab;
+        else if (action === "phoneArchive") phoneArchiveSheet.open();
+        else if (action === "phoneSync") settingsSheet.startPhoneSyncFlow();
+        else if (action === "settings") settingsSheet.open();
+        else if (action === "about") aboutSheet.open();
+        else if (action === "ota") otaSheet.open();
+        else if (action === "markRead") chatsTabContent.markAllRead();
+        else if (action === "feedback") app.invokeEmail("chungtd.natv@gmail.com", "Zalo10 Feedback");
+    }
 
     function startLogin() {
         if (!zService.loadSession()) {
@@ -133,7 +135,7 @@ TabbedPane {
             appShell: root
             accountName: root.selfName
             supportsArchive: true
-            onActionRequested: { modernMenu.selected(action); }
+            onActionRequested: root.profileAction(action)
         }
     }
 
@@ -151,23 +153,6 @@ TabbedPane {
     attachedObjects: [
         UpdateSheet { id: otaSheet },
         PhoneArchiveSheet { id: phoneArchiveSheet },
-        ModernMenu {
-            id: modernMenu
-            onSelected: {
-                if (action === "refresh") {
-                    if (root.activeTab === invitesTab) zService.fetchInvites();
-                    else if (root.activeTab === contactsTab) zService.fetchFriends();
-                    else chatsTabContent.refreshList();
-                } else if (action === "invites") root.activeTab = invitesTab;
-                else if (action === "phoneArchive") phoneArchiveSheet.open();
-                else if (action === "phoneSync") settingsSheet.startPhoneSyncFlow();
-                else if (action === "settings") settingsSheet.open();
-                else if (action === "about") aboutSheet.open();
-                else if (action === "ota") otaSheet.open();
-                else if (action === "markRead") chatsTabContent.markAllRead();
-                else if (action === "feedback") app.invokeEmail("Berrylife2025@gmail.com", "Zalo10 Feedback");
-            }
-        },
         Sheet {
             id: loginSheet
             property bool needsQR: false
@@ -190,6 +175,7 @@ TabbedPane {
             onSessionExpired: { loginSheet.needsQR = true; loginSheet.open(); }
             onLoginFailed:    { loginSheet.needsQR = true; loginSheet.open(); }
             onLoginSuccess: {
+                root.openPendingHubThread();
                 if (typeof displayName !== "undefined" && displayName.length > 0) {
                     root.selfName = displayName;
                     chatsTabContent.selfName    = displayName;
@@ -201,8 +187,7 @@ TabbedPane {
         Connections {
             target: app
             onOpenThreadRequested: {
-                root.activeTab = chatsTab;
-                chatsTabContent.openThread(threadId,isGroup);
+                root.pendingHubThread=threadId;root.pendingHubGroup=isGroup;root.openPendingHubThread();
             }
             onEventCreated: {
                 eventResultDialog.body = success

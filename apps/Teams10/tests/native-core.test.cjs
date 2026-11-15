@@ -223,3 +223,15 @@ test('own MRI matching is case insensitive so outgoing bubbles can dock right',(
 test('encoded sender MRIs are decoded only as identity fields, preserving literal text',()=>{
  const h=harness();h.auth([chat()]);const m=message();m.from='https://teams.microsoft.com/contacts/'+encodeURIComponent('8:orgid:'+USER);m.content='literal %20';h.open([m]);assert.equal(h.api.state.messages[0].mine,true);assert.equal(h.api.state.messages[0].text,'literal %20');
 });
+
+test('Hub is marked read only after a successful visible current message page',()=>{
+ const reads=[];let foreground=true;
+ const h=harness({markChatRead:(...args)=>reads.push(args),isForeground:()=>foreground});
+ h.auth([chat()]);h.api.openChat({id:CHAT,title:'Chat'});h.grant('chat');
+ assert.equal(reads.length,0);
+ h.reply(h.take('/messages?'),500,{error:'failed'});assert.equal(reads.length,0);
+ h.api.refreshMessages(false);h.reply(h.take('/messages?'),200,{messages:[message()]});
+ assert.equal(reads.length,1);assert.equal(reads[0][1],CHAT);assert.equal(reads[0][2],Date.parse('2026-11-14T10:00:00.123Z'));
+ foreground=false;h.api.refreshMessages(false);h.reply(h.take('/messages?'),200,{messages:[message('2')]});assert.equal(reads.length,1);
+ foreground=true;h.api.refreshMessages(false);const pending=h.take('/messages?');h.api.closeChat();h.reply(pending,200,{messages:[message('3')]});assert.equal(reads.length,1);
+});

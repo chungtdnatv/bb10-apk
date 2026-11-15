@@ -1,5 +1,37 @@
 # Validation of the toolkit integration
 
+## Teams10 1.1.2.10 / Zalo10 1.5.0.16
+
+Teams' directory is now a separate, name-sorted projection of contacts/groups
+from existing chats, with no message body/time fields and no message-based search.
+Removed login/session diagnostic UI and Zalo's redundant menu. Creator/support
+display Chung / chungtd.natv@gmail.com; original license notices and installed
+app/package/author IDs remain intact.
+
+Teams marks Hub read only after a successful foreground message-page response,
+retains full item metadata across processes and refuses to clear a newer item
+from an older page. Standard-notification fallback keys are persisted for deletion
+after reading. Hub opens also route missing-list chats and wait for page pops.
+Zalo reloads persisted Hub state before marking read, matches foreground state
+when deciding to notify, marks active threads read on resume and queues Hub opens
+across login. The OPEN context action now declares the UI target's application
+type; service item actions retain their original type.
+
+Zalo chat uses Teams' existing bubble artwork, dark palette, numeric timestamps,
+viewport-based left/right docking and an inline Send button; attachments, replies,
+reactions, media and message-state handlers remain connected.
+
+Passed 47 toolkit tests; Teams' 7 login/navigation tests, 2 directory tests,
+38 native-controller mocks, runtime helper suite, request-policy suite, 21 Graph
+mocks and 2 package tests; Zalo UI assertions and 3 package tests. Five OTA tests
+passed after publishing local metadata. Syntax lint passed for all changed QML.
+Both native SDK closure/unwind/entry-point builds passed, with 47 Teams assets
+and 826 Zalo assets verified. Compared packaged payloads to current source and
+checked unchanged app/package/author IDs, higher versions, creator and feed hashes.
+See [remaining phone checks](hub-passport-check-vi.md): no BB10 runtime/device is
+available in cloud, so real banners, Hub preview/taps, read badges and chat layout
+are not claimed as device-verified.
+
 ## Teams10 1.1.2.9 / Zalo10 1.5.0.15
 
 Rebuilt both native BARs with the pinned SDK filesystem in the local flattened

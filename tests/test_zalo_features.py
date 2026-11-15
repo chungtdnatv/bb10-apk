@@ -21,6 +21,33 @@ class ZaloFeatureFlows(unittest.TestCase):
         result = subprocess.run(['node','-e',script],text=True,capture_output=True)
         self.assertEqual(result.returncode,0,result.stderr)
 
+    def test_chat_timestamp_is_numeric_and_handles_seconds_and_milliseconds(self):
+        text = (ROOT/'apps/Zalo10/assets/chat/ChatBubbleItem.qml').read_text()
+        a,b = block(text,text.index('function timestampLabel('))
+        self.node("""const assert=require('node:assert/strict');process.env.TZ='UTC';
+        """+text[a:b]+"""
+          const ms=Date.UTC(2026,10,15,1,5);
+          assert.equal(timestampLabel(ms,0),'15/11/2026 01:05');
+          assert.equal(timestampLabel(0,ms/1000),'15/11/2026 01:05');
+          assert.equal(timestampLabel('invalid',0),'');
+          assert.equal(timestampLabel(0,0),'');
+        """)
+
+    def test_native_hub_open_waits_for_login_and_preserves_failed_request(self):
+        text = (ROOT/'apps/Zalo10/assets/main.qml').read_text()
+        a,b = block(text,text.index('function openPendingHubThread('))
+        self.node("""const assert=require('node:assert/strict');
+          const root={},chatsTab='chats',zService={loggedIn:false};
+          let pendingHubThread='123',pendingHubGroup=true,calls=[];
+          const chatsTabContent={openThread:(...args)=>{calls.push(args);return false}};
+        """+text[a:b]+"""
+          openPendingHubThread();assert.equal(calls.length,0);assert.equal(pendingHubThread,'123');
+          zService.loggedIn=true;openPendingHubThread();assert.deepEqual(calls,[['123',true]]);
+          assert.equal(pendingHubThread,'123');
+          chatsTabContent.openThread=(...args)=>{calls.push(args);return true};openPendingHubThread();
+          assert.equal(pendingHubThread,'');assert.equal(root.activeTab,'chats');
+        """)
+
     def test_compose_routes_to_chat_and_restores_tab_on_failure(self):
         function = self.script('main.qml','function composeConversation(')
         self.node('''const assert=require('node:assert/strict');

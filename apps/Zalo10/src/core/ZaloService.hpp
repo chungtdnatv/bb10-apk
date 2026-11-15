@@ -128,7 +128,7 @@ public:
     // Returns how many threads were marked.
     Q_INVOKABLE int markAllThreadsRead();
     Q_INVOKABLE bool isActiveThread(const QString &threadId) const
-        { return !threadId.isEmpty() && m_activeThreadId == threadId; }
+        { return m_appForeground && !threadId.isEmpty() && m_activeThreadId == threadId; }
     Q_INVOKABLE void blockUser(const QString &userId);
     Q_INVOKABLE void unblockUser(const QString &userId);
     Q_INVOKABLE bool isBlocked(const QString &userId) const { return m_blockedUsers.contains(userId); }
@@ -139,7 +139,7 @@ public:
     Q_INVOKABLE void sendHubNotification(const QString &title, const QString &body, const QString &threadId, bool isGroup = false);
     // Banner shown even while the app is in the foreground (Hub banners only show when inactive).
     Q_INVOKABLE void sendBannerNotification(const QString &title, const QString &body, const QString &threadId, bool isGroup = false);
-    void setAppForeground(bool foreground) { m_appForeground = foreground; }
+    void setAppForeground(bool foreground);
 
     // UI <-> headless service handoff: Zalo allows one WebSocket per account, so only one process
     // holds realtime at a time. The UI process never calls these.

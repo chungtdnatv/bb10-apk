@@ -2,7 +2,7 @@ Archive-Manifest-Version: 1.1
 Archive-Created-By: BlackBerry Tablet OS Elf BAR Packager 1.4.2
 
 Package-Type: application
-Package-Author: BB10 Toolkit
+Package-Author: Chung
 Package-Author-Id: testQkIxMCBUb29sa2l0ICAgICA
 Package-Name: com.bb10toolkit.Teams10
 Package-Id: testRel_kit_Teams105d440259

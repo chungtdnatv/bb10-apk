@@ -6,22 +6,18 @@ CustomListItem {
     id: rowRoot
     highlightAppearance: HighlightAppearance.None
     dividerVisible: false
+    property real rowWidth: ListItem.view.widthHint>0?ListItem.view.widthHint:ui.du(75)
+    preferredWidth: rowWidth;minWidth: rowWidth;maxWidth: rowWidth
 
     // Helper functions for bindings: block-body bindings ({ var x; ...; return x; }) are a
     // parse-time error on this QtQuick1/Cascades engine ("Expected token `numeric literal'").
     // Every multi-statement binding in this delegate must go through a named function.
     function timestampLabel(latestTs, ts) {
-        var t = latestTs || ts;
-        if (!t) return "";
-        var n = t * 1;
-        if (n > 0 && n < 1e12) n *= 1000;
-        var d   = new Date(n);
-        var dow = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()];
-        var h   = d.getHours();
-        var m2  = d.getMinutes();
-        var ap  = h >= 12 ? "PM" : "AM";
-        var h12 = h % 12; if (h12 === 0) h12 = 12;
-        return dow + " " + h12 + ":" + (m2 < 10 ? "0" : "") + m2 + " " + ap;
+        var n=Number(latestTs||ts);if(!isFinite(n)||n<=0)return "";
+        if(n<1e12)n*=1000;
+        var d=new Date(n);if(isNaN(d.getTime()))return "";
+        function two(v){return v<10?"0"+v:String(v);}
+        return two(d.getDate())+"/"+two(d.getMonth()+1)+"/"+d.getFullYear()+" "+two(d.getHours())+":"+two(d.getMinutes());
     }
     function bubbleText(content, msgType, searchQuery, isCurrentSearchMatch) {
         var raw = (typeof content === "string" && content.length > 0)
@@ -65,8 +61,7 @@ CustomListItem {
 
     // Do NOT set preferredHeight on rowRoot (even bound to a child's layoutFrame.height, or -1): it
     // is self-referential, locks the first measured height and clips later wrapped lines.
-    // CustomListItem also has no padding or background property; the divider/highlight gap is
-    // cancelled with a fixed negative bottomMargin on rowContentRoot.
+    // Padding and background belong to the content containers.
 
     // ActionItem/DeleteActionItem has no "visible" property (it extends UIObject, not Control):
     // build two full ActionSets (member vs admin/owner) and pick one. A failed bubble gets its own
@@ -79,7 +74,9 @@ CustomListItem {
     attachedObjects: [
         BubbleActionsMember { id: bubbleActionsMember },
         BubbleActionsFailed { id: bubbleActionsFailed },
-        BubbleActionsAdmin { id: bubbleActionsAdmin }
+        BubbleActionsAdmin { id: bubbleActionsAdmin },
+        ImagePaintDefinition { id: incoming;imageSource: "asset:///images/bubble.png";repeatPattern: RepeatPattern.Fill },
+        ImagePaintDefinition { id: outgoing;imageSource: "asset:///images/bubble-own.png";repeatPattern: RepeatPattern.Fill }
     ]
 
     property bool isDark: ListItem.view.isDark
@@ -120,11 +117,7 @@ CustomListItem {
         : -1
     onBubblePosChanged: {
     }
-    property real bubbleMaxW: rowLUH.layoutFrame.width > 94
-                               ? (rowLUH.layoutFrame.width - 94)
-                               : (ListItem.view.widthHint > 94
-                                  ? (ListItem.view.widthHint - 94)
-                                  : ui.du(40))
+    property real bubbleMaxW: rowRoot.rowWidth*0.82
 
     property bool hasQuote: !!(ListItemData.quoteMsgId && ListItemData.quoteMsgId.length > 0)
 
@@ -159,12 +152,7 @@ CustomListItem {
         id: rowContentRoot
         horizontalAlignment: HorizontalAlignment.Fill
         layout: StackLayout { orientation: LayoutOrientation.TopToBottom }
-        // Constant offsets cancelling CustomListItem's invisible divider gap. They must be plain
-        // constants, not bindings to a measured height (that clipped long messages). Tuned per
-        // bubblePos ("bottom" and "middle" rows measure differently).
-        property int gapCompensation:
-            rowRoot.bubblePos === "middle" ? -6 : -12
-        bottomMargin: rowRoot.kind === "message" ? gapCompensation : 0
+        bottomMargin: 0
         attachedObjects: [
             LayoutUpdateHandler {
                 id: rowContentRootLUH
@@ -176,9 +164,10 @@ CustomListItem {
     Container {
         horizontalAlignment: HorizontalAlignment.Fill
         visible: rowRoot.kind === "message"
-        topPadding:    rowRoot.grouped ? 0 : 10
-        bottomPadding: 0
-        layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
+        topPadding: ui.du(0.7)
+        bottomPadding: ui.du(0.7)
+        leftPadding: ui.du(1.5);rightPadding: ui.du(1.5)
+        layout: DockLayout {}
         attachedObjects: [
             LayoutUpdateHandler {
                 id: rowLUH
@@ -187,32 +176,24 @@ CustomListItem {
             }
         ]
 
-    Container {
-        preferredWidth: rowRoot.mine ? 18 : 60
-        minWidth:       rowRoot.mine ? 18 : 60
-        maxWidth:       rowRoot.mine ? 18 : 60
-    }
+
 
     Container {
         id: bubbleWrap
-        preferredWidth: rowRoot.bubbleMaxW
+        horizontalAlignment: rowRoot.mine?HorizontalAlignment.Right:HorizontalAlignment.Left
         maxWidth:       rowRoot.bubbleMaxW
-        background: rowRoot.isHighlighted
-            ? Color.create("#fff3b0")
-            : (rowRoot.isDark
-                ? Color.create("#2a2a2a")
-                : Color.create("#FFFFFF"))
+        background: rowRoot.isHighlighted?Color.create("#356278"):(rowRoot.mine?outgoing.imagePaint:incoming.imagePaint)
 
         Container {
             background: Color.Transparent
             horizontalAlignment: HorizontalAlignment.Fill
-            topPadding:    rowRoot.grouped ? 6 : 10
-            bottomPadding: 10
-            leftPadding:   14
-            rightPadding:  14
+            topPadding: ui.du(1)
+            bottomPadding: ui.du(1)
+            leftPadding: ui.du(1.4)
+            rightPadding: ui.du(1.4)
 
         Container {
-            visible: !rowRoot.grouped
+            visible: !rowRoot.grouped && !rowRoot.mine
             layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
             horizontalAlignment: HorizontalAlignment.Fill
             bottomMargin: 2
@@ -225,19 +206,12 @@ CustomListItem {
                 textStyle {
                     fontSize:   FontSize.Small
                     fontWeight: FontWeight.Bold
-                    color: rowRoot.mine
-                        ? (rowRoot.isDark ? Color.create("#aaaaaa") : Color.create("#555555"))
-                        : Color.create("#0073BC")
+                    color: Color.create("#28c5ed")
                 }
                 topMargin: 0; bottomMargin: 0
             }
 
-            Label {
-                text: rowRoot.timestampLabel(ListItemData.latestTs, ListItemData.ts)
-                horizontalAlignment: HorizontalAlignment.Right
-                textStyle { fontSize: FontSize.XSmall; color: rowRoot.isDark ? Color.create("#888888") : Color.create("#777777") }
-                topMargin: 0; bottomMargin: 0
-            }
+
         }
 
         Container {
@@ -434,8 +408,8 @@ Container {
                 text: rowRoot.bubbleText(ListItemData.content, ListItemData.msgType,
                                           rowRoot.searchQuery, rowRoot.isCurrentSearchMatch)
                 textStyle {
-                    base:  SystemDefaults.TextStyles.BodyText
-                    color: rowRoot.isDark ? Color.create("#eeeeee") : Color.create("#111111")
+                    fontSize: FontSize.Medium
+                    color: Color.White
                 }
                 multiline: true
                 topMargin: 0; bottomMargin: 0
@@ -450,29 +424,20 @@ Container {
             BubbleLink {}
 
             BubbleSticker {}
+            Label {
+                text: rowRoot.timestampLabel(ListItemData.latestTs,ListItemData.ts)
+                horizontalAlignment: HorizontalAlignment.Right
+                textStyle { color: Color.create("#8fb4c8");fontSize: FontSize.XSmall }
+                topMargin: 0;bottomMargin: 0
+            }
         }
         }
     }
 
-        // Accent strip on the bubble's bottom edge (gray = mine, blue = theirs), only on the last bubble
-        // of a group or a standalone one. Height 0 instead of visible: false, which doesn't reliably
-        // release the Container's layout space.
-        Container {
-            horizontalAlignment: HorizontalAlignment.Fill
-            property bool showStrip: rowRoot.bubblePos === "bottom" || rowRoot.bubblePos === "full"
-            preferredHeight: showStrip ? ui.du(0.8) : 0
-            minHeight: showStrip ? ui.du(0.8) : 0
-            maxHeight: showStrip ? ui.du(0.8) : 0
-            visible: showStrip
-            background: rowRoot.mine ? Color.create("#999999") : Color.create("#0073BC")
-        }
+
     }
 
-    Container {
-        preferredWidth: rowRoot.mine ? 60 : 18
-        minWidth:       rowRoot.mine ? 60 : 18
-        maxWidth:       rowRoot.mine ? 60 : 18
-    }
+
     }
 
     // Reaction pills (kind === "message" only): one chip per distinct icon, "+N" for the count

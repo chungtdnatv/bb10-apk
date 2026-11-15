@@ -232,25 +232,12 @@ bool TeamsNative::clearCache() {
     if (sqlite3_exec(m_db,"DELETE FROM cache;",0,0,0)!=SQLITE_OK) return false;
     sqlite3_exec(m_db,"VACUUM;",0,0,0);return true;
 }
-QString TeamsNative::diagnostic() const {
-    QSettings settings("BB10Toolkit","Teams10");
-    const curl_version_info_data *info=curl_version_info(CURLVERSION_NOW);
-    return QString("HTTPS %1 / %2 | CA %3 | Cache %4 | "+m_hub.status()+" | Session: "+QString(QFileInfo(QDir::homePath()+"/teams10-session.enc").exists()?"saved":"none")+" | Service: "+settings.value("serviceStatus","not started").toString()+" @ "+settings.value("serviceHeartbeat").toString()).arg(QString::fromLatin1(info->version)).arg(QString::fromLatin1(info->ssl_version ? info->ssl_version : "no TLS")).arg(QFileInfo(m_ca).exists()?"OK":"missing").arg(m_db?"OK":"unavailable");
-}
-
 void TeamsNative::recordEvent(const QString &event) const {
     const QStringList allowed=QStringList()<<"controller-start"<<"controller-ready"<<"controller-error"<<"login-tapped"<<"login-error"<<"request-queued"<<"http-response"<<"transport-error"<<"session-save"<<"session-saved"<<"session-save-error"<<"hub-start"<<"hub-ready"<<"recovery-mode"<<"chat-list-start"<<"chat-list-ready"<<"safe-upgrade";
     if(!allowed.contains(event))return;
     QFile file("data/teams10_startup.log");
     if(file.open(QIODevice::WriteOnly|(file.size()>256*1024?QIODevice::Truncate:QIODevice::Append)))file.write((QString("Teams10 " TEAMS10_BUILD_VERSION ": ")+event+"\n").toUtf8());
 }
-QString TeamsNative::startupLog() const {
-    QFile file("data/teams10_startup.log");
-    if(!file.open(QIODevice::ReadOnly))return "Chưa có log startup.";
-    if(file.size()>12000)file.seek(file.size()-12000);
-    return QString::fromUtf8(file.readAll());
-}
-
 QString TeamsNative::loadSession(){return m_session.load();}
 bool TeamsNative::saveSession(const QString &json){recordEvent("session-save");bool ok=m_session.save(json);recordEvent(ok?"session-saved":"session-save-error");return ok;}
 bool TeamsNative::clearSession(){bool ok=m_session.clear();if(ok){m_hub.clear();QDir dir(QDir::homePath()+"/avatars");foreach(QString f,dir.entryList(QDir::Files))dir.remove(f);}return ok;}
@@ -272,11 +259,15 @@ void TeamsNative::observeChat(const QString &account,const QVariantMap &chat,boo
  qint64 previous=newline>=0?old.left(newline).toLongLong():0;
  if(previous>time)return;
  bool shouldNotify=NotificationCursor::notify(previous,old.mid(newline+1).toStdString(),time,stamp.toStdString(),chat.value("own").toBool(),visible);
- if(backgroundEnabled()&&(shouldNotify||visible)){
+ if(backgroundEnabled()&&shouldNotify){
   QString title=chat.value("title").toString(),preview=chat.value("preview").toString();
-  m_hub.post(id,title.left(160),preview.left(500),time,!visible);
+  m_hub.post(id,title.left(160),preview.left(500),time,true);
  }
  saveCache(account,resource,QString::number(time)+"\n"+stamp);
+}
+void TeamsNative::markChatRead(const QString &account,const QString &id,qint64 through){
+ if(account.isEmpty()||id.isEmpty()||through<=0)return;
+ m_hub.markRead(id,through);
 }
 QString TeamsNative::avatar(const QString &name,const QString &source){
  // Bundled PNG + Cascades Label. Never initialize Qt's font/raster painter here.

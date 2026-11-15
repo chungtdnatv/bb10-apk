@@ -2,11 +2,11 @@
 
 Bản hiện tại có OTA native:
 
-- [Teams10 1.1.2.9](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.9-ui-ota-unsigned.bar)
-- [Zalo10 1.5.0.15](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.15-native-ui-ota-unsigned.bar)
+- [Teams10 1.1.2.10](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.10-ui-ota-unsigned.bar)
+- [Zalo10 1.5.0.16](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.16-native-ui-ota-unsigned.bar)
 
-Cài đè BAR đầy đủ này bằng cách đang dùng. Teams10 1.1.2.9 và Zalo10 1.5.0.15
-sửa mép ghép nền bottom bar/tab active và bỏ header trên các tab chính. Các bản trước 1.1.2.7 /
+Cài đè BAR đầy đủ này bằng cách đang dùng. Teams10 1.1.2.10 và Zalo10 1.5.0.16
+cập nhật Danh bạ Teams, giao diện chat Zalo, luồng Hub và thông tin người tạo. Các bản trước 1.1.2.7 /
 1.5.0.13 chưa có thành phần OTA mới. Gói giữ package ID và cả entry point UI/headless;
 không gỡ app/xóa data. Bản mới cần kiểm tra trên thiết bị.
 UI-only/original-engine chỉ có giao diện mới, không có backend OTA native.
@@ -14,7 +14,7 @@ UI-only/original-engine chỉ có giao diện mới, không có backend OTA nati
 ## Dùng trên điện thoại
 
 1. **Profile → Cập nhật OTA**. Zalo cũng có mục cập nhật trong menu và Giới thiệu.
-   Teams chưa đăng nhập có thể bấm Chẩn đoán đăng nhập rồi vào OTA.
+   Teams mở cập nhật trong Profile sau khi đăng nhập.
 2. App kiểm tra feed của chính nó trong repo. Xem phiên bản và ghi chú; bấm
    **Tải bản mới**. Nếu đang mới nhất vẫn có thể tải lại BAR hiện tại.
 3. BAR được lưu trong **Downloads** sau khi kiểm tra đúng kích thước, ZIP magic

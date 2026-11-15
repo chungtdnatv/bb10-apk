@@ -62,6 +62,13 @@ void ZaloService::onListenDone()
     }
 }
 
+void ZaloService::setAppForeground(bool foreground)
+{
+    m_appForeground = foreground;
+    if (foreground && !m_activeThreadId.isEmpty())
+        setActiveThread(m_activeThreadId, m_activeThreadIsGroup);
+}
+
 void ZaloService::setActiveThread(const QString &threadId, bool isGroup)
 {
     bool changed = (m_activeThreadId != threadId);
@@ -72,10 +79,12 @@ void ZaloService::setActiveThread(const QString &threadId, bool isGroup)
         m_seenMsgIds.clear();
         m_pending510Toid.clear();
     }
-    m_hub->markThreadRead(threadId);
-    setThreadUnread(threadId, false);
-    emit threadRead(threadId);
-    sendThreadSeenRemote(threadId);
+    if (isActiveThread(threadId)) {
+        m_hub->markThreadRead(threadId);
+        setThreadUnread(threadId, false);
+        emit threadRead(threadId);
+        sendThreadSeenRemote(threadId);
+    }
 }
 
 // Newest message in the thread that someone else sent (what a "seen" receipt refers to).

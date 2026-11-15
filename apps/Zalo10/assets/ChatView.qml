@@ -41,7 +41,7 @@ Page {
     property variant removedBoardIds: ({})
     property variant pendingImageUpdates: ([])
     property bool   pageVisible: false
-    property bool   isDark: app.getDarkTheme()
+    property bool   isDark: true
     property bool   showRecalledMessages: app.getShowRecalledMessages()
     property bool   searchVisible: false
     property string searchText: ""
@@ -360,7 +360,7 @@ Page {
         layout: StackLayout { orientation: LayoutOrientation.TopToBottom }
         horizontalAlignment: HorizontalAlignment.Fill
         verticalAlignment:   VerticalAlignment.Fill
-        background: chatViewPage.isDark ? Color.create("#1a1a1a") : Color.create("#d6d6d6")
+        background: Color.create("#101e2a")
 
         PinboardBar {
             id: pinboardBar
@@ -383,7 +383,7 @@ Page {
             id: olderStrip
             visible: chatViewPage.loadingOlder
             horizontalAlignment: HorizontalAlignment.Fill
-            background: chatViewPage.isDark ? Color.create("#262626") : Color.create("#c4c4c4")
+            background: Color.create("#142936")
             topPadding: ui.du(0.8)
             bottomPadding: ui.du(0.8)
 
@@ -743,7 +743,7 @@ Page {
 
         Container {
             horizontalAlignment: HorizontalAlignment.Fill
-            background: chatViewPage.isDark ? Color.create("#272727") : Color.create("#FFFFFF")
+            background: Color.create("#101e2a")
             topPadding:    ui.du(1.2)
             bottomPadding: ui.du(1.2)
             leftPadding:   ui.du(1.0)
@@ -752,7 +752,7 @@ Page {
 
             ImageButton {
                 verticalAlignment: VerticalAlignment.Center
-                preferredWidth:  ui.du(8); preferredHeight: ui.du(8)
+                preferredWidth: ui.du(5);preferredHeight: ui.du(7)
                 rightMargin: ui.du(0.8)
                 defaultImageSource: chatViewPage.isDark ? "asset:///images/ChatView/attach_icon.png" : "asset:///images/ChatView/ic_attach.png"
                 pressedImageSource: chatViewPage.isDark ? "asset:///images/ChatView/attach_icon.png" : "asset:///images/ChatView/ic_attach.png"
@@ -763,10 +763,11 @@ Page {
                 id: inputField
                 layoutProperties: StackLayoutProperties { spaceQuota: 1 }
                 verticalAlignment: VerticalAlignment.Center
-                hintText: "Enter a message"
+                hintText: "Nhập tin nhắn…"
+                textStyle { color: Color.White;fontSize: FontSize.Medium }
                 inputMode: TextFieldInputMode.Chat
                 minHeight: ui.du(7)
-                backgroundVisible: false
+                backgroundVisible: true
                 clearButtonVisible: false
                 input {
                     flags: TextInputFlag.SpellCheck | TextInputFlag.WordSubstitution
@@ -784,7 +785,7 @@ Page {
 
             ImageButton {
                 verticalAlignment: VerticalAlignment.Center
-                preferredWidth:  ui.du(11); preferredHeight: ui.du(9)
+                preferredWidth: ui.du(6);preferredHeight: ui.du(7)
                 leftMargin: ui.du(0.6)
                 defaultImageSource: chatViewPage.isDark ? "asset:///images/ChatView/timemesswhite.png" : "asset:///images/ChatView/timemess.png"
                 pressedImageSource: chatViewPage.isDark ? "asset:///images/ChatView/timemesswhite.png" : "asset:///images/ChatView/timemess.png"
@@ -794,7 +795,7 @@ Page {
             ImageButton {
                 id: emoticonBtn
                 verticalAlignment: VerticalAlignment.Center
-                preferredWidth:  ui.du(8); preferredHeight: ui.du(8)
+                preferredWidth: ui.du(5);preferredHeight: ui.du(7)
                 leftMargin: ui.du(0.5)
                 defaultImageSource: emojiPanelOpen
                     ? (chatViewPage.isDark ? "asset:///images/ChatView/ic_keyboard_enabled.png" : "asset:///images/ChatView/darkkeyboard.png")
@@ -817,19 +818,20 @@ Page {
                     emojiPanelSlot.visible = emojiPanelOpen;
                 }
             }
+            Button {
+                id: sendAction
+                text: "Gửi"
+                preferredWidth: ui.du(12)
+                verticalAlignment: VerticalAlignment.Center
+                enabled: false
+                onClicked: doSend()
+            }
         }
 
     }
 
     actions: [
-        ActionItem {
-            id: sendAction
-            title: "Send"
-            imageSource: "asset:///images/ChatView/ConversationPaneSend.png"
-            ActionBar.placement: ActionBarPlacement.OnBar
-            enabled: false
-            onTriggered: { doSend() }
-        },
+
         ActionItem {
             id: searchAction
             title: "Search"
@@ -1686,9 +1688,6 @@ Page {
 
             onShowRecalledMessagesChanged: {
                 chatViewPage.showRecalledMessages = show;
-            }
-            onDarkThemeChanged: {
-                chatViewPage.isDark = dark;
             }
         },
 

@@ -3,22 +3,23 @@
   "app": "Zalo10",
   "appId": "com.BerryLife.Zalo10",
   "packageId": "testRel_Life_Zalo108ff545d2",
-  "version": "1.5.0.15",
-  "barUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.15-native-ui-ota-unsigned.bar",
-  "sha256": "142e99c34b64dec19a6f254d2dffea701862ae68badd7fbdc821f9014a82ef3e",
-  "bytes": 3992630,
+  "version": "1.5.0.16",
+  "barUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.16-native-ui-ota-unsigned.bar",
+  "sha256": "3541a7ff4615bec33740115e97c3b86c10efcd6019406bd2d9a72110c1213677",
+  "bytes": 3993951,
   "minimumOs": "10.3.1",
-  "notes": "FIX: Ghép nền bottom bar và tab active bằng DockLayout, margin 0 và mép phủ 1 pixel để loại vạch sọc ở hai đầu bo.\nUI: Bỏ header tên app/tên màn hình trên các tab chính.\nUI: Giữ truy cập chẩn đoán Teams bằng nút đăng nhập/Profile; menu Zalo chuyển vào Profile.\nBUILD: Tăng version để cài đè trên Passport; giữ nguyên app ID và package ID.\n",
-  "latestVersion": "1.5.0.15",
-  "downloadUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.15-native-ui-ota-unsigned.bar",
+  "notes": "UI: Giao diện chat cùng tông Teams; tin gửi bên phải, tin nhận bên trái, thời gian số và nút Gửi trong ô soạn.\nREMOVED: Menu trùng lặp; các thao tác ở Profile.\nFIX: Thông báo khi chat còn mở nhưng app thu nhỏ; đồng bộ trạng thái đã đọc Hub giữa UI/service và giữ yêu cầu mở chat qua đăng nhập.\nINFO: Người tạo Chung, chungtd.natv@gmail.com.\nBUILD: Giữ định danh cập nhật; cần xác nhận Hub và giao diện trên Passport.\n",
+  "latestVersion": "1.5.0.16",
+  "downloadUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.16-native-ui-ota-unsigned.bar",
   "changelog": [
     {
-      "version": "1.5.0.15",
+      "version": "1.5.0.16",
       "items": [
-        "FIX: Ghép nền bottom bar và tab active bằng DockLayout, margin 0 và mép phủ 1 pixel để loại vạch sọc ở hai đầu bo.",
-        "UI: Bỏ header tên app/tên màn hình trên các tab chính.",
-        "UI: Giữ truy cập chẩn đoán Teams bằng nút đăng nhập/Profile; menu Zalo chuyển vào Profile.",
-        "BUILD: Tăng version để cài đè trên Passport; giữ nguyên app ID và package ID."
+        "UI: Giao diện chat cùng tông Teams; tin gửi bên phải, tin nhận bên trái, thời gian số và nút Gửi trong ô soạn.",
+        "REMOVED: Menu trùng lặp; các thao tác ở Profile.",
+        "FIX: Thông báo khi chat còn mở nhưng app thu nhỏ; đồng bộ trạng thái đã đọc Hub giữa UI/service và giữ yêu cầu mở chat qua đăng nhập.",
+        "INFO: Người tạo Chung, chungtd.natv@gmail.com.",
+        "BUILD: Giữ định danh cập nhật; cần xác nhận Hub và giao diện trên Passport."
       ]
     }
   ]

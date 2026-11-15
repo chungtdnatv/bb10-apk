@@ -3,22 +3,23 @@
   "app": "Teams10",
   "appId": "com.bb10toolkit.Teams10",
   "packageId": "testRel_kit_Teams105d440259",
-  "version": "1.1.2.9",
-  "barUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.9-ui-ota-unsigned.bar",
-  "sha256": "8a70bdfded2bcccb724f92d5508bfcafe0d1039aa31803a9e2ff34085887f0ff",
-  "bytes": 338482,
+  "version": "1.1.2.10",
+  "barUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.10-ui-ota-unsigned.bar",
+  "sha256": "fed114117c13a75508e1e1b4d588337ce94574b55c6bf21874f6ed00142d3eca",
+  "bytes": 338638,
   "minimumOs": "10.3.1",
-  "notes": "FIX: Ghép nền bottom bar và tab active bằng DockLayout, margin 0 và mép phủ 1 pixel để loại vạch sọc ở hai đầu bo.\nUI: Bỏ header tên app/tên màn hình trên các tab chính.\nUI: Giữ truy cập chẩn đoán Teams bằng nút đăng nhập/Profile; menu Zalo chuyển vào Profile.\nBUILD: Tăng version để cài đè trên Passport; giữ nguyên app ID và package ID.\n",
-  "latestVersion": "1.1.2.9",
-  "downloadUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.9-ui-ota-unsigned.bar",
+  "notes": "FIX: Danh bạ chỉ hiển thị liên lạc/nhóm, sắp theo tên, không hiển thị tin nhắn.\nREMOVED: Chẩn đoán đăng nhập, phiên và service khỏi giao diện.\nFIX: Đổi trạng thái Hub sau khi tải tin đang xem; không đánh dấu nhầm tin mới hơn.\nINFO: Người tạo Chung, chungtd.natv@gmail.com.\nBUILD: Giữ định danh cập nhật; cần xác nhận Hub và giao diện trên Passport.\n",
+  "latestVersion": "1.1.2.10",
+  "downloadUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.10-ui-ota-unsigned.bar",
   "changelog": [
     {
-      "version": "1.1.2.9",
+      "version": "1.1.2.10",
       "items": [
-        "FIX: Ghép nền bottom bar và tab active bằng DockLayout, margin 0 và mép phủ 1 pixel để loại vạch sọc ở hai đầu bo.",
-        "UI: Bỏ header tên app/tên màn hình trên các tab chính.",
-        "UI: Giữ truy cập chẩn đoán Teams bằng nút đăng nhập/Profile; menu Zalo chuyển vào Profile.",
-        "BUILD: Tăng version để cài đè trên Passport; giữ nguyên app ID và package ID."
+        "FIX: Danh bạ chỉ hiển thị liên lạc/nhóm, sắp theo tên, không hiển thị tin nhắn.",
+        "REMOVED: Chẩn đoán đăng nhập, phiên và service khỏi giao diện.",
+        "FIX: Đổi trạng thái Hub sau khi tải tin đang xem; không đánh dấu nhầm tin mới hơn.",
+        "INFO: Người tạo Chung, chungtd.natv@gmail.com.",
+        "BUILD: Giữ định danh cập nhật; cần xác nhận Hub và giao diện trên Passport."
       ]
     }
   ]

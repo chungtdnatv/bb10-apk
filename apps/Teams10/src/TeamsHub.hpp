@@ -6,6 +6,7 @@ class TeamsHub {
 public:
  TeamsHub();~TeamsHub();bool init();
  bool post(const QString &id,const QString &title,const QString &preview,qint64 time,bool unread);
- void clear();QString status() const;
+ bool markRead(const QString &id,qint64 through);
+ void clear();
 };
 #endif

@@ -1,6 +1,6 @@
-# Teams10 1.1.2.9
+# Teams10 1.1.2.10
 
-[Tải BAR đầy đủ](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.9-ui-ota-unsigned.bar).
+[Tải BAR đầy đủ](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.10-ui-ota-unsigned.bar).
 Cài đè bản trong repo, giữ nguyên data; không cần gỡ app. Hai entry point Teams10
 và Teams10Service phải được giữ trong BAR.
 
@@ -34,19 +34,21 @@ phép, nhưng chưa hỗ trợ đăng nhập bằng tài khoản Teams cá nhân
 Hai phần này vẫn bật riêng trong Profile sau khi kiểm tra đọc/gửi ổn. Hub và
 service có thể cần restricted permissions của firmware; chỉ khai báo quyền trong
 BAR không đồng nghĩa được cấp. Service kiểm tra khoảng 30 giây, không phải push
-tức thì. Chẩn đoán hiển thị heartbeat hoặc lỗi start. Khi UI mở, `UI owns session`
-là bình thường. Máy từ chối UDS sẽ dùng thông báo thường nếu được phép; máy từ
+tức thì. Service nhường phiên cho UI khi app mở. Máy từ chối UDS sẽ dùng thông báo thường nếu được phép; máy từ
 chối headless sẽ không nhận khi đóng UI bằng fallback đó.
 
-## OTA và chẩn đoán
+## Danh bạ, thông tin người tạo và OTA
 
-**Profile → Cập nhật OTA**; xem [hướng dẫn OTA/cài PPS](ota-vi.md). Khi chưa đăng
-nhập, bấm **Chẩn đoán đăng nhập**; trong đó có OTA. Màn hình chính
-chỉ giữ nút code, không còn các nút kỹ thuật cũ.
+Danh bạ liệt kê liên lạc/nhóm từ các hội thoại có sẵn, sắp theo tên, không hiện
+nội dung/thời gian tin nhắn. Chạm một mục để mở hội thoại; chưa phải toàn bộ
+address book của tổ chức và chưa tạo chat mới.
 
-Nếu app thoát bởi fatal signal bắt được, mở lại sẽ tạm dừng auto-restore để bạn
-lấy log qua Chẩn đoán. Gửi các dòng cuối có 1.1.2.9; không gửi file phiên/khóa
-hoặc core dump. Log sandbox là `data/teams10_startup.log`, không ở Documents.
+Người tạo: **Chung**, **chungtd.natv@gmail.com**. Profile có liên hệ và
+**Cập nhật OTA**; xem [hướng dẫn OTA/cài PPS](ota-vi.md). Các nút/màn hình chẩn đoán
+đăng nhập, phiên và service đã bỏ. Log nội bộ trong sandbox vẫn hỗ trợ sửa lỗi.
+
+Nếu fatal signal bắt được, app tạm dừng auto-restore và cho đăng nhập lại bằng
+code; không xóa phiên chỉ để chẩn đoán. Cài đè giữ app/package/author ID.
 Nếu đang bấm **Cài trên máy**, app đóng để hệ thống cài đè có thể là bình thường.
 
 Bật ngày giờ tự động và kiểm tra Internet khi có lỗi TLS; app không tắt kiểm tra

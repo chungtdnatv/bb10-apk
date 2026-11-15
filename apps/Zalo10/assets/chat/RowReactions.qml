@@ -7,9 +7,9 @@ Container {
     horizontalAlignment: HorizontalAlignment.Fill
     visible: rowRoot.kind === "message" && !!(ListItemData.reactions && ListItemData.reactions.length > 0)
     topPadding: 2; bottomPadding: 4
-    layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
+    leftPadding: ui.du(1.5);rightPadding: ui.du(1.5)
+    layout: DockLayout {}
 
-    Container { preferredWidth: rowRoot.mine ? 18 : 60; minWidth: rowRoot.mine ? 18 : 60; maxWidth: rowRoot.mine ? 18 : 60 }
 
     Container {
         horizontalAlignment: rowRoot.mine ? HorizontalAlignment.Right : HorizontalAlignment.Left
@@ -20,7 +20,7 @@ Container {
             visible: !!(ListItemData.reactions && ListItemData.reactions.length > 0)
             rightMargin: 4
             background: (ListItemData.reactions && ListItemData.reactions[0] && ListItemData.reactions[0].mine)
-                ? Color.create("#b8c4cc") : (rowRoot.isDark ? Color.create("#3a3a3a") : Color.create("#e2e2e2"))
+                ? Color.create("#175775") : (rowRoot.isDark ? Color.create("#203d50") : Color.create("#e2e2e2"))
             topPadding: 6; bottomPadding: 6; leftPadding: 12; rightPadding: 12
             layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
             gestureHandlers: [ TapHandler { onTapped: {
@@ -34,7 +34,7 @@ Container {
             visible: !!(ListItemData.reactions && ListItemData.reactions.length > 1)
             rightMargin: 4
             background: (ListItemData.reactions && ListItemData.reactions[1] && ListItemData.reactions[1].mine)
-                ? Color.create("#b8c4cc") : (rowRoot.isDark ? Color.create("#3a3a3a") : Color.create("#e2e2e2"))
+                ? Color.create("#175775") : (rowRoot.isDark ? Color.create("#203d50") : Color.create("#e2e2e2"))
             topPadding: 6; bottomPadding: 6; leftPadding: 12; rightPadding: 12
             layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
             gestureHandlers: [ TapHandler { onTapped: {
@@ -48,7 +48,7 @@ Container {
             visible: !!(ListItemData.reactions && ListItemData.reactions.length > 2)
             rightMargin: 4
             background: (ListItemData.reactions && ListItemData.reactions[2] && ListItemData.reactions[2].mine)
-                ? Color.create("#b8c4cc") : (rowRoot.isDark ? Color.create("#3a3a3a") : Color.create("#e2e2e2"))
+                ? Color.create("#175775") : (rowRoot.isDark ? Color.create("#203d50") : Color.create("#e2e2e2"))
             topPadding: 6; bottomPadding: 6; leftPadding: 12; rightPadding: 12
             layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
             gestureHandlers: [ TapHandler { onTapped: {
@@ -62,7 +62,7 @@ Container {
             visible: !!(ListItemData.reactions && ListItemData.reactions.length > 3)
             rightMargin: 4
             background: (ListItemData.reactions && ListItemData.reactions[3] && ListItemData.reactions[3].mine)
-                ? Color.create("#b8c4cc") : (rowRoot.isDark ? Color.create("#3a3a3a") : Color.create("#e2e2e2"))
+                ? Color.create("#175775") : (rowRoot.isDark ? Color.create("#203d50") : Color.create("#e2e2e2"))
             topPadding: 6; bottomPadding: 6; leftPadding: 12; rightPadding: 12
             layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
             gestureHandlers: [ TapHandler { onTapped: {
@@ -76,7 +76,7 @@ Container {
             visible: !!(ListItemData.reactions && ListItemData.reactions.length > 4)
             rightMargin: 4
             background: (ListItemData.reactions && ListItemData.reactions[4] && ListItemData.reactions[4].mine)
-                ? Color.create("#b8c4cc") : (rowRoot.isDark ? Color.create("#3a3a3a") : Color.create("#e2e2e2"))
+                ? Color.create("#175775") : (rowRoot.isDark ? Color.create("#203d50") : Color.create("#e2e2e2"))
             topPadding: 6; bottomPadding: 6; leftPadding: 12; rightPadding: 12
             layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
             gestureHandlers: [ TapHandler { onTapped: {
@@ -89,7 +89,7 @@ Container {
         Container {
             visible: !!(ListItemData.reactions && ListItemData.reactions.length > 5)
             background: (ListItemData.reactions && ListItemData.reactions[5] && ListItemData.reactions[5].mine)
-                ? Color.create("#b8c4cc") : (rowRoot.isDark ? Color.create("#3a3a3a") : Color.create("#e2e2e2"))
+                ? Color.create("#175775") : (rowRoot.isDark ? Color.create("#203d50") : Color.create("#e2e2e2"))
             topPadding: 6; bottomPadding: 6; leftPadding: 12; rightPadding: 12
             layout: StackLayout { orientation: LayoutOrientation.LeftToRight }
             gestureHandlers: [ TapHandler { onTapped: {

@@ -33,7 +33,7 @@ Page {
                 horizontalAlignment: HorizontalAlignment.Center
                 textStyle { color: Color.create("#b8dce9"); fontSize: FontSize.Small }
             }
-            Button { text: "Menu"; horizontalAlignment: HorizontalAlignment.Fill; preferredHeight: ui.du(8); onClicked: { if (profile.appShell) profile.appShell.openModernMenu(); } }
+            Label { text: "Người tạo: Chung\nchungtd.natv@gmail.com";multiline: true;horizontalAlignment: HorizontalAlignment.Center;textStyle.color: Color.create("#b8dce9") }
             Button { text: "Lời mời kết bạn"; horizontalAlignment: HorizontalAlignment.Fill; preferredHeight: ui.du(8); onClicked: profile.actionRequested("invites") }
             Button { text: "Đồng bộ tin nhắn"; horizontalAlignment: HorizontalAlignment.Fill; preferredHeight: ui.du(8); onClicked: profile.actionRequested("phoneSync") }
             Button { text: "Lịch sử từ điện thoại"; visible: profile.supportsArchive; horizontalAlignment: HorizontalAlignment.Fill; preferredHeight: ui.du(8); onClicked: profile.actionRequested("phoneArchive") }

@@ -1,4 +1,6 @@
 #include "TeamsHub.hpp"
+#include "NotificationCursor.hpp"
+#include <QSettings>
 #include <bb/pim/unified/unified_data_source.h>
 #include <bb/platform/Notification>
 #include <bb/system/InvokeRequest>
@@ -25,10 +27,16 @@ bool TeamsHub::init(){
  return true;
 }
 bool TeamsHub::post(const QString &id,const QString &title,const QString &preview,qint64 time,bool unread){
+ QSettings state("BB10Toolkit","Teams10");state.sync();state.beginGroup("hubItems");state.beginGroup(id);
+ if(state.value("timestamp",0).toLongLong()>time)return false;
+ state.setValue("title",title);state.setValue("preview",preview);state.setValue("timestamp",time);state.sync();
+ QString notificationKey=state.value("notificationKey").toString();
+ if(!unread&&!notificationKey.isEmpty())bb::platform::Notification::deleteFromInbox(notificationKey);
  if(!init()) {
-  if(!unread)return false;
+  if(!unread)return true;
   // Fallback produces one standard Hub notification, never alongside a UDS row.
-  bb::platform::Notification n;n.setTitle(title);n.setBody(preview);n.setTimestamp(time);
+  if(!notificationKey.isEmpty())bb::platform::Notification::deleteFromInbox(notificationKey);
+  bb::platform::Notification n;state.setValue("notificationKey",n.key());state.sync();n.setTitle(title);n.setBody(preview);n.setTimestamp(time);
   bb::system::InvokeRequest req;req.setTarget(TARGET);req.setAction("bb.action.OPEN");req.setMimeType(MIME);req.setData(id.toUtf8());n.setInvokeRequest(req);n.notify();return false;
  }
  uds_inbox_item_data_t *item=uds_inbox_item_data_create();
@@ -37,5 +45,10 @@ bool TeamsHub::post(const QString &id,const QString &title,const QString &previe
  uds_inbox_item_data_set_name(item,name.constData());uds_inbox_item_data_set_description(item,body.constData());uds_inbox_item_data_set_icon(item,"ic_hub.png");uds_inbox_item_data_set_mime_type(item,MIME);uds_inbox_item_data_set_category_id(item,1);uds_inbox_item_data_set_timestamp(item,time);uds_inbox_item_data_set_unread_count(item,unread?1:0);uds_inbox_item_data_set_total_count(item,1);uds_inbox_item_data_set_context_state(item,unread?2:1);uds_inbox_item_data_set_notification_state(item,unread);
  int rc=uds_item_updated(m_handle,item);if(rc!=UDS_SUCCESS&&unread)rc=uds_item_added(m_handle,item);uds_inbox_item_data_destroy(item);return rc==UDS_SUCCESS;
 }
-void TeamsHub::clear(){if(m_handle){uds_account_removed(m_handle,ACCOUNT);uds_context_t h=m_handle;uds_close(&h);}m_handle=0;m_attempted=false;bb::platform::Notification::deleteAllFromInbox();}
-QString TeamsHub::status() const{return m_handle?"Hub account OK":m_attempted?"Hub UDS unavailable; standard notifications":"Hub pending";}
+bool TeamsHub::markRead(const QString &id,qint64 through){
+ QSettings state("BB10Toolkit","Teams10");state.sync();state.beginGroup("hubItems");state.beginGroup(id);
+ qint64 time=state.value("timestamp",0).toLongLong();
+ if(!NotificationCursor::read(time,through))return false;
+ return post(id,state.value("title").toString(),state.value("preview").toString(),time,false);
+}
+void TeamsHub::clear(){QSettings state("BB10Toolkit","Teams10");state.remove("hubItems");state.sync();if(m_handle){uds_account_removed(m_handle,ACCOUNT);uds_context_t h=m_handle;uds_close(&h);}m_handle=0;m_attempted=false;bb::platform::Notification::deleteAllFromInbox();}

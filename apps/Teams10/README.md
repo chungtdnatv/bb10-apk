@@ -1,4 +1,4 @@
-# Teams10 1.1.2.9 — native BB10 Microsoft 365 chat
+# Teams10 1.1.2.10 — native BB10 Microsoft 365 chat
 
 Independent, unofficial Cascades client for work/school accounts. No WebView,
 password input or own Entra App Registration. Device-code/native interoperability
@@ -20,17 +20,23 @@ HTML handling, saved-session restore and the rest of the UI remain enabled.
 Enable each experimental feature separately in Profile after checking basic
 read/send. No Hub registration happens through observe/cleanup when disabled.
 A caught fatal signal writes a static marker and crash flag. On the next UI
-launch, integration switches turn off and auto-restore pauses so diagnostics
-remain reachable; the saved session itself is preserved. Boot service startup
+launch, integration switches turn off and auto-restore pauses for explicit login; the saved session itself is preserved. Boot service startup
 must not consume the UI's crash flag. SIGKILL/OS termination cannot be caught.
 
-## UI update (1.1.2.9)
+## Directory and Hub update (1.1.2.10)
 
-The shared rounded plates use a DockLayout with zero margins and one pixel of
-center overlap beneath each cap, avoiding gaps at the bar/active-tab joins.
-The home title header is removed. Login diagnostics remain available through an
-explicit login-page button and Profile; OTA remains accessible there. Device
-rendering still needs Passport validation.
+Contacts lists unique recipients and groups from existing conversations, sorted
+by name and without message previews/timestamps. It does not fetch an entire
+organization address book or create new chats. Session/login diagnostic UI has
+been removed; background service and Hub switches remain because notifications
+use them. Creator: Chung, chungtd.natv@gmail.com.
+
+Hub read state changes only after a successful foreground message page; a stale
+page cannot clear a newer notification. Full item metadata is retained when
+setting read, and standard-notification fallback keys are persisted for cleanup.
+Invokes can open a chat missing from the current list and wait across login or
+page transitions. Phone-level banners, Hub taps and read badges need Passport
+validation; host tests and native builds do not emulate Hub.
 
 ## UI / OTA update (1.1.2.7)
 
@@ -80,7 +86,7 @@ PPS/device rendering has not been tested on hardware in this release.
   service. A process lease gives the UI exclusive token ownership while open;
   a native QTimer refreshes the UI while minimized if background reception is on.
   Profile can disable background reception. Service status/heartbeat and errors
-  are visible in diagnostics. This is polling, **not instant push** or Trouter.
+  are recorded in internal logs. This is polling, **not instant push** or Trouter.
 
 ## Session and data storage
 

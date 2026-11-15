@@ -2,9 +2,9 @@
 <qnx xmlns="http://www.qnx.com/schemas/application/1.0">
     <id>com.bb10toolkit.Teams10</id>
     <name>Teams10</name>
-    <author>BB10 Toolkit</author>
+    <author>Chung</author>
     <versionNumber>1.1.2</versionNumber>
-    <buildId>9</buildId>
+    <buildId>10</buildId>
     <description>Native Cascades application</description>
     <configuration id="release" name="Device-Release">
         <entryPointType>Qnx/Cascades</entryPointType>

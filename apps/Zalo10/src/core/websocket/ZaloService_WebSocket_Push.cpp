@@ -433,7 +433,7 @@ void ZaloService::handleWsPushedMessage(QVariantMap m, bool isGroup)
             m_threadLastMsgId[threadId] = msgId;
     }
     emit newMessage(threadId, out);
-    if (!isSelf && threadId != m_activeThreadId && !m_mutedThreads.contains(threadId)) {
+    if (!isSelf && !isActiveThread(threadId) && !m_mutedThreads.contains(threadId)) {
         QString senderName = out["dName"].toString();
         if (senderName.isEmpty()) senderName = "Unknown";
         int mt = out["msgType"].toInt();
@@ -479,7 +479,7 @@ void ZaloService::handleWsPushedMessage(QVariantMap m, bool isGroup)
     }
     // The user is looking at this thread, so the message is read: tell Zalo's servers too, or the
     // official app keeps counting it as unread.
-    if (!isSelf && threadId == m_activeThreadId) sendThreadSeenRemote(threadId, out["isGroup"].toBool());
+    if (!isSelf && isActiveThread(threadId)) sendThreadSeenRemote(threadId, out["isGroup"].toBool());
     if (threadId == m_activeThreadId && !msgId.isEmpty()) {
         qint64 newNum = msgId.toLongLong();
         qint64 curNum = m_lastPollMsgId.toLongLong();
