@@ -1,6 +1,6 @@
-# Teams10 1.1.2.7
+# Teams10 1.1.2.8
 
-[Tải BAR đầy đủ](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.7-ui-ota-unsigned.bar).
+[Tải BAR đầy đủ](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.8-ui-ota-unsigned.bar).
 Cài đè bản trong repo, giữ nguyên data; không cần gỡ app. Hai entry point Teams10
 và Teams10Service phải được giữ trong BAR.
 
@@ -45,7 +45,7 @@ nhập, giữ tiêu đề **Teams10** để mở Chẩn đoán; trong đó có O
 chỉ giữ nút code, không còn các nút kỹ thuật cũ.
 
 Nếu app thoát bởi fatal signal bắt được, mở lại sẽ tạm dừng auto-restore để bạn
-lấy log qua Chẩn đoán. Gửi các dòng cuối có 1.1.2.7; không gửi file phiên/khóa
+lấy log qua Chẩn đoán. Gửi các dòng cuối có 1.1.2.8; không gửi file phiên/khóa
 hoặc core dump. Log sandbox là `data/teams10_startup.log`, không ở Documents.
 Nếu đang bấm **Cài trên máy**, app đóng để hệ thống cài đè có thể là bình thường.
 

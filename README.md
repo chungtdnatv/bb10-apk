@@ -32,7 +32,7 @@ hoặc cache build; `toolchains/` chứa source và revision để tái tạo/m�
 ## Teams10 cho Microsoft 365
 
 App native độc lập có đăng nhập device-code, đọc lịch sử và gửi văn bản vào chat có sẵn.
-[Tải Teams10 1.1.2.7 UI + OTA](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.7-ui-ota-unsigned.bar).
+[Tải Teams10 1.1.2.8 UI + OTA](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.8-ui-ota-unsigned.bar).
 Không có gọi điện. Không cần App Registration riêng: dùng luồng tương thích
 purple-teams/squads-app và public client ID Teams; Microsoft/tenant vẫn có thể từ chối.
 Không dùng WebView hoặc trình duyệt Passport để mở Teams Web.
@@ -47,7 +47,12 @@ Bản 1.0.0.4 đã đăng nhập được trên Passport theo xác nhận của 
 
 ## UI và OTA cho hai app
 
-[Tải Zalo10 1.5.0.13](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.13-native-ui-ota-unsigned.bar).
+Teams10 **1.1.2.8** và Zalo10 **1.5.0.14** tăng build ID để cài cập nhật trên
+Passport từ bản 1.1.2.7 / 1.5.0.13. Giữ nguyên app/package ID và tính năng của
+bản trước. Cài đè để giữ dữ liệu; không gỡ app hoặc xóa data. Bản mới chưa được
+kiểm tra trên thiết bị.
+
+[Tải Zalo10 1.5.0.14](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.14-native-ui-ota-unsigned.bar).
 Cả hai app có bottom bar bo tròn bằng end-cap đúng tỉ lệ và **Profile → Cập nhật OTA**.
 Teams thêm màn hình code tối giản, sửa thời gian `%#c` và căn tin gửi/nhận phải/trái.
 Cài trực tiếp dùng PPS trên firmware hỗ trợ, tham khảo script trong BarInstaller

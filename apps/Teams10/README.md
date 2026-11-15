@@ -1,4 +1,4 @@
-# Teams10 1.1.2.7 — native BB10 Microsoft 365 chat
+# Teams10 1.1.2.8 — native BB10 Microsoft 365 chat
 
 Independent, unofficial Cascades client for work/school accounts. No WebView,
 password input or own Entra App Registration. Device-code/native interoperability

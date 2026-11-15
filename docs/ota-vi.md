@@ -1,12 +1,14 @@
 # OTA cho Zalo10 và Teams10
 
-Bản đầu có OTA native:
+Bản hiện tại có OTA native:
 
-- [Teams10 1.1.2.7](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.7-ui-ota-unsigned.bar)
-- [Zalo10 1.5.0.13](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.13-native-ui-ota-unsigned.bar)
+- [Teams10 1.1.2.8](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.8-ui-ota-unsigned.bar)
+- [Zalo10 1.5.0.14](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/zalo10/Zalo10-1.5.0.14-native-ui-ota-unsigned.bar)
 
-Cài đè BAR đầy đủ này một lần bằng cách đang dùng. Các bản cũ chưa có thành phần
-OTA mới. Gói giữ package ID và cả entry point UI/headless; không gỡ app/xóa data.
+Cài đè BAR đầy đủ này bằng cách đang dùng. Teams10 1.1.2.8 và Zalo10 1.5.0.14
+tăng build ID từ 1.1.2.7 / 1.5.0.13, giữ nguyên tính năng. Các bản trước 1.1.2.7 /
+1.5.0.13 chưa có thành phần OTA mới. Gói giữ package ID và cả entry point UI/headless;
+không gỡ app/xóa data. Bản mới cần kiểm tra trên thiết bị.
 UI-only/original-engine chỉ có giao diện mới, không có backend OTA native.
 
 ## Dùng trên điện thoại
