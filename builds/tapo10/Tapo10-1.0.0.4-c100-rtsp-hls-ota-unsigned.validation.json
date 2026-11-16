@@ -1,0 +1,77 @@
+{
+  "app": "Tapo10",
+  "version": "1.0.0.4",
+  "sha256": "caca55cc736eb2e2047e4537469276a939649226ec98b4a3e1e102eed46c2e55",
+  "bytes": 1061718,
+  "bar": {
+    "assets": 16,
+    "entry_points": [
+      "Tapo10"
+    ],
+    "arm_binaries": 1,
+    "signature_files_present": false
+  },
+  "package_identity_retained": true,
+  "native_sdk_checks": [
+    {
+      "binary": "build/native/arm/Tapo10.so",
+      "sdk_libraries": 101,
+      "strong_imports_resolved": 439,
+      "orphan_unwind_sections": 0
+    }
+  ],
+  "host_tests": {
+    "passed": 73,
+    "failed": 0,
+    "toolkit": 50,
+    "native_controller": 8,
+    "real_stream": 6,
+    "ui": 6,
+    "package": 3
+  },
+  "ota_tests": {
+    "passed": 5,
+    "failed": 0
+  },
+  "regression_reproduction": {
+    "baseline_commit": "b3d33781bf6989fa8ca5446c996a26770a154804",
+    "fixture": "Real Digest RTSP/TCP via RTP timestamp proxy; video clock steps backwards by 180000 ticks after 30 frames",
+    "baseline_result": "ERROR Không ghi tiếp được bộ đệm video; mã -22.",
+    "fixed_result": "HLS readiness, real decode and audio/video start-time difference <250ms in segment after reset"
+  },
+  "real_stream_tests": [
+    "Digest RTSP/TCP and escaped credentials",
+    "ALAW/MULAW to AAC; AAC copy; H.264 B frames; video-only HLS decode",
+    "Backward video RTP timestamps with real HLS decode and A/V timing check",
+    "401 and 404 without credentials in messages",
+    "HTTP HEAD/ranges/nonce paths and serving while UI is blocked",
+    "Cancellation of stalled RTSP and media buffer cleanup"
+  ],
+  "additional_regressions": [
+    "Production PacketClock: duplicate/backward/missing DTS/PTS, reorder offsets and 100 duplicates without persistent A/V offset",
+    "Production AudioPipe: decode/convert/encode buffer failures classified by stage",
+    "Controller: one fresh video-only retry, mute disabled, terminal video failure, saved account retained"
+  ],
+  "ffmpeg": {
+    "project": "FFmpeg",
+    "version": "6.1.4",
+    "repository": "https://github.com/FFmpeg/FFmpeg",
+    "commit": "34277e12e80031c7f89494ba543684bc1dd0be8f",
+    "tag": "n6.1.4",
+    "sha256": "50ec1f37af804658f5de6f884cba95405521270c5dc582e1c32e5adb2060fb86",
+    "license": "LGPL-2.1-or-later (minimal build; GPL/nonfree disabled)",
+    "tag_signature": "Good cryptographic EDDSA signature from DD1EC9E8DE085C629B3E1846B18E8928B3948D64; GPG reports signing key now expired. Source is pinned to exact official Git commit and this archive hash."
+  },
+  "build_provenance": {
+    "sdk_image": "ghcr.io/zsavajji/bb10-cxx20@sha256:60ddcfc3acb0c0215611c353780f196c3b7928ae266292f7f45038df358574ba",
+    "method": "crane export pinned image; extract SDK, binutils and Qt4 tools into user workspace; relocate temporary compiler/CMake path references; FFmpeg built from checked-in hash-verified source; native ARM CMake build and SDK unsigned packager",
+    "host_compiler": "Debian clang 19.1.7; SDK Qt4/libcpp target ABI",
+    "sdk_installer_on_cloud": false
+  },
+  "device_validation": "Cloud only: no actual C100/Passport hardware playback tested; reproduced failure mechanism does not identify the real camera packets",
+  "source_archive": {
+    "file": "Tapo10-1.0.0.4-source.zip",
+    "bytes": 10515033,
+    "sha256": "1a50f31983896b1b4888b2ba5f8fbec67fd65b962ed411aa9c7c639ae9e7e54a"
+  }
+}

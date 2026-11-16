@@ -37,10 +37,11 @@ class Native(unittest.TestCase):
 #include <sys/stat.h>
 using namespace bb::multimedia;
 static QString suppliedRtsp;
+static bool failAudio=false,failVideo=false;static int starts=0;
 class FakeStream:public RtspStream {
 public:
  explicit FakeStream(QObject *parent):RtspStream(parent){}
- void start(const QString &source){suppliedRtsp=source;emit ready(QUrl("http://127.0.0.1:33333/session/live.m3u8"),true);}
+ void start(const QString &source){suppliedRtsp=source;++starts;if(failAudio&&!videoOnly){emit audioFailed("audio encode/send: Invalid argument (-22)");return;}if(failVideo&&videoOnly){emit failed("video mux: Invalid argument (-22)");return;}emit ready(QUrl("http://127.0.0.1:33333/session/live.m3u8"),!videoOnly);}
 };
 class TestCameraController:public CameraController {
 public:
@@ -105,6 +106,16 @@ int main(int argc,char **argv) {
   app.playCamera(id,false,"");assert(!app.playing()&&!app.busy());
   assert(app.deleteCamera(id));assert(app.cameras().isEmpty());CameraController reopened(0,dir);assert(reopened.storageReady()&&reopened.cameras().isEmpty());return 0;
  }
+ if(mode=="audio-fallback") {
+  QTcpServer server;assert(server.listen(QHostAddress::LocalHost,0));CameraController app(0,dir);
+  assert(app.saveCamera(fields(server.serverPort())).isEmpty());QString id=app.cameras()[0].toMap().value("id").toString();
+  failAudio=true;app.playCamera(id,false,"group");wait(app);
+  assert(starts==2&&app.playing()&&!app.audioAvailable());assert(app.status().contains(QString::fromUtf8("do lỗi")));
+  bool muted=app.muted();app.toggleMute();assert(app.muted()==muted);
+  app.stop();starts=0;failVideo=true;app.playCamera(id,false,"group");wait(app);
+  assert(starts==2&&!app.playing()&&!app.busy()&&app.status().contains("video mux"));
+  assert(app.camera(id).value("hasPassword").toBool());return 0;
+ }
  if(mode=="refused") {
   QTcpServer server;assert(server.listen(QHostAddress::LocalHost,0));int port=server.serverPort();server.close();
   CameraController app(0,dir);assert(app.saveCamera(fields(port)).isEmpty());QString id=app.cameras()[0].toMap().value("id").toString();
@@ -139,6 +150,7 @@ int main(int argc,char **argv) {
     def test_encryption_authentication_and_fresh_iv(self):self.run_case('cipher')
     def test_store_reload_permissions_and_corruption(self):self.run_case('store')
     def test_controller_crud_connect_quality_mute_cancel_and_delete(self):self.run_case('controller')
+    def test_audio_error_retries_once_without_sound_and_preserves_account(self):self.run_case('audio-fallback')
     def test_connection_refusal_is_not_reported_as_playback(self):self.run_case('refused')
     def test_corrupt_store_blocks_overwrite(self):self.run_case('corrupt')
     def test_camera_account_survives_process_restart(self):

@@ -15,7 +15,7 @@ class Package(unittest.TestCase):
         with zipfile.ZipFile(bar) as z:
             fields={line.split(': ',1)[0]:line.split(': ',1)[1] for line in logical_lines(z.read('META-INF/MANIFEST.MF')) if ': ' in line}
             self.assertEqual(fields['Package-Name'],'com.bb10toolkit.Tapo10')
-            self.assertEqual(fields['Package-Version'],'1.0.0.3')
+            self.assertEqual(fields['Package-Version'],'1.0.0.4')
             self.assertIn('access_internet',fields['Entry-Point-User-Actions'])
             self.assertIn('access_shared',fields['Entry-Point-User-Actions'])
             for p in (ROOT/'assets').rglob('*'):
@@ -33,7 +33,7 @@ class Package(unittest.TestCase):
         script=ROOT/'assets/ota-install.sh'
         subprocess.run(['sh','-n',str(script)],check=True)
         for args in [[],['/tmp/other.bar','com.bb10toolkit.Tapo10'],['/accounts/1000/shared/downloads/x.bar','com.bb10toolkit.Teams10']]:
-            result=subprocess.run(['sh',str(script),*args,'1.0.0.3'],capture_output=True,text=True)
+            result=subprocess.run(['sh',str(script),*args,'1.0.0.4'],capture_output=True,text=True)
             self.assertNotEqual(result.returncode,0)
             self.assertNotIn('INSTALL_REQUEST_SUBMITTED',result.stdout)
         self.assertEqual((ROOT/'assets/UpdateSheet.qml').read_bytes(),(ROOT.parents[1]/'shared/ota/UpdateSheet.qml').read_bytes())

@@ -3,21 +3,21 @@
   "app": "Tapo10",
   "appId": "com.bb10toolkit.Tapo10",
   "packageId": "testRel_lkit_Tapo10345d07c7",
-  "version": "1.0.0.3",
-  "barUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/tapo10/Tapo10-1.0.0.3-c100-rtsp-hls-ota-unsigned.bar",
-  "sha256": "69fcb5f557e955903b7d176c260c6633b3916cc0d439348126d346a1417d7c72",
-  "bytes": 1059956,
+  "version": "1.0.0.4",
+  "barUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/tapo10/Tapo10-1.0.0.4-c100-rtsp-hls-ota-unsigned.bar",
+  "sha256": "caca55cc736eb2e2047e4537469276a939649226ec98b4a3e1e102eed46c2e55",
+  "bytes": 1061718,
   "minimumOs": "10.3.1",
-  "notes": "Thay cách phát RTSP trực tiếp gây lỗi 10 bằng bộ nhận RTSP/TCP có xác thực và HLS v3 nội bộ trên Passport.\nGiữ video H.264 nguyên bản; chuyển âm thanh G.711 của C100 sang AAC. Không cần máy chủ hay VPN khi cùng Wi-Fi nhà.\nPhân biệt lỗi RTSP 401/403/404 với lỗi bộ phát BB10; dừng/kết nối lại xóa bộ đệm. Video có độ trễ vài giây.",
-  "latestVersion": "1.0.0.3",
-  "downloadUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/tapo10/Tapo10-1.0.0.3-c100-rtsp-hls-ota-unsigned.bar",
+  "notes": "Sửa lỗi -22 đã tái hiện khi timestamp RTP video bị lùi; giữ thứ tự giải mã và độ lệch PTS/DTS, hỗ trợ timestamp thiếu/trùng và B-frame có timing hợp lệ.\nPhân biệt lỗi video mux và audio decode/convert/encode/mux. Audio lỗi tự thử lại một lần chỉ có hình ảnh, khóa điều khiển tiếng; giữ nguyên cấu hình và tài khoản camera.\nĐã kiểm thử RTSP/TCP Digest thực, G.711 ALAW/MULAW→AAC, AAC copy, B-frame, video-only, decode HLS, đồng bộ sau reset, hủy và HTTP khi UI bị chặn. Chưa thử trên C100/Passport thật.\n",
+  "latestVersion": "1.0.0.4",
+  "downloadUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/tapo10/Tapo10-1.0.0.4-c100-rtsp-hls-ota-unsigned.bar",
   "changelog": [
     {
-      "version": "1.0.0.3",
+      "version": "1.0.0.4",
       "items": [
-        "Thay cách phát RTSP trực tiếp gây lỗi 10 bằng bộ nhận RTSP/TCP có xác thực và HLS v3 nội bộ trên Passport.",
-        "Giữ video H.264 nguyên bản; chuyển âm thanh G.711 của C100 sang AAC. Không cần máy chủ hay VPN khi cùng Wi-Fi nhà.",
-        "Phân biệt lỗi RTSP 401/403/404 với lỗi bộ phát BB10; dừng/kết nối lại xóa bộ đệm. Video có độ trễ vài giây."
+        "Sửa lỗi -22 đã tái hiện khi timestamp RTP video bị lùi; giữ thứ tự giải mã và độ lệch PTS/DTS, hỗ trợ timestamp thiếu/trùng và B-frame có timing hợp lệ.",
+        "Phân biệt lỗi video mux và audio decode/convert/encode/mux. Audio lỗi tự thử lại một lần chỉ có hình ảnh, khóa điều khiển tiếng; giữ nguyên cấu hình và tài khoản camera.",
+        "Đã kiểm thử RTSP/TCP Digest thực, G.711 ALAW/MULAW→AAC, AAC copy, B-frame, video-only, decode HLS, đồng bộ sau reset, hủy và HTTP khi UI bị chặn. Chưa thử trên C100/Passport thật."
       ]
     }
   ]

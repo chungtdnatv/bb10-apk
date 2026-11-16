@@ -1,8 +1,25 @@
 # Tapo10 cho Tapo C100 và BlackBerry Passport
 
-Bản hiện tại: **1.0.0.3**, native BB10 10.3.1+. App độc lập với Teams10, Zalo10 và
+Bản hiện tại: **1.0.0.4**, native BB10 10.3.1+. App độc lập với Teams10, Zalo10 và
 ứng dụng Tapo chính hãng, dùng package `com.bb10toolkit.Tapo10`.
 
+
+## Bản sửa bộ đệm video 1.0.0.4
+
+Test RTSP/TCP thật trong cloud đã tái hiện đúng lỗi -22 của bản 1.0.0.3 khi
+timestamp video bị lùi. Bản mới sửa timestamp trước khi mux HLS, giữ thứ tự
+giải mã và độ lệch PTS/DTS cho B-frame. Đây là cơ chế lỗi đã tái hiện trong lab;
+chưa xác nhận timestamp thực tế mà C100 của bạn gửi.
+
+Nếu audio lỗi, app báo công đoạn rồi tự kết nối lại **một lần chỉ có hình ảnh**,
+khóa nút tiếng và hiển thị trạng thái đã tắt âm thanh do lỗi. Nếu lần thử đó vẫn
+lỗi thì dừng, không kết nối lặp vô hạn. Không đổi IP, Camera Account hoặc mật khẩu
+đã lưu. Cài đè BAR cùng identity hoặc dùng OTA; không gỡ app/xóa dữ liệu.
+
+Đã kiểm thử Digest, H.264/G.711→AAC, AAC copy, B-frame, timestamp lùi và decode
+HLS bằng FFmpeg, cùng hủy/HTTP/quản lý camera. **Chưa thử trên C100/Passport thật.**
+Sau cập nhật thử Mượt (stream2), rồi HD (stream1), ghi lại chế độ và nguyên văn
+thông báo nếu còn lỗi; không gửi mật khẩu. Wi-Fi nhà không cần VPN.
 
 ## Bản sửa phát video 1.0.0.3
 
@@ -11,7 +28,7 @@ trực tiếp vào bộ phát BB10: app tự nhận RTSP có xác thực qua TCP
 và chuyển sang HLS nội bộ trên điện thoại; âm thanh G.711 của C100 đổi sang AAC.
 Không cần máy chủ phụ. Ở Wi-Fi nhà **không cần VPN**; khi đi xa mới dùng VPN về nhà.
 
-Giữ nguyên IP/account đã lưu, cập nhật lên **1.0.0.3**, mở camera ở chế độ **Mượt**.
+Giữ nguyên IP/account đã lưu, cập nhật lên **1.0.0.4**, mở camera ở chế độ **Mượt**.
 Chờ khoảng vài giây để đệm hình; khi ổn định có thể thử HD. Bản 1.0.0.2 có thể
 vào menu Cập nhật phần mềm để tải/cài bản này, hoặc cài BAR đè thủ công giữ dữ liệu.
 
@@ -50,7 +67,7 @@ cài thành công; gửi yêu cầu cài chưa đồng nghĩa đã cài xong.
 
 ## Cài và thêm camera
 
-Cài `Tapo10-1.0.0.3-c100-rtsp-hls-ota-unsigned.bar` bằng phương thức cài BAR hiện có trên
+Cài `Tapo10-1.0.0.4-c100-rtsp-hls-ota-unsigned.bar` bằng phương thức cài BAR hiện có trên
 Passport. Đây là gói unsigned; quyền cài tùy thiết bị/cách cài đang dùng.
 
 Mở Tapo10 → **Thêm camera**, nhập tên, IP, cổng, Camera Account và mật khẩu.

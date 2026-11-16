@@ -11,4 +11,7 @@ def build():
     subprocess.run([str(moc),*flags,str(ROOT/'tests/relay_driver.cpp'),'-o',str(out/'relay_driver.moc')],check=True)
     exe=out/'relay-driver'
     subprocess.run(['c++','-std=c++11','-fPIC','-Wno-deprecated-declarations',*flags,str(ROOT/'tests/relay_driver.cpp'),str(ROOT/'src/RtspStream.cpp'),str(ROOT/'src/RtspWorker.cpp'),str(out/'moc_stream.cpp'),*[str(ffmpeg/'lib'/n) for n in ['libavformat.a','libavcodec.a','libswresample.a','libavutil.a']],'-l:libQt5Core.so.5','-l:libQt5Network.so.5','-pthread','-lm','-o',str(exe)],check=True)
+    clock=out/'packet-clock'
+    subprocess.run(['c++','-std=c++11','-fPIC','-Wno-deprecated-declarations',*flags,str(ROOT/'tests/packet_clock.cpp'),str(ROOT/'src/RtspStream.cpp'),str(out/'moc_stream.cpp'),*[str(ffmpeg/'lib'/n) for n in ['libavformat.a','libavcodec.a','libswresample.a','libavutil.a']],'-l:libQt5Core.so.5','-l:libQt5Network.so.5','-pthread','-lm','-o',str(clock)],check=True)
+    subprocess.run([str(clock)],check=True)
     return exe

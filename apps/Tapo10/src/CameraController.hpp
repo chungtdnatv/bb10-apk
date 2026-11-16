@@ -24,8 +24,8 @@ class CameraController:public QObject {
  RtspStream *m_stream;
  QTcpSocket m_socket;
  QTimer m_timeout;
- QString m_status,m_currentId,m_name,m_group;
- bool m_busy,m_playing,m_wanted,m_muted,m_hd,m_storageReady,m_probing,m_audioAvailable,m_mediaActive;
+ QString m_status,m_currentId,m_name,m_group,m_audioFailure;
+ bool m_busy,m_playing,m_wanted,m_muted,m_hd,m_storageReady,m_probing,m_audioAvailable,m_mediaActive,m_audioRetry;
  QVariantMap find(const QString &id) const;
  bool persist(const QVariantList &rows);
  void fail(const QString &message);
@@ -58,6 +58,7 @@ private slots:
  void timedOut();
  void streamReady(const QUrl &url,bool audio);
  void streamFailed(const QString &error);
+ void streamAudioFailed(const QString &error);
  void mediaError(bb::multimedia::MediaError::Type error,unsigned int position);
  void mediaStateChanged(bb::multimedia::MediaState::Type state);
  void playbackCompleted();

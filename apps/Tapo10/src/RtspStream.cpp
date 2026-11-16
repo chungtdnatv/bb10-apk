@@ -15,7 +15,7 @@ HlsHttpServer::~HlsHttpServer(){foreach(QTcpSocket *s,m_clients){s->disconnect(t
 bool HlsHttpServer::listen(){return m_server.listen(QHostAddress::LocalHost,0);}
 void HlsHttpServer::checkStop(){if(m_stop&&m_stop->fetchAndAddOrdered(0))QThread::currentThread()->quit();}
 void HlsHttpThread::run(){if(cancelled.fetchAndAddOrdered(0))return;HlsHttpServer server(directory,nonce,&cancelled);if(!server.listen()){emit failed(QString::fromUtf8("Không mở được bộ phát video nội bộ."));return;}QTimer poll;QObject::connect(&poll,SIGNAL(timeout()),&server,SLOT(checkStop()));poll.start(100);emit listening(server.port());if(!cancelled.fetchAndAddOrdered(0))exec();}
-RtspStream::RtspStream(QObject *parent,const QString &dataDirectory):QObject(parent),m_worker(0),m_http(0),m_baseDirectory(dataDirectory.isEmpty()?QDir::homePath():dataDirectory),m_retiring(false),m_cancelled(false),m_playlistReady(false),m_audio(false),m_emitted(false),m_port(0){
+RtspStream::RtspStream(QObject *parent,const QString &dataDirectory):QObject(parent),m_worker(0),m_http(0),m_baseDirectory(dataDirectory.isEmpty()?QDir::homePath():dataDirectory),m_retiring(false),m_cancelled(false),m_playlistReady(false),m_audio(false),m_emitted(false),m_port(0),videoOnly(false){
  av_log_set_level(AV_LOG_QUIET);
  static QSet<QString> cleaned;
  if(!cleaned.contains(m_baseDirectory)){
@@ -32,7 +32,7 @@ void RtspStream::start(const QString &source){
  m_directory=m_baseDirectory+"/tapo10-live/"+m_nonce;if(!QDir().mkpath(m_directory)){emit failed(QString::fromUtf8("Không tạo được bộ đệm video trong sandbox."));return;}::chmod((m_baseDirectory+"/tapo10-live").toUtf8().constData(),0700);::chmod(m_directory.toUtf8().constData(),0700);
  m_http=new HlsHttpThread;m_http->directory=m_directory;m_http->nonce=m_nonce;
  connect(m_http,SIGNAL(listening(int)),this,SLOT(serverListening(int)));connect(m_http,SIGNAL(failed(const QString&)),this,SLOT(serverFailed(const QString&)));connect(m_http,SIGNAL(finished()),this,SLOT(disposeIfFinished()));m_http->start();
- m_worker=new RtspWorker;m_worker->source=source;m_worker->directory=m_directory;
+ m_worker=new RtspWorker;m_worker->videoOnly=videoOnly;m_worker->source=source;m_worker->directory=m_directory;
  connect(m_worker,SIGNAL(playlistReady(bool)),this,SLOT(workerReady(bool)));connect(m_worker,SIGNAL(finished()),this,SLOT(workerFinished()));m_worker->start();
 }
 void RtspStream::retire(){m_retiring=true;m_cancelled=true;if(m_worker)m_worker->cancelled.fetchAndStoreOrdered(1);if(m_http){m_http->cancelled.fetchAndStoreOrdered(1);m_http->quit();}disposeIfFinished();}
@@ -41,7 +41,7 @@ void RtspStream::serverListening(int port){m_port=port;maybeReady();}
 void RtspStream::serverFailed(const QString &error){if(!m_cancelled)emit failed(error);}
 void RtspStream::workerReady(bool audio){m_playlistReady=true;m_audio=audio;maybeReady();}
 void RtspStream::maybeReady(){if(!m_cancelled&&!m_emitted&&m_playlistReady&&m_port){m_emitted=true;emit ready(QUrl(QString("http://127.0.0.1:%1/%2/live.m3u8").arg(m_port).arg(m_nonce)),m_audio);}}
-void RtspStream::workerFinished(){if(!m_cancelled)emit failed(m_worker->error.isEmpty()?QString::fromUtf8("Camera đã ngắt luồng video."):m_worker->error);disposeIfFinished();}
+void RtspStream::workerFinished(){if(!m_cancelled&&m_worker->audioFailed)emit audioFailed(m_worker->error);else if(!m_cancelled)emit failed(m_worker->error.isEmpty()?QString::fromUtf8("Camera đã ngắt luồng video."):m_worker->error);disposeIfFinished();}
 void HlsHttpServer::acceptClient(){while(m_server.hasPendingConnections()){QTcpSocket *s=m_server.nextPendingConnection();if(m_clients.size()>=8){s->abort();s->deleteLater();continue;}m_clients.insert(s);s->setReadBufferSize(8192);connect(s,SIGNAL(readyRead()),this,SLOT(readRequest()));connect(s,SIGNAL(disconnected()),this,SLOT(disconnected()));QTimer *timer=new QTimer(s);timer->setSingleShot(true);connect(timer,SIGNAL(timeout()),this,SLOT(clientExpired()));timer->start(5000);}}
 void HlsHttpServer::clientExpired(){QTcpSocket *socket=sender()?qobject_cast<QTcpSocket*>(sender()->parent()):0;if(socket)socket->abort();}
 void HlsHttpServer::disconnected(){QTcpSocket *s=qobject_cast<QTcpSocket*>(sender());if(s){m_clients.remove(s);s->deleteLater();}}

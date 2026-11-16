@@ -14,6 +14,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from build_relay_driver import build
+from rtsp_fault_proxy import TimestampProxy
 
 USER='camera@name'
 PASSWORD='p@ss#&!'  # Synthetic fixture only; exercises escaped userinfo and Digest.
@@ -28,8 +29,8 @@ class Stream(unittest.TestCase):
         cls.server=cls.publisher=None
         with socket.socket() as sock:sock.bind(('127.0.0.1',0));cls.port=sock.getsockname()[1]
         config={'logLevel':'warn','rtspAddress':f'127.0.0.1:{cls.port}','protocols':['tcp'],'rtspAuthMethods':['digest'],'rtmp':False,'hls':False,'webrtc':False,'srt':False,
-          'authInternalUsers':[{'user':'publisher','pass':'publishpass','permissions':[{'action':'publish','path':'cam'}]},
-                               {'user':USER,'pass':PASSWORD,'permissions':[{'action':'read'}]}],'paths':{'cam':{},'all_others':{}}}
+          'authInternalUsers':[{'user':'publisher','pass':'publishpass','permissions':[{'action':'publish'}]},
+                               {'user':USER,'pass':PASSWORD,'permissions':[{'action':'read'}]}],'paths':{'cam':{},'aac':{},'mulaw':{},'bframes':{},'all_others':{}}}
         config_file=cls.work/'mediamtx.yml';config_file.write_text(json.dumps(config))
         cls.server_log=(cls.work/'server.log').open('w');cls.publisher_log=(cls.work/'publisher.log').open('w')
         try:
@@ -66,9 +67,9 @@ class Stream(unittest.TestCase):
     def url(self,password=PASSWORD,path='cam'):
         return f'rtsp://{urllib.parse.quote(USER,safe="")}:{urllib.parse.quote(password,safe="")}@127.0.0.1:{self.port}/{path}'
     @contextlib.contextmanager
-    def driver(self,url):
+    def driver(self,url,video_only=False):
         with tempfile.TemporaryDirectory(prefix='tapo-live-cache-') as directory:
-            process=subprocess.Popen([str(self.binary),directory],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+            process=subprocess.Popen([str(self.binary),directory]+(['--video-only'] if video_only else []),stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
             process.stdin.write(url+'\n');process.stdin.flush()
             try:yield process,Path(directory)
             finally:
@@ -112,6 +113,48 @@ class Stream(unittest.TestCase):
                 self.assertEqual(error.exception.code,404)
             process.stdin.write('STOP\n');process.stdin.flush();self.assertEqual(process.wait(timeout=5),0)
             self.assertFalse(list((directory/'tapo10-live').rglob('*.ts')),'Rolling media buffer was not removed after stop')
+    def test_aac_copy_mulaw_conversion_b_frames_and_video_only(self):
+        for path,codec,bframes in [('aac','aac',0),('mulaw','pcm_mulaw',0),('bframes','aac',2)]:
+            with self.subTest(path=path):
+                command=['ffmpeg','-v','error','-re','-f','lavfi','-i','testsrc2=size=320x180:rate=15','-f','lavfi','-i','sine=sample_rate=8000',
+                         '-c:v','libx264','-preset','ultrafast','-g','15','-bf',str(bframes),'-c:a',codec,'-ar','8000','-ac','1','-f','rtsp','-rtsp_transport','tcp',f'rtsp://publisher:publishpass@127.0.0.1:{self.port}/{path}']
+                publisher=subprocess.Popen(command,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+                try:
+                    time.sleep(1)
+                    self.assertIsNone(publisher.poll(),'Additional RTSP fixture did not start')
+                    with self.driver(self.url(path=path)) as (process,directory):
+                        line=self.line(process);self.assertTrue(line.startswith('READY '),line);self.assertTrue(line.endswith(' 1'),line)
+                        url=line.split()[1];playlist=urllib.request.urlopen(url,timeout=5).read().decode()
+                        segment=next(x for x in playlist.splitlines() if x.endswith('.ts'))
+                        sample=directory/'audio-variant.ts';sample.write_bytes(urllib.request.urlopen(urllib.parse.urljoin(url,segment),timeout=5).read())
+                        decode=subprocess.run(['ffmpeg','-v','error','-xerror','-i',str(sample),'-map','0:v','-map','0:a','-frames:v','10','-f','null','-'],capture_output=True,text=True)
+                        self.assertEqual(decode.returncode,0,decode.stderr)
+                finally:
+                    publisher.terminate();publisher.wait(timeout=5)
+        with self.driver(self.url(),video_only=True) as (process,directory):
+            line=self.line(process);self.assertTrue(line.startswith('READY '),line);self.assertTrue(line.endswith(' 0'),line)
+            url=line.split()[1];playlist=urllib.request.urlopen(url,timeout=5).read().decode()
+            segment=next(x for x in playlist.splitlines() if x.endswith('.ts'))
+            sample=directory/'video-only.ts';sample.write_bytes(urllib.request.urlopen(urllib.parse.urljoin(url,segment),timeout=5).read())
+            probe=subprocess.run(['ffprobe','-v','error','-show_streams','-of','json',str(sample)],capture_output=True,text=True,check=True)
+            self.assertEqual([x['codec_name'] for x in json.loads(probe.stdout)['streams']],['h264'])
+    def test_real_rtsp_backward_rtp_timestamp_keeps_hls_decodable(self):
+        proxy=TimestampProxy(self.port)
+        try:
+            url=self.url().replace(f':{self.port}/',f':{proxy.local_port}/')
+            with self.driver(url) as (process,directory):
+                line=self.line(process);self.assertTrue(line.startswith('READY '),line)
+                self.assertGreater(proxy.changed,0,'RTP timestamp fault was not injected')
+                playlist=urllib.request.urlopen(line.split()[1],timeout=5).read().decode()
+                segment=[x for x in playlist.splitlines() if x.endswith('.ts')][-1]
+                data=urllib.request.urlopen(urllib.parse.urljoin(line.split()[1],segment),timeout=5).read()
+                sample=directory/'reset.ts';sample.write_bytes(data)
+                decode=subprocess.run(['ffmpeg','-v','error','-xerror','-i',str(sample),'-frames:v','10','-f','null','-'],capture_output=True,text=True)
+                self.assertEqual(decode.returncode,0,decode.stderr)
+                probe=subprocess.run(['ffprobe','-v','error','-show_streams','-of','json',str(sample)],capture_output=True,text=True,check=True)
+                starts=[float(x['start_time']) for x in json.loads(probe.stdout)['streams']]
+                self.assertLess(max(starts)-min(starts),.25,'Timestamp repair shifted video away from audio')
+        finally:proxy.close()
     def test_wrong_camera_account_reports_401_without_exposing_credentials(self):
         with self.driver(self.url(password='wrong-password')) as (process,directory):
             line=self.line(process);self.assertTrue(line.startswith('ERROR '),line);self.assertIn('401',line)

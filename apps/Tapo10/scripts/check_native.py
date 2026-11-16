@@ -10,7 +10,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT.parents[1]))
 from bb10kit.elf import check_cascades
-BIN = '/opt/bb10-toolchain/bin/arm-unknown-nto-qnx6.5.0eabi-'
+BIN = os.environ.get('BB10_BINUTILS_PREFIX', '/opt/bb10-toolchain/bin/arm-unknown-nto-qnx6.5.0eabi-')
 TARGET = Path(os.environ.get('QNX_TARGET', '/opt/bb10-sdk/target/qnx6'))/'armle-v7'
 LIBDIRS = [TARGET/'lib', TARGET/'usr/lib', TARGET/'usr/lib/qt4/lib']
 

@@ -16,7 +16,7 @@ bool valid(const QVariantMap &row) {
 }
 QVariantMap publicRow(QVariantMap row){bool password=!row.value("password").toString().isEmpty();row.remove("password");row["hasPassword"]=password;return row;}
 }
-CameraController::CameraController(QObject *parent,const QString &dataDirectory):QObject(parent),m_store(dataDirectory.isEmpty()?QDir::homePath():dataDirectory),m_player(new bb::multimedia::MediaPlayer(this)),m_stream(0),m_busy(false),m_playing(false),m_wanted(false),m_muted(true),m_hd(false),m_storageReady(true),m_probing(false),m_audioAvailable(false),m_mediaActive(false) {
+CameraController::CameraController(QObject *parent,const QString &dataDirectory):QObject(parent),m_store(dataDirectory.isEmpty()?QDir::homePath():dataDirectory),m_player(new bb::multimedia::MediaPlayer(this)),m_stream(0),m_busy(false),m_playing(false),m_wanted(false),m_muted(true),m_hd(false),m_storageReady(true),m_probing(false),m_audioAvailable(false),m_mediaActive(false),m_audioRetry(false) {
  m_status=QString::fromUtf8("Chọn camera để xem. Ngoài nhà, kết nối VPN trước.");
  m_timeout.setSingleShot(true);
  connect(&m_timeout,SIGNAL(timeout()),this,SLOT(timedOut()));
@@ -77,7 +77,7 @@ void CameraController::shutdown(){m_wanted=false;m_mediaActive=false;m_probing=f
 void CameraController::fail(const QString &message){shutdown();m_status=message;emit playbackChanged();}
 void CameraController::stop(){shutdown();m_currentId="";m_name="";m_status=QString::fromUtf8("Đã dừng video.");emit playbackChanged();}
 void CameraController::playCamera(const QString &id,bool hd,const QString &windowGroup) {
- shutdown();QVariantMap row=find(id);
+ shutdown();m_audioRetry=false;m_audioFailure.clear();QVariantMap row=find(id);
  if(findChildren<RtspStream*>().size()>=4){fail(QString::fromUtf8("Đang dừng kết nối cũ. Đợi một lát rồi thử lại."));return;}
  if(row.isEmpty()||!valid(row)){fail(QString::fromUtf8("Camera không hợp lệ; kiểm tra lại cấu hình."));return;}
  if(windowGroup.isEmpty()){fail(QString::fromUtf8("Màn hình video chưa sẵn sàng. Thử mở lại camera."));return;}
@@ -89,8 +89,8 @@ void CameraController::connected() {
  if(!m_wanted||!m_probing)return;m_probing=false;m_socket.abort();QVariantMap row=find(m_currentId);
  std::string raw=CameraConfig::url(utf8(row.value("host").toString()),row.value("port").toInt(),utf8(row.value("username").toString()),utf8(row.value("password").toString()),m_hd,utf8(row.value("path").toString()));
  if(raw.empty()){fail(QString::fromUtf8("Cấu hình camera không hợp lệ."));return;}
- m_status=QString::fromUtf8("Đang xác thực và nhận video từ camera…");emit playbackChanged();m_timeout.start(45000);
- m_stream=createStream();connect(m_stream,SIGNAL(ready(const QUrl&,bool)),this,SLOT(streamReady(const QUrl&,bool)));connect(m_stream,SIGNAL(failed(const QString&)),this,SLOT(streamFailed(const QString&)));
+ m_status=m_audioRetry?m_audioFailure+QString::fromUtf8(" Đang thử lại một lần chỉ với hình ảnh; điều khiển tiếng đã tắt."):QString::fromUtf8("Đang xác thực và nhận video từ camera…");emit playbackChanged();m_timeout.start(45000);
+ m_stream=createStream();m_stream->videoOnly=m_audioRetry;connect(m_stream,SIGNAL(audioFailed(const QString&)),this,SLOT(streamAudioFailed(const QString&)));connect(m_stream,SIGNAL(ready(const QUrl&,bool)),this,SLOT(streamReady(const QUrl&,bool)));connect(m_stream,SIGNAL(failed(const QString&)),this,SLOT(streamFailed(const QString&)));
  m_stream->start(QString::fromUtf8(raw.data(),raw.size()));
 }
 void CameraController::streamReady(const QUrl &url,bool audio) {
@@ -99,11 +99,19 @@ void CameraController::streamReady(const QUrl &url,bool audio) {
  m_player->setWindowGroupId(m_group);m_player->setWindowId("tapo10-live");
  if(m_player->setVideoOutput(bb::multimedia::VideoOutput::PrimaryDisplay)!=bb::multimedia::MediaError::None){fail(QString::fromUtf8("Không khởi tạo được màn hình video."));return;}
  m_player->setVolume(m_muted?0.0:1.0);
- m_status=QString::fromUtf8("Đã nhận video. Đang mở màn hình phát…");emit playbackChanged();m_timeout.start(30000);
+ m_status=m_audioRetry?QString::fromUtf8("Đã nhận hình ảnh; âm thanh đã tắt do lỗi. Đang mở bộ phát…"):QString::fromUtf8("Đã nhận video. Đang mở màn hình phát…");emit playbackChanged();m_timeout.start(30000);
  bb::multimedia::MediaError::Type result=m_player->setSourceUrl(url);
  if(!m_wanted)return;
  if(result==bb::multimedia::MediaError::None)result=m_player->play();
  if(m_wanted&&result!=bb::multimedia::MediaError::None)mediaError(result,0);
+}
+void CameraController::streamAudioFailed(const QString &error){
+ if(!m_wanted||sender()!=m_stream)return;
+ if(m_audioRetry){fail(error);return;}
+ m_audioFailure=error;m_audioRetry=true;m_mediaActive=false;m_audioAvailable=false;m_busy=true;m_playing=false;
+ m_stream->disconnect(this);m_stream->retire();m_stream=0;m_player->stop();m_player->reset();
+ m_status=error+QString::fromUtf8(" Đang thử lại một lần chỉ với hình ảnh; điều khiển tiếng đã tắt.");emit playbackChanged();
+ m_probing=true;connected();
 }
 void CameraController::streamFailed(const QString &error){if(m_wanted&&sender()==m_stream)fail(error);}
 void CameraController::networkError(QAbstractSocket::SocketError error) {
@@ -120,8 +128,8 @@ void CameraController::mediaError(bb::multimedia::MediaError::Type error,unsigne
 }
 void CameraController::mediaStateChanged(bb::multimedia::MediaState::Type state) {
  if(!m_wanted||!m_mediaActive)return;
- if(state==bb::multimedia::MediaState::Started){m_timeout.stop();m_busy=false;m_playing=true;m_status=m_audioAvailable?QString::fromUtf8("Đang phát trực tiếp"):QString::fromUtf8("Đang phát hình ảnh • luồng không có âm thanh tương thích");emit playbackChanged();}
+ if(state==bb::multimedia::MediaState::Started){m_timeout.stop();m_busy=false;m_playing=true;m_status=m_audioAvailable?QString::fromUtf8("Đang phát trực tiếp"):(m_audioRetry?QString::fromUtf8("Đang phát hình ảnh • đã tắt âm thanh do lỗi xử lý audio"):QString::fromUtf8("Đang phát hình ảnh • luồng không có âm thanh tương thích"));emit playbackChanged();}
  else if(state==bb::multimedia::MediaState::Stopped||state==bb::multimedia::MediaState::Paused){m_playing=false;m_busy=false;m_status=QString::fromUtf8("Luồng đã dừng. Bấm Kết nối lại để tiếp tục.");emit playbackChanged();}
 }
 void CameraController::playbackCompleted(){if(m_wanted)fail(QString::fromUtf8("Luồng camera đã kết thúc. Bấm Kết nối lại."));}
-void CameraController::toggleMute(){m_muted=!m_muted;m_player->setVolume(m_muted?0.0:1.0);emit playbackChanged();}
+void CameraController::toggleMute(){if(!m_audioAvailable)return;m_muted=!m_muted;m_player->setVolume(m_muted?0.0:1.0);emit playbackChanged();}

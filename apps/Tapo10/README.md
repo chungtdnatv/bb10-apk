@@ -1,4 +1,26 @@
-# Tapo10 1.0.0.3
+# Tapo10 1.0.0.4
+
+## Timestamp and audio recovery (1.0.0.4)
+
+A real RTSP/TCP fixture with a backward RTP video timestamp reproduces the exact
+1.0.0.3 failure: `Không ghi tiếp được bộ đệm video; mã -22.` The new worker repairs
+missing/duplicate/backward decode timestamps before muxing, retaining packet decode
+order and PTS-DTS offsets. Initial missing B-frame DTS uses known frame cadence
+and reorder depth; missing B-frame presentation order is rejected explicitly.
+G.711 output follows encoded sample counts; missing initial audio PTS anchors to
+the video clock. Valid timestamps are retained rather than resetting each track
+to zero. Video is never transcoded.
+
+Errors identify video timestamp/mux or audio decode/convert/encode/mux stages,
+with FFmpeg reason/code and no source URL. Audio setup/processing failure starts
+one fresh video-only session, retires the old private HTTP/media buffer, displays
+why sound was disabled and disables mute. A failure of that retry terminates;
+manual reconnect starts a new attempt. Camera storage and package identity stay
+unchanged. RTSP tests also cover AAC copy, mu-law, B frames, video-only decode and
+A/V start-time alignment after a timestamp reset. Controller tests cover the
+single retry, disabled sound, terminal video failure and retained account.
+These cloud fixtures reproduce a failure mechanism; they do not establish which
+packets the real C100 sent. Actual C100/Passport playback still needs verification.
 
 ## RTSP playback repair (1.0.0.3)
 

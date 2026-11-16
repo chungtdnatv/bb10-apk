@@ -13,7 +13,8 @@ class RtspWorker:public QThread {
 public:
  QString source,directory,error;
  QAtomicInt cancelled;
- RtspWorker():cancelled(0){}
+ bool videoOnly,audioFailed;
+ RtspWorker():cancelled(0),videoOnly(false),audioFailed(false){}
  void run();
 signals:
  void playlistReady(bool audio);
@@ -60,11 +61,13 @@ class RtspStream:public QObject {
 public:
  explicit RtspStream(QObject *parent=0,const QString &dataDirectory=QString());
  virtual ~RtspStream();
+ bool videoOnly;
  virtual void start(const QString &source);
  virtual void retire();
 signals:
  void ready(const QUrl &url,bool audio);
  void failed(const QString &error);
+ void audioFailed(const QString &error);
 private slots:
  void workerReady(bool audio);
  void workerFinished();
