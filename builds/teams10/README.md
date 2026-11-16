@@ -1,0 +1,46 @@
+# Teams10 test BARs
+
+## Latest release: 1.1.2.15
+
+[Teams10 1.1.2.15 — chat images](Teams10-1.1.2.15-chat-images-unsigned.bar)
+adds authenticated inline Teams image previews, private account-scoped caching,
+loading/error states and explicit retry. Both native entry points were rebuilt.
+See [device checks and limits](../../docs/teams10-chat-images-vi.md).
+The OTA feed points to this BAR. No authenticated image or Passport rendering
+check has been performed.
+
+## Historical builds
+
+[Current: Teams10 1.1.2.7 UI + OTA](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.7-ui-ota-unsigned.bar).
+Code-login-only landing page; fixed numeric timestamps instead of %#c; viewport-wide
+left/right message rows; larger shared rounded bottom bar; Profile OTA updater.
+Install once manually, then use Profile → Cập nhật OTA. Direct PPS installation
+requires firmware support. See [guide](../../docs/ota-vi.md) and
+[UI details](../../docs/ui-ota-release-vi.md). New rendering/install behavior is not
+yet device-tested. Crash recovery/session behavior from 1.1.1.6 is retained;
+photos/Hub remain opt-in. Previous builds below are historical.
+
+## Previous release
+
+[Teams10 1.1.1.6 — native + Hub](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.1.6-recovery-unsigned.bar)
+is the current work/school Microsoft 365 build. It adds encrypted session restore,
+consumer/federated name lookup, authenticated circular photos, HTML5 decoding,
+a dark capsule-nav/bubble UI and a separate native Hub/background polling service.
+
+Install over Teams10, log in once after upgrading from RAM-only 1.0.0.4, then
+check reopening without another code. First verify basic read/send. This repair defaults photo download and Hub/background
+off; enable each separately in Profile. Then close the UI, send a message from
+another device and check Hub after 30–60 seconds. Native font/painter calls were
+removed; a caught crash pauses automatic restore on the next launch for diagnostics.
+The BAR includes both Teams10 and Teams10Service: do not drop the second entry.
+
+No calling or WebView. No own App Registration. Public Teams-client compatibility
+can still be denied by Microsoft/tenant. Restricted UDS/headless permissions must
+be granted by the device; listing them in the package isn't a grant. Latest
+summary polling isn't realtime push. Passport login was confirmed by the user on
+1.0.0.4; new session/photo/Hub/service features have not yet been device-tested.
+
+[Guide and diagnostics](../../docs/teams10-setup-vi.md),
+[source/licensing/limits](../../apps/Teams10/README.md), adjacent SHA256/report.
+Independent unsigned test package `com.bb10toolkit.Teams10`, doesn't replace Zalo
+or Telega. Historical 1.0.0.x builds remain available for comparison/rollback.

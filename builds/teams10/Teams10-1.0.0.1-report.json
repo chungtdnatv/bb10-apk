@@ -1,0 +1,34 @@
+{
+  "assets": 10,
+  "entry_points": [
+    "Teams10"
+  ],
+  "arm_binaries": 1,
+  "signature_files_present": false,
+  "version": "1.0.0.1",
+  "package_id": "com.bb10toolkit.Teams10",
+  "sha256": "07814c8e11c9ebf894cdac32f8365f70b69de4b4091bbfc042b43ff7a2be3c4a",
+  "sdk_image": "ghcr.io/zsavajji/bb10-cxx20@sha256:60ddcfc3acb0c0215611c353780f196c3b7928ae266292f7f45038df358574ba",
+  "native_checks": [
+    {
+      "binary": "build/native/arm/Teams10.so",
+      "sdk_libraries": 97,
+      "strong_imports_resolved": 136,
+      "orphan_unwind_sections": 0
+    }
+  ],
+  "ca_bundle": {
+    "source": "certifi 2026.10.19 Mozilla roots",
+    "sha256": "b67dce2c84359d6ba0b0ffbb980c819737cb6fc94aa85ead330ae1e957c69e69",
+    "license": "MPL-2.0"
+  },
+  "validation": {
+    "toolkit_tests": 35,
+    "controller_mock_tests": 21,
+    "package_tests": 2,
+    "qml_syntax": "pass",
+    "authenticated_graph_session": "not tested: no client/tenant registration available",
+    "passport_launch": "not tested",
+    "qnx_tls_handshake": "not tested on device"
+  }
+}

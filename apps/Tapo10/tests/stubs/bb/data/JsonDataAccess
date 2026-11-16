@@ -1,0 +1,13 @@
+// Host-test adapter for BB10 JSON serialization, backed by host Qt5.
+#ifndef TAPO10_TEST_JSON
+#define TAPO10_TEST_JSON
+#include <QJsonDocument>
+#include <QVariant>
+namespace bb { namespace data {
+class JsonDataAccess {
+public:
+ QVariant loadFromBuffer(const QByteArray &bytes){return QJsonDocument::fromJson(bytes).toVariant();}
+ void saveToBuffer(const QVariant &value,QByteArray *bytes){*bytes=QJsonDocument::fromVariant(value).toJson(QJsonDocument::Compact);}
+};
+}}
+#endif

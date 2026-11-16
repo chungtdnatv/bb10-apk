@@ -1,0 +1,94 @@
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const path=require('node:path');
+const qml=fs.readFileSync(path.join(__dirname,'../assets/main.qml'),'utf8');
+const chatQml=fs.readFileSync(path.join(__dirname,'../assets/ChatPage.qml'),'utf8');
+const handlers=qml.slice(qml.indexOf('    function refreshMessages('),qml.indexOf('    onCreationCompleted:'));
+const core=fs.readFileSync(path.join(__dirname,'../assets/TeamsCore.js'),'utf8').replace('.pragma library','');
+function harness() {
+ const events=[],requests=[];
+ const root={statusText:'',loginBusy:false,render:s=>{root.statusText=s.status;}};
+ // Model the lossy QVariantMap boundary: functions are discarded on property write.
+ let legacyVariant=null,variantWrites=0;
+ Object.defineProperty(root,'service',{get:()=>legacyVariant,set:value=>{
+  variantWrites++;legacyVariant=value===null?null:JSON.parse(JSON.stringify(value));
+ }});
+ const context=vm.createContext({root,tenantField:{text:''},loginTimer:{stop(){},restart(){}},
+  teamsNet:{recoveryMode:()=>false,photosEnabled:()=>false,loadSession:()=>'',saveSession:()=>true,clearSession:()=>true,avatar:()=>'',cachedAvatar:()=>'',observeChat(){},startBackground(){},recordEvent:s=>events.push(s),abortAll(){},saveConfig(){},request:(...args)=>requests.push(args)}});
+ vm.runInContext(core+'\nvar Teams={initialize:initialize,controller:controller,releaseController:releaseController};\n'+handlers,context);
+ root.initializeService=context.initializeService;
+ root.refreshMessages=context.refreshMessages;root.sendMessage=context.sendMessage;
+ return {context,root,events,requests,api:()=>context.controller(),variantWrites:()=>variantWrites,click:()=>context.beginLogin()};
+}
+test('login initializes controller without passing API through a lossy QML variant property',()=>{
+ const h=harness();h.root.service={startLogin(){}};assert.equal(h.root.service.startLogin,undefined);
+ const oldWrites=h.variantWrites();h.click();assert(h.api());assert.equal(h.api().state.phase,'requesting');
+ assert.equal(h.variantWrites(),oldWrites);assert.equal(h.requests.length,1);
+ assert(h.requests[0][2].endsWith('/organizations/oauth2/devicecode'));
+ assert(h.events.includes('login-tapped'));assert(h.events.includes('controller-ready'));
+ assert(h.root.statusText.includes('Đang xin mã'));
+});
+test('failed initialization is visible and can recover on the next tap',()=>{
+ const h=harness(),original=h.context.Teams.initialize;
+ h.context.Teams.initialize=()=>{throw new Error('synthetic startup failure');};
+ h.click();assert.equal(h.api(),null);assert(h.root.statusText.includes('synthetic startup failure'));assert(h.events.includes('controller-error'));
+ h.context.Teams.initialize=original;h.click();assert.equal(h.requests.length,1);
+});
+test('existing controller is reused; synchronous login error becomes visible',()=>{
+ const h=harness();h.context.initializeService();const existing=h.api();
+ existing.startLogin=()=>{throw new Error('synthetic click failure');};
+ h.click();assert.equal(h.api(),existing);assert(h.root.statusText.includes('synthetic click failure'));assert.equal(h.root.loginBusy,false);assert(h.events.includes('login-error'));
+});
+test('clock adapter and device-code response work without Date.now',()=>{
+ const h=harness();vm.runInContext('Date.now=undefined',h.context);h.click();
+ const request=h.requests[0];h.api().receive(request[0],200,JSON.stringify({device_code:'D',user_code:'C',expires_in:900}), '',{});
+ assert.equal(h.api().state.phase,'waiting');assert.equal(h.api().state.code,'C');
+});
+test('chat calls bridge through QML root methods, without storing JS API on a QML page',()=>{
+ const h=harness();h.context.initializeService();const calls=[];
+ h.api().refreshMessages=more=>calls.push(['refresh',more]);h.api().sendMessage=text=>calls.push(['send',text]);
+ h.root.refreshMessages(true);h.root.sendMessage('hello');
+ assert.deepEqual(calls,[['refresh',true],['send','hello']]);assert.equal(h.variantWrites(),0);
+ assert(!/property\s+variant\s+(service|controller)\s*:/.test(qml+'\n'+chatQml));
+ assert(qml.includes('page.appRoot=root;'));assert(chatQml.includes('chat.appRoot.sendMessage(draft.text)'));
+});
+
+test('recovery startup leaves diagnostics accessible and does not automatically replay saved-session work',()=>{
+ const h=harness();h.context.teamsNet.recoveryMode=()=>true;let reads=0;h.context.teamsNet.loadSession=()=>{reads++;return ''};
+ assert(h.context.initializeService());assert(h.api());assert.equal(reads,0);assert.equal(h.requests.length,0);assert(h.root.statusText.includes('đăng nhập bằng code'));
+});
+
+test('Hub opens missing-list conversations and waits for an existing page to pop',()=>{
+ const start=qml.indexOf('    function openPending()'),end=qml.indexOf('\n    Page {',start);
+ let cleared=0,opened=[],pops=0,refreshes=0;
+ const context=vm.createContext({authenticated:false,activeChat:null,chatRows:[],
+  teamsNet:{pendingChat:()=> '19:hub@thread.v2',clearPendingChat:()=>cleared++},
+  Teams:{controller:()=>({refreshMessages:()=>refreshes++})},
+  root:{pop:()=>pops++},openChat:row=>opened.push(row)});
+ vm.runInContext(qml.slice(start,end),context);
+ context.openPending();assert.equal(cleared,0);assert.equal(opened.length,0);
+ context.authenticated=true;context.activeChat={chatId:'19:other'};
+ context.openPending();assert.equal(pops,1);assert.equal(cleared,0);
+ context.activeChat=null;context.openPending();assert.equal(opened[0].id,'19:hub@thread.v2');assert.equal(cleared,1);
+ context.activeChat={chatId:'19:hub@thread.v2'};context.openPending();assert.equal(refreshes,1);assert.equal(cleared,2);
+});
+
+test('top chat back action pops its owner and tolerates an unassigned owner',()=>{
+ const start=chatQml.indexOf('    function requestBack()'),end=chatQml.indexOf('\n    Container {',start);
+ let pops=0;const context=vm.createContext({chat:{appRoot:null}});
+ vm.runInContext(chatQml.slice(start,end),context);context.requestBack();
+ context.chat.appRoot={pop:()=>pops++};context.requestBack();assert.equal(pops,1);
+});
+
+test('rounded composer sends typed text once, keeps whitespace/camera out of text transport',()=>{
+ const start=chatQml.indexOf('    function submitComposer()'),end=chatQml.indexOf('    actionBarVisibility:',start);
+ const sent=[];let notices=0;
+ const chat={sending:false,appRoot:{sendMessage:text=>sent.push(text)}};
+ const draft={text:'  '},featureToast={body:'',show:()=>notices++};
+ const context=vm.createContext({chat,draft,featureToast});vm.runInContext(chatQml.slice(start,end),context);
+ context.submitComposer();assert.equal(sent.length,0);assert.equal(notices,1);
+ draft.text='hello 😃';context.submitComposer();assert.deepEqual(sent,['hello 😃']);
+ chat.sending=true;context.submitComposer();assert.equal(sent.length,1);
+});

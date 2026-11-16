@@ -1,0 +1,6 @@
+FFmpeg 6.1.4, LGPL-2.1-or-later. Copyright FFmpeg developers.
+Static minimal RTSP/TCP, HLS/MPEG-TS, H.264 remux and G.711/AAC audio build.
+Video is not decoded or re-encoded by FFmpeg.
+Exact source, build configuration and application source for relinking:
+https://github.com/chungtdnatv/bb10-apk/tree/bb10-bar-toolkit/apps/Tapo10
+https://github.com/chungtdnatv/bb10-apk/blob/bb10-bar-toolkit/builds/tapo10/third-party/ffmpeg-6.1.4-source.tar.xz

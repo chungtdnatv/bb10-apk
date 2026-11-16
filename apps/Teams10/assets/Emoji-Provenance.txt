@@ -1,0 +1,7 @@
+The eight PNGs in images/emoji-mini are copied unchanged from the vendored
+BBerryLife/Zalo10 emoji assets, based on upstream revision
+47c2da2af4bd6e8cdeb01a4ca0324402768514d3.
+Source: https://github.com/BBerryLife/Zalo10
+The upstream GPLv3 license is retained in apps/Zalo10/LICENSE in the repository.
+Teams10 is distributed under GPL-3.0-or-later; original upstream attribution is
+retained. The shared chat controls/glyphs are newly authored toolkit components.

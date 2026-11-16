@@ -1,0 +1,63 @@
+{
+  "assets": 32,
+  "entry_points": [
+    "Teams10",
+    "Teams10Service"
+  ],
+  "arm_binaries": 2,
+  "signature_files_present": false,
+  "version": "1.1.1.6",
+  "package_id": "com.bb10toolkit.Teams10",
+  "sha256": "008ac8d056aec197590a6dcfa5b5534ba2f57c9d931cad29b0d628e5f22fb74d",
+  "sdk_image": "ghcr.io/zsavajji/bb10-cxx20@sha256:60ddcfc3acb0c0215611c353780f196c3b7928ae266292f7f45038df358574ba",
+  "native_checks": [
+    {
+      "binary": "build/native/arm/Teams10.so",
+      "sdk_libraries": 101,
+      "strong_imports_resolved": 304,
+      "orphan_unwind_sections": 0
+    },
+    {
+      "binary": "build/native/arm/Teams10Service",
+      "sdk_libraries": 52,
+      "strong_imports_resolved": 310,
+      "orphan_unwind_sections": 0
+    }
+  ],
+  "validation": {
+    "toolkit_tests": 40,
+    "login_ui_handler_tests": 6,
+    "native_controller_mock_tests": 34,
+    "crypto_lease_native_preview_notification_helper_tests": 1,
+    "native_route_policy_tests": 1,
+    "historical_graph_controller_tests": 21,
+    "package_ca_tests": 2,
+    "qml_syntax": "pass, both files",
+    "previous_device_login": "user confirmed on Passport with 1.0.0.4",
+    "current_device_session_avatar_hub_background": "repair awaiting device verification; prior 1.1.0.5 reported to close after login"
+  },
+  "background": {
+    "implementation": "native separate entry point, no QML/QtScript engine",
+    "interval_ms": 30000,
+    "delivery": "latest summary polling, not realtime push",
+    "permission_grant": "device dependent; manifest declaration is not a grant"
+  },
+  "session_storage": {
+    "cipher": "AES256-CBC encrypt-then-HMAC-SHA256",
+    "key": "random, separate mode-0600 sandbox file; not hardware-backed",
+    "refresh_rotation": "UI/service fcntl lease and atomic credential replacement"
+  },
+  "ca_bundle": {
+    "source": "certifi 2026.10.19 Mozilla roots",
+    "sha256": "b67dce2c84359d6ba0b0ffbb980c819737cb6fc94aa85ead330ae1e957c69e69",
+    "license": "MPL-2.0"
+  },
+  "repair": {
+    "diagnosis": "unconfirmed without device crash-site log",
+    "native_painter_font_textdocument_imports": "none; checked against both ARM binaries",
+    "default_photo_download": false,
+    "default_hub_background": false,
+    "retained": "encrypted saved session, names, HTML, Cascades UI",
+    "recovery": "caught fatal signal produces crash flag; next UI launch pauses auto-restore and exposes diagnostics"
+  }
+}

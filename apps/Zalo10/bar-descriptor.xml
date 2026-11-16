@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<qnx xmlns="http://www.qnx.com/schemas/application/1.0">
+
+    <id>com.BerryLife.Zalo10</id>
+
+    <configuration id="modern-release" name="Modern-Release">
+        <entryPointType>Qnx/Cascades</entryPointType>
+        <platformArchitecture>armle-v7</platformArchitecture>
+        <asset entryPointId="Zalo10" path="build/modern/arm/o.le-v7/Zalo10.so" entry="true" type="Qnx/Elf">Zalo10.so</asset>
+        <asset entryPointId="Zalo10Headless" path="build/modern/headless/arm/Zalo10Headless" type="Qnx/Elf">Zalo10Headless</asset>
+    </configuration>
+
+    <configuration id="com.qnx.qcc.toolChain.666213485" name="Device-Debug">
+       <platformArchitecture>armle-v7</platformArchitecture>
+       <entryPointType>Qnx/Elf</entryPointType>
+       <asset entryPointId="Zalo10" path="arm/o.le-v7-g/Zalo10" entry="true" type="Qnx/Elf">Zalo10</asset>
+        <asset entryPointId="Zalo10Headless" path="../Zalo10Headless/arm/Zalo10Headless" type="Qnx/Elf">Zalo10Headless</asset>
+    </configuration>
+    <configuration id="com.qnx.qcc.toolChain.2137696721" name="Device-Release">
+       <entryPointType>Qnx/Cascades</entryPointType>
+       <platformArchitecture>armle-v7</platformArchitecture>
+       <asset entryPointId="Zalo10" path="arm/o.le-v7/Zalo10.so" entry="true" type="Qnx/Elf">Zalo10.so</asset>
+        <asset entryPointId="Zalo10Headless" path="../Zalo10Headless/arm/Zalo10Headless" type="Qnx/Elf">Zalo10Headless</asset>
+    </configuration>
+    <configuration id="com.qnx.qcc.toolChain.560740241" name="Device-Profile">
+       <platformArchitecture>armle-v7</platformArchitecture>
+       <entryPointType>Qnx/Elf</entryPointType>
+       <asset entryPointId="Zalo10" path="arm-p/o.le-v7-g/Zalo10" entry="true" type="Qnx/Elf">Zalo10</asset>
+        <asset entryPointId="Zalo10Headless" path="../Zalo10Headless/arm/Zalo10Headless" type="Qnx/Elf">Zalo10Headless</asset>
+    </configuration>
+    <configuration id="com.qnx.qcc.toolChain.1655019260" name="Simulator-Debug">
+       <platformArchitecture>x86</platformArchitecture>
+       <entryPointType>Qnx/Elf</entryPointType>
+       <asset entryPointId="Zalo10" path="x86/o-g/Zalo10" entry="true" type="Qnx/Elf">Zalo10</asset>
+        <asset entryPointId="Zalo10Headless" path="../Zalo10Headless/x86/Zalo10Headless" type="Qnx/Elf">Zalo10Headless</asset>
+    </configuration>
+
+    <!-- Two entry points: the UI (Zalo10) and the headless service (Zalo10Headless project,
+         see src/core/ServiceHandoff.hpp). -->
+    <entryPoint id="Zalo10">
+        <name>Zalo10</name>
+    </entryPoint>
+
+    <entryPoint id="Zalo10Headless">
+        <name>Zalo10 Service</name>
+        <entryPointType>Qnx/Elf</entryPointType>
+        <permission system="true">_sys_run_headless</permission>
+        <permission system="true">_sys_headless_nostop</permission>
+    </entryPoint>
+
+    <!-- Headless service: starts at boot (STARTED) and handles two WebSocket handoff actions from
+         the UI. The id and both actions must match ServiceHandoff.hpp. -->
+    <invoke-target id="com.BerryLife.Zalo10.service">
+        <invoke-target-type>application.headless</invoke-target-type>
+        <invoke-target-name>Zalo10 Service</invoke-target-name>
+        <entry-point-id>Zalo10Headless</entry-point-id>
+        <filter>
+            <action>bb.action.system.STARTED</action>
+            <mime-type>application/vnd.blackberry.system.event.STARTED</mime-type>
+            <property var="uris" value="data://local" />
+        </filter>
+        <filter>
+            <action>com.BerryLife.Zalo10.service.UI_OPENED</action>
+            <action>com.BerryLife.Zalo10.service.UI_CLOSED</action>
+            <mime-type>*</mime-type>
+            <property var="uris" value="headless:" />
+        </filter>
+        <!-- Hub account target = this service: Mark read / Mark unread / Delete run in the background
+             (no UI); OPEN/VIEW are forwarded to the UI. Same filter as the UI's <invoke-target>
+             (mime + pim: uris). -->
+        <filter>
+            <action>bb.action.OPEN</action>
+            <action>bb.action.VIEW</action>
+            <action>bb.action.MARKREAD</action>
+            <action>bb.action.MARKUNREAD</action>
+            <action>bb.action.DELETE</action>
+            <mime-type>application/vnd.zalo10.hub.chat</mime-type>
+            <property var="uris" value="pim:application/vnd.zalo10.hub.chat" />
+        </filter>
+    </invoke-target>
+
+    <name>Zalo10</name>
+    <versionNumber>1.5.0</versionNumber>
+    <description>The Zalo10 application for BB10</description>
+    <author>BerryLife</author>
+    <buildId>19</buildId>
+
+    <icon>
+       <image>icon86.png</image>
+       <image>icon90.png</image>
+       <image>icon96.png</image>
+       <image>icon.png</image>
+       <image>icon110.png</image>
+    </icon>
+
+    <splashScreens>
+       <image>splash.png</image>
+       <image>splash720x1280.png</image>
+       <image>splash768x1280.png</image>
+       <image>splash720.png</image>
+       <image>splash1024x600.png</image>
+       <image>splash1280x720.png</image>
+       <image>splash1280x768.png</image>
+       <image>splash600x1024.png</image>
+    </splashScreens>
+
+    <initialWindow>
+        <systemChrome>none</systemChrome>
+        <autoOrients>true</autoOrients>
+    </initialWindow>
+
+    <asset path="icon.png">icon.png</asset>
+    <asset path="icon86.png">icon86.png</asset>
+    <asset path="icon90.png">icon90.png</asset>
+    <asset path="icon96.png">icon96.png</asset>
+    <asset path="icon110.png">icon110.png</asset>
+    <asset path="splash.png">splash.png</asset>
+    <asset path="splash720x1280.png">splash720x1280.png</asset>
+    <asset path="splash768x1280.png">splash768x1280.png</asset>
+    <asset path="splash720.png">splash720.png</asset>
+    <asset path="splash1024x600.png">splash1024x600.png</asset>
+    <asset path="splash1280x720.png">splash1280x720.png</asset>
+    <asset path="splash1280x768.png">splash1280x768.png</asset>
+    <asset path="splash600x1024.png">splash600x1024.png</asset>
+    <asset path="assets">assets</asset>
+    <!-- Hub icons (account tab + inbox items, see HubIntegration.cpp) live in the top-level "res_hub/"
+         folder. Don't give it a name starting with "assets": Momentics validates by name prefix
+         ("assets-public" failed with "Asset folder is packaged by another asset folder") even for
+         sibling folders. Must match publicAssetPath() in HubIntegration.cpp. -->
+    <asset path="res_hub" public="true">res_hub</asset>
+    <asset path="translations" dest="qm">
+        <include name="*.qm"/>
+    </asset>
+
+    <permission system="true">run_native</permission>
+    <permission>access_internet</permission>
+    <permission>access_location_services</permission>
+    <permission>post_notification</permission>
+    <permission>access_notify_settings_control</permission>
+    <permission>run_when_backgrounded</permission>
+    <permission system="true">_sys_run_headless</permission>
+    <permission system="true">_sys_headless_nostop</permission>
+    <!-- Required for UDS (Hub integration): /pps/services/pim/unified is protected by this restricted
+         ("_sys_") permission. BlackBerry grants it on request only, but it must still be declared.
+         Self-signed/debug builds may not enforce it. -->
+    <permission system="true">_sys_access_pim_unified</permission>
+    <!-- Untested hypothesis for the Hub short-tap bug: AccountService docs say Account-domain read
+         access is granted automatically with another pimdomain permission. The app has
+         calendars/contacts/calllogs but not access_pimdomain_messages, and Hub may route "open
+         message item" under the Messages domain (long-press works: it is an app-registered action). -->
+    <permission>access_pimdomain_messages</permission>
+    <permission>access_wifi_public</permission>
+    <permission>access_shared</permission>
+    <permission>access_pimdomain_calendars</permission>
+    <permission>use_camera</permission>
+    <permission>access_pimdomain_contacts</permission>
+    <permission>record_audio</permission>
+    <permission>read_personally_identifiable_information</permission>
+    <permission>access_phone</permission>
+    <permission system="true">_sys_inject_voice</permission>
+    <permission>read_phonecall_details</permission>
+    <permission>control_phone</permission>
+    <permission>access_pimdomain_calllogs</permission>
+    <permission>read_device_identifying_information</permission>
+
+    <env var="LD_LIBRARY_PATH" value="app/native/lib:/usr/lib/qt4/lib"/>
+    <env var="CASCADES_THEME" value="default"/>
+
+    <!-- Invoke target for Hub (short-tap + long-press "Open in Zalo10"), modeled on BBCord/Beeper10
+         (short-tap confirmed on 10.3.1): an app-specific mime type (application/vnd.zalo10.hub.chat;
+         generic mimes made Hub fail silently) and <property var="uris" value="pim:<mime>"/> in the
+         filter. Must match HUB_MIME_TYPE_MESSAGE in HubIntegration.cpp for items and item actions. -->
+    <invoke-target id="com.BerryLife.Zalo10.invoke">
+        <invoke-target-name>Zalo10</invoke-target-name>
+        <icon><image>icon.png</image></icon>
+        <type>application</type>
+        <entry-point-id>Zalo10</entry-point-id>
+        <filter>
+            <action>bb.action.OPEN</action>
+            <action>bb.action.VIEW</action>
+            <!-- Do NOT declare MARKREAD/MARKUNREAD/DELETE here: item actions belong to the service's
+                 <invoke-target>. If the UI declared them too, an invoke without a target (e.g. Hub's Delete
+                 button) could land in the UI and launch it. -->
+            <mime-type>application/vnd.zalo10.hub.chat</mime-type>
+            <property var="uris" value="pim:application/vnd.zalo10.hub.chat"/>
+        </filter>
+    </invoke-target>
+
+    <!-- Active frame images, picked at runtime via DisplayInfo (720x720 medium, 720x1280 big,
+         1440x1440 big + small). -->
+    <!-- No per-file ActiveFrame asset entries: they duplicated the recursive "assets" rule, and
+         Momentics (NDK 10.3.1) rejects duplicates ("Only one asset may be packaged as ..."). -->
+
+</qnx>

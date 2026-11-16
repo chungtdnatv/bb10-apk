@@ -1,0 +1,14 @@
+[
+  {
+    "binary": "build/modern/arm/o.le-v7/Zalo10.so",
+    "sdk_libraries": 104,
+    "strong_imports_resolved": 730,
+    "orphan_unwind_sections": 0
+  },
+  {
+    "binary": "build/modern/headless/arm/Zalo10Headless",
+    "sdk_libraries": 60,
+    "strong_imports_resolved": 608,
+    "orphan_unwind_sections": 0
+  }
+]

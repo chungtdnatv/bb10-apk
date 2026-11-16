@@ -1,0 +1,61 @@
+# Headless service that receives notifications while the UI app is closed. Expects
+# <workspace>/Zalo10/ (with src/) next to this project.
+APP_NAME = Zalo10Headless
+
+CONFIG += qt warn_on
+CONFIG -= cascades10
+# QtGui only for QImage in ZaloService (no QApplication/widgets).
+QT += network script gui
+
+UI_SRC = ../Zalo10/src
+
+# ZaloService is split across core/<area>/ in Zalo10 (auth, contacts, db, messages, network,
+# phonesync, websocket). Those folders are globbed so new files added there are picked up
+# automatically. ZaloService_ContactPicker.cpp (Cascades) is deliberately NOT included: the
+# headless build uses src/core/ContactPickerStub.cpp instead.
+
+LIBS += -lbbsystem -lbb -lbbplatform -lbbdevice -lbbpim -lunifieddatasourcec
+LIBS += -lQtNetwork -lQtScript -lQtGui
+LIBS += -lssl -lcrypto -lsqlite3
+LIBS += -lsocket   # POSIX sockets used directly by PhoneSyncCore::httpsGet
+# zlib must be explicit: ZaloService_WebSocket.cpp uses inflate*/deflate*, and the service
+# doesn't link Cascades (which provides libz for the UI).
+LIBS += -lz
+LIBS += -L$$PWD/$$UI_SRC/third_party/webp/lib -lwebpdecoder
+
+INCLUDEPATH += src $$UI_SRC $$UI_SRC/third_party/webp/include
+
+# src/third_party/xz is vendored in Zalo10; built in qcc's default C mode, no -std=gnu99.
+INCLUDEPATH += $$(QNX_TARGET)/usr/include/qt4/QtGui
+
+HEADERS += \
+    src/core/ServiceController.hpp \
+    $$UI_SRC/core/ServiceHandoff.hpp \
+    $$UI_SRC/utils/LogSanitizer.hpp \
+    $$UI_SRC/utils/ZaloNetworkManager.hpp \
+    $$UI_SRC/core/PhoneSyncCore.hpp \
+    $$UI_SRC/utils/ZaloCookieJar.hpp \
+    $$UI_SRC/core/ZaloService.hpp \
+    $$UI_SRC/utils/ZaloServiceUtils.hpp \
+    $$UI_SRC/core/HubIntegration.hpp
+
+SOURCES += \
+    src/main.cpp \
+    src/core/ServiceController.cpp \
+    src/core/ContactPickerStub.cpp \
+    $$UI_SRC/core/ZaloService.cpp \
+    $$UI_SRC/core/ZaloService_Crypto.cpp \
+    $$UI_SRC/core/ZaloService_Sync.cpp \
+    $$files($$UI_SRC/core/auth/*.cpp) \
+    $$files($$UI_SRC/core/contacts/*.cpp) \
+    $$files($$UI_SRC/core/db/*.cpp) \
+    $$files($$UI_SRC/core/messages/*.cpp) \
+    $$files($$UI_SRC/core/network/*.cpp) \
+    $$files($$UI_SRC/core/phonesync/*.cpp) \
+    $$files($$UI_SRC/core/websocket/*.cpp) \
+    $$UI_SRC/core/PhoneSyncCore.cpp \
+    $$UI_SRC/third_party/xz/xz_crc32.c \
+    $$UI_SRC/third_party/xz/xz_crc64.c \
+    $$UI_SRC/third_party/xz/xz_dec_stream.c \
+    $$UI_SRC/third_party/xz/xz_dec_lzma2.c \
+    $$UI_SRC/core/HubIntegration.cpp

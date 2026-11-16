@@ -1,0 +1,33 @@
+{
+  "app": "Tapo10",
+  "version": "1.0.0.1",
+  "package_name": "com.bb10toolkit.Tapo10",
+  "package_id": "testRel_lkit_Tapo10345d07c7",
+  "sha256": "5d8d37e61cec2d00854104ca6520447e3f3c3b082b6c27671cc51419ca001858",
+  "bytes": 51077,
+  "bar": {
+    "assets": 10,
+    "entry_points": [
+      "Tapo10"
+    ],
+    "arm_binaries": 1,
+    "signature_files_present": false
+  },
+  "native_sdk_checks": [
+    {
+      "binary": "build/native/arm/Tapo10.so",
+      "sdk_libraries": 101,
+      "strong_imports_resolved": 159,
+      "orphan_unwind_sections": 0
+    }
+  ],
+  "host_tests": {
+    "passed": 63,
+    "failed": 0,
+    "multimedia": "test double; no RTSP decoding"
+  },
+  "qml_syntax": "4 files passed",
+  "device_playback": "not verified; requires real C100 and Passport",
+  "remote_access": "existing user VPN to home LAN",
+  "tp_link_cloud_login": false
+}

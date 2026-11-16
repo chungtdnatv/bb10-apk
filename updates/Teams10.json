@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "app": "Teams10",
+  "appId": "com.bb10toolkit.Teams10",
+  "packageId": "testRel_kit_Teams105d440259",
+  "version": "1.1.2.15",
+  "barUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.15-chat-images-unsigned.bar",
+  "sha256": "76ecc3be3683aad8998c5689bd8fc93547988cfd58ed06b358557984de8a3b0b",
+  "bytes": 456035,
+  "minimumOs": "10.3.1",
+  "notes": "Hiển thị ảnh inline trong chat Teams, giữ chú thích và emoji.\nTải ảnh có xác thực, lưu đệm riêng theo tài khoản; có trạng thái tải, lỗi và thử lại.\nBuild lại giao diện và dịch vụ nền; cần kiểm tra ảnh thật và giao diện trên Passport.",
+  "latestVersion": "1.1.2.15",
+  "downloadUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.15-chat-images-unsigned.bar",
+  "changelog": [
+    {
+      "version": "1.1.2.15",
+      "items": [
+        "Hiển thị ảnh inline trong chat Teams, giữ chú thích và emoji.",
+        "Tải ảnh có xác thực, lưu đệm riêng theo tài khoản; có trạng thái tải, lỗi và thử lại.",
+        "Build lại giao diện và dịch vụ nền; cần kiểm tra ảnh thật và giao diện trên Passport."
+      ]
+    }
+  ]
+}

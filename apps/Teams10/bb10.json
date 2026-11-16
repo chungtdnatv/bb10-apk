@@ -1,0 +1,38 @@
+{
+  "build_script": "scripts/build.sh",
+  "output": "build/Teams10-unsigned.bar",
+  "tests": [
+    [
+      "node",
+      "--test",
+      "tests/login-ui.test.cjs"
+    ],
+    [
+      "node",
+      "--test",
+      "tests/directory.test.cjs"
+    ],
+    [
+      "node",
+      "--test",
+      "tests/native-core.test.cjs"
+    ],
+    [
+      "python3",
+      "tests/test_runtime_helpers.py"
+    ],
+    [
+      "python3",
+      "tests/test_policy.py"
+    ],
+    [
+      "node",
+      "--test",
+      "tests/core.test.cjs"
+    ],
+    [
+      "python3",
+      "tests/test_package.py"
+    ]
+  ]
+}

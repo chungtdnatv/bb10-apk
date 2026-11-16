@@ -1,0 +1,35 @@
+{
+  "assets": 807,
+  "entry_points": [
+    "Zalo10",
+    "Zalo10Headless"
+  ],
+  "arm_binaries": 2,
+  "signature_files_present": false,
+  "version": "1.5.0.11",
+  "sha256": "4e695d7e45e23cc94f7396f270ad0f3f773c2e4b222cdd379eb0485861220804",
+  "mode": "native source build; custom active frame removed",
+  "native_checks": [
+    {
+      "binary": "build/modern/arm/o.le-v7/Zalo10.so",
+      "sdk_libraries": 104,
+      "strong_imports_resolved": 704,
+      "orphan_unwind_sections": 0
+    },
+    {
+      "binary": "build/modern/headless/arm/Zalo10Headless",
+      "sdk_libraries": 60,
+      "strong_imports_resolved": 608,
+      "orphan_unwind_sections": 0
+    }
+  ],
+  "evidence": {
+    "version": "1.5.0.9",
+    "runs": 2,
+    "last_stage": "ApplicationUI: scene set",
+    "signal": "SIGSEGV (11)",
+    "next_unreached_stage": "ApplicationUI: active frame ready",
+    "limitation": "No stack trace; crash interval is established, exact faulting instruction is unknown"
+  },
+  "device_retest": "pending"
+}

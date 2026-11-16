@@ -1,0 +1,35 @@
+name: Build BB10 BARs
+on:
+  workflow_dispatch:
+  push:
+    paths: ['bb10.py', 'bb10kit/**', 'scripts/**', 'shared/**', 'updates/**', 'apps/**', 'templates/**', 'tests/**', 'toolchains/image.txt', '.github/workflows/build-bar.yml']
+  pull_request:
+    paths: ['bb10.py', 'bb10kit/**', 'scripts/**', 'shared/**', 'updates/**', 'apps/**', 'templates/**', 'tests/**', 'toolchains/image.txt', '.github/workflows/build-bar.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev libssl-dev
+      - run: python3 bb10.py test
+      - run: python3 bb10.py build Hello10
+      - run: python3 bb10.py build Zalo10
+      - run: python3 bb10.py test Zalo10
+      - run: python3 bb10.py build Teams10
+      - run: python3 bb10.py test Teams10
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bb10-unsigned-test-bars
+          path: dist/*.bar
+          if-no-files-found: error

@@ -1,0 +1,37 @@
+{
+  "assets": 12,
+  "entry_points": [
+    "Teams10"
+  ],
+  "arm_binaries": 1,
+  "signature_files_present": false,
+  "version": "1.0.0.2",
+  "package_id": "com.bb10toolkit.Teams10",
+  "sha256": "0630f9f3d1c2b5c3e3bf17c296bb9e88a24fc1f852dfedb41751e8eb5571a978",
+  "sdk_image": "ghcr.io/zsavajji/bb10-cxx20@sha256:60ddcfc3acb0c0215611c353780f196c3b7928ae266292f7f45038df358574ba",
+  "native_checks": [
+    {
+      "binary": "build/native/arm/Teams10.so",
+      "sdk_libraries": 97,
+      "strong_imports_resolved": 144,
+      "orphan_unwind_sections": 0
+    }
+  ],
+  "ca_bundle": {
+    "source": "certifi 2026.10.19 Mozilla roots",
+    "sha256": "b67dce2c84359d6ba0b0ffbb980c819737cb6fc94aa85ead330ae1e957c69e69",
+    "license": "MPL-2.0"
+  },
+  "validation": {
+    "toolkit_tests": 40,
+    "native_controller_mock_tests": 23,
+    "native_route_policy_tests": 1,
+    "historical_graph_tests": 21,
+    "package_tests": 2,
+    "qml_syntax": "pass",
+    "authenticated_native_session": "not tested: no company account used",
+    "passport_launch": "not tested",
+    "qnx_tls_handshake": "not tested on device"
+  },
+  "protocol": "CSA/IC3 native interoperability; fixed upstream public Teams client ID; v1 device-code + v2 resource refresh"
+}

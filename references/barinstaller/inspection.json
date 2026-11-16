@@ -1,0 +1,14 @@
+{
+  "file": "BarInstaller.bar",
+  "sha256": "b5e302b0c8d22f74031975c850312d2f7235b194f6a4c4b52115645238208c46",
+  "bytes": 1494301,
+  "archive_entries": 16,
+  "package": "com.tbbx.barinstaller.pps",
+  "version": "1.6.127",
+  "qml_sources": [],
+  "inspectable_source": "native/barinstall.sh",
+  "script_sha256": "3108f6688c202e268991b2625ab6f1a9d276956bc789e74aa42db857919f0dce",
+  "descriptor_invoke_targets": 0,
+  "protocol": "PPS job/runtimeInstall via existing firmware installer contexts; no-wait for self-update",
+  "redistributed_from_upload": []
+}

@@ -1,0 +1,32 @@
+{
+  "app": "Tapo10",
+  "version": "1.0.0.2",
+  "sha256": "1dff93d807f817efefc99540608a816f839562cf38ffbb0311b74fce4f3e6efa",
+  "bytes": 203647,
+  "bar": {
+    "assets": 14,
+    "entry_points": [
+      "Tapo10"
+    ],
+    "arm_binaries": 1,
+    "signature_files_present": false
+  },
+  "package_id": "testRel_lkit_Tapo10345d07c7",
+  "install_over_identity_matches_1_0_0_1": true,
+  "native_sdk_checks": [
+    {
+      "binary": "build/native/arm/Tapo10.so",
+      "sdk_libraries": 101,
+      "strong_imports_resolved": 237,
+      "orphan_unwind_sections": 0
+    }
+  ],
+  "host_tests": {
+    "passed": 66,
+    "failed": 0
+  },
+  "qml_syntax": "5 files passed",
+  "startup_repair": "Replace unsupported NavigationPane popTransitionStarted with topChanged; show native QML diagnostics on failure",
+  "ota": "Tapo10 feed and scoped identity, HTTPS, byte count/SHA-256, install submission and version recheck",
+  "device_validation": "Startup, camera playback and firmware installation require hardware verification"
+}

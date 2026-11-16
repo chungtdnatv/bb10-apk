@@ -1,0 +1,32 @@
+// Host-test double only. Native builds include the real BB10 SDK MediaPlayer.
+#ifndef TAPO10_TEST_MEDIA
+#define TAPO10_TEST_MEDIA
+#include <QObject>
+#include <QUrl>
+namespace bb { namespace multimedia {
+struct MediaError {enum Type {None=0,UnsupportedValue=4,UnsupportedMediaType=5,SourceUnavailable=10};};
+struct MediaState {enum Type {Unprepared=0,Prepared=1,Started=2,Paused=3,Stopped=4};};
+struct VideoOutput {enum Type {None=0,PrimaryDisplay=1};};
+class MediaPlayer;
+inline MediaPlayer *&lastPlayer(){static MediaPlayer *last=0;return last;}
+class MediaPlayer:public QObject {
+ Q_OBJECT
+public:
+ QUrl source;QString group,id;double volume;bool active;VideoOutput::Type output;
+ explicit MediaPlayer(QObject *parent=0):QObject(parent),volume(0),active(false),output(VideoOutput::None){lastPlayer()=this;}
+ MediaError::Type stop(){active=false;emit mediaStateChanged(MediaState::Stopped);return MediaError::None;}
+ MediaError::Type reset(){source=QUrl();emit mediaStateChanged(MediaState::Unprepared);return MediaError::None;}
+ MediaError::Type setSourceUrl(const QUrl &url){source=url;return MediaError::None;}
+ MediaError::Type play(){active=true;emit mediaStateChanged(MediaState::Started);return MediaError::None;}
+ MediaError::Type setVolume(double value){volume=value;return MediaError::None;}
+ void setWindowId(const QString &value){id=value;}
+ void setWindowGroupId(const QString &value){group=value;}
+ MediaError::Type setVideoOutput(VideoOutput::Type value){output=value;return MediaError::None;}
+ void fail(){emit error(MediaError::SourceUnavailable,0);}
+signals:
+ void error(bb::multimedia::MediaError::Type error,unsigned int position);
+ void mediaStateChanged(bb::multimedia::MediaState::Type state);
+ void playbackCompleted();
+};
+}}
+#endif

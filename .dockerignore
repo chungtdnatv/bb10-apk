@@ -1,0 +1,6 @@
+.git
+dist
+**/build
+**/__pycache__
+work
+original-apps

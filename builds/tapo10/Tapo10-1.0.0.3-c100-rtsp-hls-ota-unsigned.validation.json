@@ -1,0 +1,46 @@
+{
+  "app": "Tapo10",
+  "version": "1.0.0.3",
+  "sha256": "69fcb5f557e955903b7d176c260c6633b3916cc0d439348126d346a1417d7c72",
+  "bytes": 1059956,
+  "bar": {
+    "assets": 16,
+    "entry_points": [
+      "Tapo10"
+    ],
+    "arm_binaries": 1,
+    "signature_files_present": false
+  },
+  "package_identity_retained": true,
+  "native_sdk_checks": [
+    {
+      "binary": "build/native/arm/Tapo10.so",
+      "sdk_libraries": 101,
+      "strong_imports_resolved": 439,
+      "orphan_unwind_sections": 0
+    }
+  ],
+  "host_tests": {
+    "passed": 70,
+    "failed": 0
+  },
+  "real_stream_tests": [
+    "Digest-authenticated RTSP/TCP; escaped credentials",
+    "HLS v3 and MPEG-TS H.264/AAC conversion with actual decoding",
+    "401 and 404 classification",
+    "HTTP HEAD, ranges and private routes",
+    "HTTP serves while UI is blocked",
+    "Retirement interrupts unresponsive RTSP and deletes media buffers"
+  ],
+  "ffmpeg": {
+    "project": "FFmpeg",
+    "version": "6.1.4",
+    "repository": "https://github.com/FFmpeg/FFmpeg",
+    "commit": "34277e12e80031c7f89494ba543684bc1dd0be8f",
+    "tag": "n6.1.4",
+    "sha256": "50ec1f37af804658f5de6f884cba95405521270c5dc582e1c32e5adb2060fb86",
+    "license": "LGPL-2.1-or-later (minimal build; GPL/nonfree disabled)",
+    "tag_signature": "Good cryptographic EDDSA signature from DD1EC9E8DE085C629B3E1846B18E8928B3948D64; GPG reports signing key now expired. Source is pinned to exact official Git commit and this archive hash."
+  },
+  "device_validation": "Real C100/Passport playback still requires user retry; laboratory media decoding is verified"
+}

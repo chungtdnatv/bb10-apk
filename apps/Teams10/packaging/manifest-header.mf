@@ -1,0 +1,51 @@
+Archive-Manifest-Version: 1.1
+Archive-Created-By: BlackBerry Tablet OS Elf BAR Packager 1.4.2
+
+Package-Type: application
+Package-Author: Chung
+Package-Author-Id: testQkIxMCBUb29sa2l0ICAgICA
+Package-Name: com.bb10toolkit.Teams10
+Package-Id: testRel_kit_Teams105d440259
+Package-Version: 1.0.0.4
+Package-Version-Id: testMS4wLjAuNCAgICAgICAgICA
+Package-Architecture: armle-v7
+
+Application-Name: Teams10
+Application-Id: testRel_kit_Teams105d440259
+Application-Description: Native Cascades application
+Application-Version: 1.0.0.4
+Application-Version-Id: testMS4wLjAuNCAgICAgICAgICA
+Application-Requires-System: BlackBerry 10/10.3.1.0
+Application-Development-Mode: false
+
+Entry-Point-Name: Teams10
+Entry-Point-Key: Teams10
+Entry-Point: LD_LIBRARY_PATH=app/native/lib:/usr/lib/qt4/lib app/native/Teams10.so
+Entry-Point-Type: Qnx/Cascades
+Entry-Point-Icon: native/icon.png
+Entry-Point-Orientation: auto
+Entry-Point-User-Actions: access_internet,post_notification,run_when_backgrounded,access_shared
+Entry-Point-System-Actions: run_native,_sys_run_headless,_sys_headless_nostop,_sys_access_pim_unified
+
+
+Entry-Point-Name: Teams10 Service
+Entry-Point-Key: Teams10Service
+Entry-Point: LD_LIBRARY_PATH=app/native/lib:/usr/lib/qt4/lib app/native/Teams10Service
+Entry-Point-Type: Qnx/Elf
+Entry-Point-User-Actions: access_internet,post_notification,run_when_backgrounded,access_shared
+Entry-Point-System-Actions: run_native,_sys_run_headless,_sys_headless_nostop,_sys_access_pim_unified
+
+Invoke-Target-Key: com.bb10toolkit.Teams10.service
+Invoke-Target-Label: Teams10 Service
+Invoke-Target-Entry-Point-Ref: Teams10Service
+Invoke-Target-Type: application.headless
+Invoke-Target-Filter: actions=bb.action.system.STARTED;types=application/vnd.blackberry.system.event.STARTED;uris=data://local;
+Invoke-Target-Filter: actions=bb.action.system.UPDATED;types=application/vnd.blackberry.system.event.UPDATED;uris=data://local;
+Invoke-Target-Filter: actions=com.bb10toolkit.Teams10.RUN;types=application/vnd.teams10.background;uris=headless:;
+
+Invoke-Target-Key: com.bb10toolkit.Teams10.open
+Invoke-Target-Label: Teams10
+Invoke-Target-Entry-Point-Ref: Teams10
+Invoke-Target-Type: application
+Invoke-Target-Filter: actions=bb.action.OPEN,bb.action.VIEW;types=application/vnd.teams10.chat;uris=pim:application/vnd.teams10.chat;
+Invoke-Target-Filter: actions=bb.action.OPEN;types=application/vnd.teams10.chat;
