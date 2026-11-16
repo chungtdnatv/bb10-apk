@@ -3,21 +3,21 @@
   "app": "Tapo10",
   "appId": "com.bb10toolkit.Tapo10",
   "packageId": "testRel_lkit_Tapo10345d07c7",
-  "version": "1.0.0.2",
-  "barUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/tapo10/Tapo10-1.0.0.2-c100-vpn-ota-unsigned.bar",
-  "sha256": "1dff93d807f817efefc99540608a816f839562cf38ffbb0311b74fce4f3e6efa",
-  "bytes": 203647,
+  "version": "1.0.0.3",
+  "barUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/tapo10/Tapo10-1.0.0.3-c100-rtsp-hls-ota-unsigned.bar",
+  "sha256": "69fcb5f557e955903b7d176c260c6633b3916cc0d439348126d346a1417d7c72",
+  "bytes": 1059956,
   "minimumOs": "10.3.1",
-  "notes": "Sửa lỗi interface could not load do sự kiện NavigationPane không có trên BB10.\nThêm Cập nhật phần mềm: kiểm tra phiên bản, tải BAR, xác minh kích thước/SHA-256 và cài OTA.\nNếu QML còn lỗi, hiển thị tên file/dòng lỗi và lưu chẩn đoán trong sandbox.",
-  "latestVersion": "1.0.0.2",
-  "downloadUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/tapo10/Tapo10-1.0.0.2-c100-vpn-ota-unsigned.bar",
+  "notes": "Thay cách phát RTSP trực tiếp gây lỗi 10 bằng bộ nhận RTSP/TCP có xác thực và HLS v3 nội bộ trên Passport.\nGiữ video H.264 nguyên bản; chuyển âm thanh G.711 của C100 sang AAC. Không cần máy chủ hay VPN khi cùng Wi-Fi nhà.\nPhân biệt lỗi RTSP 401/403/404 với lỗi bộ phát BB10; dừng/kết nối lại xóa bộ đệm. Video có độ trễ vài giây.",
+  "latestVersion": "1.0.0.3",
+  "downloadUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/tapo10/Tapo10-1.0.0.3-c100-rtsp-hls-ota-unsigned.bar",
   "changelog": [
     {
-      "version": "1.0.0.2",
+      "version": "1.0.0.3",
       "items": [
-        "Sửa lỗi interface could not load do sự kiện NavigationPane không có trên BB10.",
-        "Thêm Cập nhật phần mềm: kiểm tra phiên bản, tải BAR, xác minh kích thước/SHA-256 và cài OTA.",
-        "Nếu QML còn lỗi, hiển thị tên file/dòng lỗi và lưu chẩn đoán trong sandbox."
+        "Thay cách phát RTSP trực tiếp gây lỗi 10 bằng bộ nhận RTSP/TCP có xác thực và HLS v3 nội bộ trên Passport.",
+        "Giữ video H.264 nguyên bản; chuyển âm thanh G.711 của C100 sang AAC. Không cần máy chủ hay VPN khi cùng Wi-Fi nhà.",
+        "Phân biệt lỗi RTSP 401/403/404 với lỗi bộ phát BB10; dừng/kết nối lại xóa bộ đệm. Video có độ trễ vài giây."
       ]
     }
   ]

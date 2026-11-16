@@ -36,7 +36,7 @@ Page {
             Container {
                 leftPadding: ui.du(1);rightPadding: ui.du(1);topPadding: ui.du(1);bottomPadding: ui.du(2)
                 Label { text: cameraApp.status;multiline: true;textFormat: TextFormat.Plain;textStyle.color: Color.White }
-                Label { text: "Ở xa: bật VPN về mạng nhà. Nếu hình đứng, thử Mượt hoặc Kết nối lại.";multiline: true;textStyle { color: Color.create("#97b6c5");fontSize: FontSize.Small } }
+                Label { text: "Cùng Wi-Fi nhà không cần VPN. Khi ở xa, bật VPN về nhà. Video có độ trễ đệm vài giây.";multiline: true;textStyle { color: Color.create("#97b6c5");fontSize: FontSize.Small } }
                 DropDown {
                     id: quality;title: "Chất lượng";visible: !live.customStream
                     options: [Option { text: "Mượt • stream2";selected: true },Option { text: "HD • stream1" }]
@@ -49,7 +49,7 @@ Page {
     actions: [
         ActionItem { title: cameraApp.busy?"Đang kết nối…":"Kết nối lại";enabled: !cameraApp.busy;ActionBar.placement: ActionBarPlacement.OnBar;onTriggered: live.connectCamera() },
         ActionItem { title: "Dừng";ActionBar.placement: ActionBarPlacement.OnBar;onTriggered: cameraApp.stop() },
-        ActionItem { title: cameraApp.muted?"Bật âm thanh":"Tắt âm thanh";ActionBar.placement: ActionBarPlacement.OnBar;onTriggered: cameraApp.toggleMute() }
+        ActionItem { title: cameraApp.muted?"Bật âm thanh":"Tắt âm thanh";enabled: cameraApp.audioAvailable;ActionBar.placement: ActionBarPlacement.OnBar;onTriggered: cameraApp.toggleMute() }
     ]
     attachedObjects: [
         Timer { id: startTimer;interval: 120;repeat: false;onTriggered: live.connectCamera() },

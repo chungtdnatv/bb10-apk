@@ -1,13 +1,13 @@
-# Tapo10 1.0.0.2
+# Tapo10 1.0.0.3
 
-[Unsigned BAR](Tapo10-1.0.0.2-c100-vpn-ota-unsigned.bar), SHA-256 and validation report
-are provided here. [Source archive](Tapo10-1.0.0.2-source.zip) is also available. Native BlackBerry Passport/BB10 viewer for Tapo C100 using
+[Unsigned BAR](Tapo10-1.0.0.3-c100-rtsp-hls-ota-unsigned.bar), SHA-256 and validation report
+are provided here. [Source archive](Tapo10-1.0.0.3-source.zip) is also available. Native BlackBerry Passport/BB10 viewer for Tapo C100 using
 Camera Account + RTSP, over local Wi-Fi or the user's existing home VPN.
 Adds saved camera profiles, Mượt/HD, stop/reconnect and mute. Generic NVR/NAS
 RTSP paths are supported when the device supplies an H.264 stream.
 
 This is an independent app, not an update to Teams10 or an official Tapo app.
-Build, 66 host checks, QML syntax and ARM dependency/entry/unwind verification
+Build, 70 host/toolkit checks, QML syntax and ARM dependency/entry/unwind verification
 passed. Real camera authentication, decoding and Passport rendering require
 device validation. No cloud P2P, TP-Link ID login or bundled VPN is implemented.
 
@@ -18,3 +18,12 @@ Version 1.0.0.1 is retained only for history: the user reported a QML startup
 failure. Version 1.0.0.2 replaces an unsupported NavigationPane handler and adds
 native QML diagnostics plus **Cập nhật phần mềm**. Install this fix manually once;
 subsequent updates can be checked/downloaded/installed through its Tapo10 OTA feed.
+
+Version 1.0.0.3 addresses the reported SourceUnavailable (10) during direct RTSP
+playback. It receives authenticated RTSP over TCP and serves HLS3 privately on
+loopback for BB10, remuxing H.264 and converting C100 G.711 audio to AAC. No home
+server or VPN is needed on home Wi-Fi. Real-stream lab tests exercise Digest,
+codec conversion/decoding, HTTP serving, wrong credentials/paths and cancellation.
+C100/Passport hardware playback still requires a retry. Library source/license
+and exact build provenance are under [third-party](third-party/) and
+[ffmpeg-source.json](../../apps/Tapo10/ffmpeg-source.json).

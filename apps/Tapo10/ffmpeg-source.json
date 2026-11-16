@@ -1,0 +1,10 @@
+{
+  "project": "FFmpeg",
+  "version": "6.1.4",
+  "repository": "https://github.com/FFmpeg/FFmpeg",
+  "commit": "34277e12e80031c7f89494ba543684bc1dd0be8f",
+  "tag": "n6.1.4",
+  "sha256": "50ec1f37af804658f5de6f884cba95405521270c5dc582e1c32e5adb2060fb86",
+  "license": "LGPL-2.1-or-later (minimal build; GPL/nonfree disabled)",
+  "tag_signature": "Good cryptographic EDDSA signature from DD1EC9E8DE085C629B3E1846B18E8928B3948D64; GPG reports signing key now expired. Source is pinned to exact official Git commit and this archive hash."
+}

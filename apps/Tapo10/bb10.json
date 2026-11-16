@@ -3,6 +3,7 @@
   "output": "build/Tapo10-unsigned.bar",
   "tests": [
     ["python3", "tests/test_native.py"],
+    ["python3", "tests/test_stream.py"],
     ["node", "--test", "tests/ui.test.cjs"],
     ["python3", "tests/test_package.py"]
   ]

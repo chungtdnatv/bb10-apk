@@ -4,7 +4,7 @@
     <name>Tapo10</name>
     <author>Chung</author>
     <versionNumber>1.0.0</versionNumber>
-    <buildId>2</buildId>
+    <buildId>3</buildId>
     <description>Tapo C100 live camera viewer over Wi-Fi and home VPN</description>
     <configuration id="release" name="Device-Release">
         <entryPointType>Qnx/Cascades</entryPointType>

@@ -1,5 +1,33 @@
 # Validation of the toolkit integration
 
+## Tapo10 1.0.0.3 — real RTSP receiver and local HLS playback
+
+The user reported native MediaError 10 on home Wi-Fi despite configuring the
+camera IP/account. The prior direct RTSP-to-MediaPlayer path was not established
+on hardware; the SDK documents HTTP/HLS3 network inputs. This revision receives
+authenticated RTSP over TCP with a minimal static FFmpeg 6.1.4 C library, remuxes
+H.264 unchanged and converts C100 G.711 to mono AAC-LC. It waits for the first
+keyframe and three completed HLS3 segments. The loopback HTTP server runs on its
+own event-loop thread because BB10 MediaPlayer prepare/play calls are blocking.
+No external server, camera setting changes or extra LAN UDP routes are required.
+
+All 70 checks passed: 50 toolkit, seven controller/store/crypto, four new real-stream
+integration, six QML handler and three package cases. The integration suite uses
+a Digest-only MediaMTX server and actual RTSP publisher, the production worker and
+HTTP code, then decodes the resulting H.264/AAC segment with host ffmpeg (errors
+are failures). It checks 401/404, escaped credentials, HLS version 3, HEAD/ranges,
+private routes, cancellation/retirement and buffer removal. HTTP keeps responding
+while the UI thread is deliberately blocked, guarding against native prepare
+starving its own data source. Early non-key frames are dropped to avoid the
+missing-PPS errors found in the first experiment. Source archive SHA-256, native
+SDK dependency/entry/unwind checks and QML syntax checks passed. Real C100/Passport
+playback remains unverified; laboratory RTSP/media decoding is not that claim.
+
+FFmpeg's full corresponding source and exact build configuration are distributed.
+The official tag has a good cryptographic signature under the documented signer
+fingerprint; GPG notes that the signing key is now expired. The exact commit and
+archive hash are pinned and recorded; no checksum/TLS/signature settings were disabled.
+
 ## Tapo10 1.0.0.2 — QML startup repair and OTA
 
 After 1.0.0.1 was installed, the user reported its native "interface could not

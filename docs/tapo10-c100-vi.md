@@ -1,7 +1,26 @@
 # Tapo10 cho Tapo C100 và BlackBerry Passport
 
-Bản hiện tại: **1.0.0.2**, native BB10 10.3.1+. App độc lập với Teams10, Zalo10 và
+Bản hiện tại: **1.0.0.3**, native BB10 10.3.1+. App độc lập với Teams10, Zalo10 và
 ứng dụng Tapo chính hãng, dùng package `com.bb10toolkit.Tapo10`.
+
+
+## Bản sửa phát video 1.0.0.3
+
+Bản 1.0.0.2 đã được báo lỗi 10 trên Wi-Fi nhà. Bản 1.0.0.3 thay cách đưa RTSP
+trực tiếp vào bộ phát BB10: app tự nhận RTSP có xác thực qua TCP, giữ video H.264
+và chuyển sang HLS nội bộ trên điện thoại; âm thanh G.711 của C100 đổi sang AAC.
+Không cần máy chủ phụ. Ở Wi-Fi nhà **không cần VPN**; khi đi xa mới dùng VPN về nhà.
+
+Giữ nguyên IP/account đã lưu, cập nhật lên **1.0.0.3**, mở camera ở chế độ **Mượt**.
+Chờ khoảng vài giây để đệm hình; khi ổn định có thể thử HD. Bản 1.0.0.2 có thể
+vào menu Cập nhật phần mềm để tải/cài bản này, hoặc cài BAR đè thủ công giữ dữ liệu.
+
+Nếu camera trả 401/403/404, app sẽ hiển thị đúng lỗi tài khoản/quyền/đường dẫn.
+Nếu đã nhận video nhưng BB10 chưa mở được, thông báo cũng nêu rõ giai đoạn đó.
+Khi báo lỗi, gửi nguyên văn thông báo và chọn Mượt hay HD; không gửi mật khẩu.
+Video được đệm ngắn trong sandbox, xóa khi dừng; đây không phải tính năng ghi hình.
+Luồng mới đã thử qua RTSP Digest/TCP và giải mã đầu ra H.264/AAC trong lab, nhưng
+chưa có kết quả chạy lại trên C100 và Passport của người dùng.
 
 ## Sửa lỗi giao diện và cập nhật OTA
 
@@ -10,7 +29,7 @@ NavigationPane không được BB10 hỗ trợ và thêm màn hình chi tiết l
 giao diện vẫn không tải được. Khi đó báo lại tên file, số dòng và thông báo hiện
 trên màn hình; bản ghi cũng nằm trong `data/tapo10_startup.log` của sandbox.
 
-Cài đè bản **1.0.0.2** một lần bằng cách cài BAR đang dùng; bản 1.0.0.1 chưa có
+Cài đè bản mới nhất một lần bằng cách cài BAR đang dùng; bản 1.0.0.1 chưa có
 OTA. Không cần gỡ app hoặc xóa dữ liệu. Sau đó mở menu **Cập nhật phần mềm** trên
 trang danh sách camera để kiểm tra, tải và cài bản tiếp theo. Cho phép quyền tệp
 dùng chung để lưu BAR vào Downloads. App kiểm tra phiên bản, định danh, kích
@@ -31,7 +50,7 @@ cài thành công; gửi yêu cầu cài chưa đồng nghĩa đã cài xong.
 
 ## Cài và thêm camera
 
-Cài `Tapo10-1.0.0.2-c100-vpn-ota-unsigned.bar` bằng phương thức cài BAR hiện có trên
+Cài `Tapo10-1.0.0.3-c100-rtsp-hls-ota-unsigned.bar` bằng phương thức cài BAR hiện có trên
 Passport. Đây là gói unsigned; quyền cài tùy thiết bị/cách cài đang dùng.
 
 Mở Tapo10 → **Thêm camera**, nhập tên, IP, cổng, Camera Account và mật khẩu.
@@ -47,8 +66,8 @@ muốn xem lại, mở camera hoặc bấm Kết nối lại. Mỗi lần xem m�
 Kết nối VPN về nhà trên **chính Passport** trước, sau đó mở camera bằng cùng
 IP nội bộ như lúc ở nhà. Tapo10 sử dụng kết nối của hệ điều hành, không cài
 VPN và không dùng P2P cloud Tapo. VPN phải định tuyến được tới subnet camera,
-cho phép RTSP và các cổng RTP được thương lượng. TCP 554 thông nhưng hình
-không lên vẫn có thể là lỗi tuyến RTP, tài khoản hoặc codec.
+cho phép RTSP qua TCP (thông thường cổng 554). Từ 1.0.0.3, app ép RTSP/TCP
+để không cần các cổng RTP/UDP riêng qua VPN.
 
 Nếu mạng nơi đang ở trùng subnet với mạng nhà, cần xử lý định tuyến VPN/router;
 chỉ đổi tên camera trong app không giải quyết được. Không cần tự động UPnP hay
