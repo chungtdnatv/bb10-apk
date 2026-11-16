@@ -1,5 +1,21 @@
 # Validation of the toolkit integration
 
+## Tapo10 1.0.0.1 — C100 / home VPN viewer
+
+Built the new native Cascades app against the pinned BB10 SDK. BAR verification
+passed with one ARM UI entry, ten assets and a distinct package identity. All
+159 strong imports resolved against 101 SDK libraries, with a valid Cascades
+entry and consolidated ARM unwind segment. All four QML files passed syntax lint.
+
+The toolkit suite (50), production native controller/store/crypto cases (7),
+executed QML handler tests (4) and package checks (2) passed: 63 total. Host native
+tests use Qt5 adapters for BB10 JSON and MediaPlayer, actual TCP connect/refusal,
+actual OpenSSL crypto/file persistence and separate-process account restoration.
+They check password encoding/redaction, failed-save retention, corruption guard,
+quality changes, media errors, cancellation and output release. They do not
+negotiate camera authentication, decode RTSP or emulate BB10 rendering. No C100,
+Passport or real home VPN was accessible; hardware playback is unverified.
+
 ## Teams10 1.1.2.15 — inline chat images
 
 Restored the pinned SDK into a flattened Docker image after vfs layer expansion

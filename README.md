@@ -29,6 +29,22 @@ Có thể đặt `--jobs 2` nếu cần giới hạn số compiler chạy đồn
 Image được ghim theo SHA-256 trong `toolchains/image.txt`. Repo không chứa SDK 4 GB
 hoặc cache build; `toolchains/` chứa source và revision để tái tạo/mở rộng toolchain.
 
+## Tapo10 cho Tapo C100 / Passport
+
+App native mới **Tapo10 1.0.0.1** quản lý cấu hình camera và xem live bằng
+Camera Account, RTSP/H.264, trong Wi-Fi hoặc qua VPN về nhà đã kết nối trên
+Passport. Có Mượt/HD, dừng/kết nối lại, bật/tắt tiếng, lưu tài khoản mã hóa và
+cấu hình đường dẫn RTSP cho NVR/NAS. Không đăng nhập TP-Link ID/cloud P2P.
+
+```sh
+python3 bb10.py build Tapo10
+python3 bb10.py test Tapo10
+```
+
+[Bản BAR](builds/tapo10/Tapo10-1.0.0.1-c100-vpn-unsigned.bar),
+[cài đặt và VPN](docs/tapo10-c100-vi.md), [source/giới hạn/test](apps/Tapo10/README.md).
+Build native và test host đã qua; cần kiểm tra phát live trên C100/Passport thật.
+
 ## Teams10 cho Microsoft 365
 
 App native độc lập có đăng nhập device-code, đọc lịch sử và gửi văn bản vào chat có sẵn.
