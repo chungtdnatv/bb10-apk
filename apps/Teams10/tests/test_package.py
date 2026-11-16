@@ -16,7 +16,7 @@ class TeamsBar(unittest.TestCase):
         with zipfile.ZipFile(bar) as z:
             for name in (p.relative_to(ROOT/'assets').as_posix() for p in (ROOT/'assets').rglob('*') if p.is_file() and p.name!='.assets.index'):
                 self.assertEqual(z.read('native/assets/'+name),(ROOT/'assets'/name).read_bytes())
-            self.assertIn(b'Package-Version: 1.1.2.14',z.read('META-INF/MANIFEST.MF'))
+            self.assertIn(b'Package-Version: 1.1.2.15',z.read('META-INF/MANIFEST.MF'))
             descriptor=z.read('native/bar-descriptor.xml')
             for permission in (b'access_internet',b'post_notification',b'run_when_backgrounded',b'_sys_run_headless',b'_sys_headless_nostop',b'_sys_access_pim_unified'):
                 self.assertIn(permission,descriptor)

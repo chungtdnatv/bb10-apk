@@ -22,6 +22,22 @@ int main() {
  assert(route("graph.microsoft.com","/v1.0/me","GET")==GraphProfile);
  assert(route("graph.microsoft.com","/v1.0/me","POST")==Denied);
  assert(route("graph.microsoft.com","/v1.0/chats","GET")==Denied);
+ assert(route("teams.microsoft.com","/api/authsvc/v1.0/authz","POST")==MediaAuth);
+ assert(route("teams.microsoft.com","/api/authsvc/v1.0/authz","GET")==Denied);
+ const char *mediaHosts[]={"api.asm.skype.com","as-api.asm.skype.com","eu-api.asm.skype.com","as-prod.asyncgw.teams.microsoft.com"};
+ for(int i=0;i<4;++i){
+   assert(route(mediaHosts[i],"/v1/objects/0-ea-123_test/views/imgo","GET")==ChatImage);
+   assert(route(mediaHosts[i],"/v1/objects/abc/views/imgt1","GET")==ChatImage);
+   assert(route(mediaHosts[i],"/v1/objects/abc/views/imgpsh_fullsize","GET")==ChatImage);
+   assert(route(mediaHosts[i],"/v1/objects/abc/views/imgo","POST")==Denied);
+   assert(route(mediaHosts[i],"/v1/objects/../views/imgo","GET")==Denied);
+   assert(route(mediaHosts[i],"/v1/objects/%2e%2e/views/imgo","GET")==Denied);
+   assert(route(mediaHosts[i],"/v1/objects/abc/views/imgo/other","GET")==Denied);
+   assert(route(mediaHosts[i],"/v1/objects/abc/content/imgpsh","GET")==Denied);
+ }
+ assert(route("as-api.asm.skype.com.evil.invalid","/v1/objects/abc/views/imgo","GET")==Denied);
+ assert(route("a.b-api.asm.skype.com","/v1/objects/abc/views/imgo","GET")==Denied);
+ assert(route("evil.invalid","/v1/objects/abc/views/imgo","GET")==Denied);
  assert(route("teams.microsoft.com","/api/csa/api/v2/teams/users/me","GET")==ChatAggregate);
  const char *regions[]={"emea","amer","apac"};
  for(int i=0;i<3;++i) {

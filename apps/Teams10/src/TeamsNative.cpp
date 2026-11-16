@@ -6,6 +6,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QFile>
+#include <QTemporaryFile>
 #include <QStringList>
 #include <QtGui/QImage>
 #include <QtGui/QImageReader>
@@ -23,15 +24,21 @@
 #include <QTimer>
 #include <curl/curl.h>
 #include <openssl/ssl.h>
+#include <openssl/sha.h>
 #include <string>
 
 namespace {
 const size_t MAX_BODY=4*1024*1024;
-struct Transfer { std::string body; QVariantMap headers; };
+QString chatImageKey(const QString &account,const QString &url) {
+    QByteArray input=(account+"\n"+url).toUtf8();unsigned char digest[SHA256_DIGEST_LENGTH];
+    SHA256(reinterpret_cast<const unsigned char *>(input.constData()),input.size(),digest);
+    return QString::fromLatin1(QByteArray(reinterpret_cast<const char *>(digest),sizeof(digest)).toHex());
+}
+struct Transfer { std::string body; QVariantMap headers; size_t limit; Transfer():limit(MAX_BODY){} };
 size_t receiveBody(char *ptr,size_t size,size_t nmemb,void *data) {
     Transfer *out=static_cast<Transfer *>(data);
     size_t n=size*nmemb;
-    if (n>MAX_BODY || out->body.size()>MAX_BODY-n) return 0;
+    if (n>out->limit || out->body.size()>out->limit-n) return 0;
     out->body.append(ptr,n); return n;
 }
 size_t receiveHeader(char *ptr,size_t size,size_t nmemb,void *data) {
@@ -59,9 +66,16 @@ bool safeRequest(const TeamsRequest &r) {
     if (r.body.toUtf8().size()>64*1024) return false;
     TeamsRequestPolicy::Service service=TeamsRequestPolicy::route(url.host().toLower().toStdString(),std::string(url.encodedPath().constData()),r.method.toStdString());
     if(service==TeamsRequestPolicy::Denied)return false;
+    if(service==TeamsRequestPolicy::ChatImage) {
+        QString token=r.headers.value("X-Teams10-Media-Token").toString();
+        if(token.isEmpty()||token.size()>16384||!QRegExp("[A-Za-z0-9._~-]+").exactMatch(token))return false;
+        if(!QRegExp("[a-f0-9]{64}").exactMatch(r.headers.value("X-Teams10-Cache-Key").toString()))return false;
+        if(r.headers.contains("Authorization"))return false;
+    }
     if(service==TeamsRequestPolicy::OAuth && r.headers.contains("Authorization"))return false;
     for (QVariantMap::const_iterator i=r.headers.constBegin();i!=r.headers.constEnd();++i) {
-        if (i.key()!="Authorization" && i.key()!="Content-Type" && i.key()!="Accept") return false;
+        bool mediaHeader=service==TeamsRequestPolicy::ChatImage&&(i.key()=="X-Teams10-Media-Token"||i.key()=="X-Teams10-Cache-Key");
+        if (!mediaHeader && i.key()!="Authorization" && i.key()!="Content-Type" && i.key()!="Accept") return false;
         if (i.value().toString().contains('\r') || i.value().toString().contains('\n')) return false;
     }
     return true;
@@ -75,7 +89,9 @@ void TeamsWorker::run() {
     QByteArray url=request.url.toUtf8(), data=request.body.toUtf8(), ca=caFile.toUtf8();
     struct curl_slist *headers=0;
     QUrl requestUrl(request.url);
-    bool photo=TeamsRequestPolicy::route(requestUrl.host().toStdString(),requestUrl.encodedPath().constData(),request.method.toStdString())==TeamsRequestPolicy::Photo;
+    TeamsRequestPolicy::Service service=TeamsRequestPolicy::route(requestUrl.host().toStdString(),requestUrl.encodedPath().constData(),request.method.toStdString());
+    bool photo=service==TeamsRequestPolicy::Photo,chatImage=service==TeamsRequestPolicy::ChatImage;
+    if(chatImage)headers=curl_slist_append(headers,("Cookie: skypetoken_asm="+request.headers.value("X-Teams10-Media-Token").toString()).toUtf8().constData());
     if(photo) {
         QString bearer=request.headers.value("Authorization").toString();
         if(bearer.startsWith("Bearer ")) {
@@ -84,11 +100,14 @@ void TeamsWorker::run() {
             headers=curl_slist_append(headers,"Referer: https://teams.microsoft.com/");
         }
     }
-    for (QVariantMap::const_iterator i=request.headers.constBegin();i!=request.headers.constEnd();++i)
+    for (QVariantMap::const_iterator i=request.headers.constBegin();i!=request.headers.constEnd();++i) {
+        if(i.key().startsWith("X-Teams10-"))continue;
         headers=curl_slist_append(headers,(i.key()+": "+i.value().toString()).toUtf8().constData());
+    }
     headers=curl_slist_append(headers,"Accept-Encoding: identity");
     headers=curl_slist_append(headers,"Expect:");
     Transfer transfer;
+    if(chatImage)transfer.limit=8*1024*1024;
     char errorBuffer[CURL_ERROR_SIZE]={0};
     curl_easy_setopt(curl,CURLOPT_URL,url.constData());
     curl_easy_setopt(curl,CURLOPT_HTTPHEADER,headers);
@@ -118,8 +137,35 @@ void TeamsWorker::run() {
     CURLcode code=curl_easy_perform(curl);
     long responseCode=0;
     curl_easy_getinfo(curl,CURLINFO_RESPONSE_CODE,&responseCode);
-    if (code==CURLE_OK) { status=(int)responseCode; body=QString::fromUtf8(transfer.body.data(),(int)transfer.body.size()); }
+    if (code==CURLE_OK) { status=(int)responseCode; if(!chatImage)body=QString::fromUtf8(transfer.body.data(),(int)transfer.body.size()); }
     else error=QString::fromLatin1(errorBuffer[0] ? errorBuffer : curl_easy_strerror(code));
+    if(chatImage && code==CURLE_OK && responseCode==200) {
+        QByteArray bytes(transfer.body.data(),transfer.body.size());QBuffer buffer(&bytes);buffer.open(QIODevice::ReadOnly);QImageReader reader(&buffer);
+        QSize size=reader.size();QByteArray format=reader.format().toLower();
+        if((format!="png"&&format!="jpeg"&&format!="jpg"&&format!="gif")||size.width()<1||size.height()<1||size.width()>4096||size.height()>4096||qint64(size.width())*size.height()>12000000) {
+            status=0;error="Unsupported image or image too large";
+        } else {
+            QSize preview=size;preview.scale(1280,1280,Qt::KeepAspectRatio);if(size.width()>1280||size.height()>1280)reader.setScaledSize(preview);
+            QImage image=reader.read();
+            if(image.isNull()){status=0;error="Invalid chat image";}
+            else {
+                if(image.width()>1280||image.height()>1280)image=image.scaled(1280,1280,Qt::KeepAspectRatio,Qt::FastTransformation);
+                QString dir=QDir::homePath()+"/chat-images";QDir().mkpath(dir);::chmod(dir.toUtf8().constData(),0700);
+                QDir cache(dir);QFileInfoList files=cache.entryInfoList(QStringList()<<"*.png",QDir::Files,QDir::Time|QDir::Reversed);
+                qint64 total=0;foreach(QFileInfo f,files)total+=f.size();
+                while(!files.isEmpty()&&(total>48*1024*1024||files.size()>=128)){QFileInfo f=files.takeFirst();total-=f.size();QFile::remove(f.absoluteFilePath());}
+                QString file=dir+"/"+request.headers.value("X-Teams10-Cache-Key").toString()+".png";
+                QTemporaryFile temporary(dir+"/image-XXXXXX");
+                if(temporary.open()&&image.save(&temporary,"PNG")&&temporary.flush()) {
+                    temporary.close();QFile::remove(file);
+                    if(QFile::rename(temporary.fileName(),file)){
+                        ::chmod(file.toUtf8().constData(),0600);
+                        body=QString("{\"image\":\"")+QUrl::fromLocalFile(file).toString()+"\",\"width\":"+QString::number(image.width())+",\"height\":"+QString::number(image.height())+"}";
+                    }else {status=0;error="Image cache unavailable";}
+                }else {status=0;error="Image cache unavailable";}
+            }
+        }
+    }
     if(photo && code==CURLE_OK && responseCode==200) {
         QByteArray bytes(transfer.body.data(),transfer.body.size());QBuffer buffer(&bytes);buffer.open(QIODevice::ReadOnly);QImageReader reader(&buffer);
         QSize size=reader.size();
@@ -172,9 +218,9 @@ void TeamsNative::request(int id,const QString &method,const QString &url,const 
     TeamsRequestPolicy::Service type=TeamsRequestPolicy::route(destination.host().toStdString(),destination.encodedPath().constData(),r.method.toStdString());
     if(m_pending.size()>=64){emit completed(id,0,QString(),"Request queue full; try refresh",QVariantMap());return;}
     int position=m_pending.size();
-    if(type!=TeamsRequestPolicy::Photo)for(int i=0;i<m_pending.size();i++){
+    if(type!=TeamsRequestPolicy::Photo&&type!=TeamsRequestPolicy::ChatImage)for(int i=0;i<m_pending.size();i++){
         QUrl u(m_pending[i].url);TeamsRequestPolicy::Service queued=TeamsRequestPolicy::route(u.host().toStdString(),u.encodedPath().constData(),m_pending[i].method.toStdString());
-        if(queued==TeamsRequestPolicy::Photo||(queued==TeamsRequestPolicy::Directory&&type!=TeamsRequestPolicy::Directory)){position=i;break;}
+        if(queued==TeamsRequestPolicy::Photo||queued==TeamsRequestPolicy::ChatImage||(queued==TeamsRequestPolicy::Directory&&type!=TeamsRequestPolicy::Directory)){position=i;break;}
     }
     m_pending.insert(position,r);
     startNext();
@@ -188,6 +234,10 @@ void TeamsNative::startNext() {
 }
 void TeamsNative::finished() {
     TeamsWorker *done=m_worker; m_worker=0;
+    if(done->cancelled.fetchAndAddOrdered(0)&&done->request.headers.contains("X-Teams10-Cache-Key")) {
+        QFile::remove(QDir::homePath()+"/chat-images/"+done->request.headers.value("X-Teams10-Cache-Key").toString()+".png");
+        done->status=0;done->body="";done->error="Request cancelled";
+    }
     recordEvent(done->status ? "http-response" : "transport-error");
     emit completed(done->request.id,done->status,done->body,done->error,done->responseHeaders);
     done->deleteLater(); startNext();
@@ -237,7 +287,20 @@ void TeamsNative::recordEvent(const QString &event) const {
 }
 QString TeamsNative::loadSession(){return m_session.load();}
 bool TeamsNative::saveSession(const QString &json){recordEvent("session-save");bool ok=m_session.save(json);recordEvent(ok?"session-saved":"session-save-error");return ok;}
-bool TeamsNative::clearSession(){bool ok=m_session.clear();if(ok){m_hub.clear();QDir dir(QDir::homePath()+"/avatars");foreach(QString f,dir.entryList(QDir::Files))dir.remove(f);}return ok;}
+bool TeamsNative::clearSession(){bool ok=m_session.clear();if(ok){m_hub.clear();QDir dir(QDir::homePath()+"/avatars");foreach(QString f,dir.entryList(QDir::Files))dir.remove(f);QDir images(QDir::homePath()+"/chat-images");foreach(QString f,images.entryList(QDir::Files))images.remove(f);}return ok;}
+QString TeamsNative::cachedChatImage(const QString &account,const QString &url) const {
+    QUrl destination(url);
+    if(account.isEmpty()||destination.scheme()!="https"||!destination.userInfo().isEmpty()||!destination.fragment().isEmpty()||destination.port(443)!=443||TeamsRequestPolicy::route(destination.host().toStdString(),destination.encodedPath().constData(),"GET")!=TeamsRequestPolicy::ChatImage)return QString();
+    QString key=chatImageKey(account,url);
+    QString file=QDir::homePath()+"/chat-images/"+key+".png";
+    return QFileInfo(file).isFile()?QUrl::fromLocalFile(file).toString():QString();
+}
+void TeamsNative::requestChatImage(int id,const QString &url,const QString &account,const QString &token) {
+    QVariantMap headers;headers["Accept"]="image/png,image/jpeg,image/gif";
+    headers["X-Teams10-Media-Token"]=token;
+    headers["X-Teams10-Cache-Key"]=chatImageKey(account,url);
+    request(id,"GET",url,QString(),headers);
+}
 void TeamsNative::releaseSession(){m_session.release();}
 QString TeamsNative::pendingChat() const{return m_pendingChat;}
 void TeamsNative::clearPendingChat(){m_pendingChat.clear();}

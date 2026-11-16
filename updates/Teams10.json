@@ -3,20 +3,21 @@
   "app": "Teams10",
   "appId": "com.bb10toolkit.Teams10",
   "packageId": "testRel_kit_Teams105d440259",
-  "version": "1.1.2.14",
-  "barUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.14-ui-ota-unsigned.bar",
-  "sha256": "5dde6c63bad622538d47af153eef948c3d1b30236050b229cf23f3fba97627ef",
-  "bytes": 440455,
+  "version": "1.1.2.15",
+  "barUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.15-chat-images-unsigned.bar",
+  "sha256": "76ecc3be3683aad8998c5689bd8fc93547988cfd58ed06b358557984de8a3b0b",
+  "bytes": 456035,
   "minimumOs": "10.3.1",
-  "notes": "Đồng bộ giao diện Profile nền tối, avatar căn giữa và thanh điều hướng sát đáy.\nĐổi tên thành Cập nhật phần mềm; bỏ hướng dẫn dài và trạng thái dư thừa trên Profile.\n",
-  "latestVersion": "1.1.2.14",
-  "downloadUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.14-ui-ota-unsigned.bar",
+  "notes": "Hiển thị ảnh inline trong chat Teams, giữ chú thích và emoji.\nTải ảnh có xác thực, lưu đệm riêng theo tài khoản; có trạng thái tải, lỗi và thử lại.\nBuild lại giao diện và dịch vụ nền; cần kiểm tra ảnh thật và giao diện trên Passport.",
+  "latestVersion": "1.1.2.15",
+  "downloadUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.15-chat-images-unsigned.bar",
   "changelog": [
     {
-      "version": "1.1.2.14",
+      "version": "1.1.2.15",
       "items": [
-        "Đồng bộ giao diện Profile nền tối, avatar căn giữa và thanh điều hướng sát đáy.",
-        "Đổi tên thành Cập nhật phần mềm; bỏ hướng dẫn dài và trạng thái dư thừa trên Profile."
+        "Hiển thị ảnh inline trong chat Teams, giữ chú thích và emoji.",
+        "Tải ảnh có xác thực, lưu đệm riêng theo tài khoản; có trạng thái tải, lỗi và thử lại.",
+        "Build lại giao diện và dịch vụ nền; cần kiểm tra ảnh thật và giao diện trên Passport."
       ]
     }
   ]

@@ -1,4 +1,24 @@
-# Teams10 1.1.2.12 — native BB10 Microsoft 365 chat
+# Teams10 1.1.2.15 — native BB10 Microsoft 365 chat
+
+## Inline chat images (1.1.2.15)
+
+Teams inline ASM images now appear inside incoming/outgoing message bubbles,
+alongside their text captions. Up to four image references per message are
+recognized in HTML and legacy Picture URIObject content; emoji keep their text.
+The latest 20 messages load automatically (bounded queue, two outstanding image
+jobs); older images and failures have an explicit load/retry action. Auth uses a
+separate, memory-only Skype media token obtained from the existing Microsoft
+session. Only supported HTTPS Teams ASM image endpoints receive the media cookie;
+redirects are not followed. API/chat requests take priority over queued images.
+
+Private, account-scoped PNG previews preserve aspect ratio and are removed on
+logout. Downloads are bounded to 8 MiB, input dimensions to 4096 per side / 12 MP,
+and previews to 1280 per side. The disk cache is bounded by count and size. PNG,
+JPEG and the first GIF frame are supported; WebP, SharePoint/OneDrive file
+attachments, image upload and a full-screen image viewer are not implemented.
+Host tests, QML syntax checks and the native ARM build pass; authenticated image
+loading and rendering still require device validation. See
+[Vietnamese release/device checks](../../docs/teams10-chat-images-vi.md).
 
 Independent, unofficial Cascades client for work/school accounts. No WebView,
 password input or own Entra App Registration. Device-code/native interoperability
@@ -142,7 +162,7 @@ reception. Polling checks the latest summary per conversation, not every
 intermediate event, and does not download all history while closed. Hardware
 validation must include closing the UI and sending a message from another device.
 
-No calls, channels, new-chat creation, media transfer, read receipts, rich cards,
+No calls, channels, new-chat creation, media upload, read receipts, rich cards,
 Trouter realtime push or sovereign clouds. Up to 500 messages cached per chat;
 text send <=6,000 UTF-16 units and <=24,000 JSON UTF8 bytes. Old edits/deletions
 outside fetched windows aren't guaranteed to update. Internal endpoints may change.

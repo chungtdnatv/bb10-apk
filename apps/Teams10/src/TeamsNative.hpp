@@ -45,6 +45,8 @@ public:
     Q_INVOKABLE bool recoveryMode() const;
     Q_INVOKABLE bool photosEnabled() const;
     Q_INVOKABLE QString cachedAvatar(const QString &url) const;
+    Q_INVOKABLE QString cachedChatImage(const QString &account,const QString &url) const;
+    Q_INVOKABLE void requestChatImage(int id,const QString &url,const QString &account,const QString &token);
     Q_INVOKABLE QString avatar(const QString &name,const QString &source=QString());
     Q_INVOKABLE void startBackground();
     Q_INVOKABLE bool backgroundEnabled() const;

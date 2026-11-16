@@ -58,6 +58,7 @@ Page {
         ActivityIndicator { visible: chat.loading; running: visible; horizontalAlignment: HorizontalAlignment.Center }
         ListView {
             id: messageList
+            function loadImages(id) { if(chat.appRoot)chat.appRoot.loadMessageImages(id); }
             leftPadding: ui.du(1.5);rightPadding: ui.du(1.5)
             property real widthHint: listMeasure.layoutFrame.width>0?listMeasure.layoutFrame.width-ui.du(3):ui.du(75)
             horizontalAlignment: HorizontalAlignment.Fill
@@ -92,7 +93,12 @@ Page {
                             leftPadding: ui.du(1.4);rightPadding: ui.du(1.4);topPadding: ui.du(1);bottomPadding: ui.du(1)
                             background: ListItemData.mine?outgoing.imagePaint:incoming.imagePaint
                             Label { visible: !ListItemData.mine;text: ListItemData.sender;textFormat: TextFormat.Plain;multiline: false;textStyle { color: Color.create("#28c5ed");fontSize: FontSize.Small;fontWeight: FontWeight.Bold } }
-                            Label { text: ListItemData.text;textFormat: TextFormat.Plain;multiline: true;textStyle { color: Color.White;fontSize: FontSize.Medium } }
+                            Label { visible: text.length>0;text: ListItemData.text;textFormat: TextFormat.Plain;multiline: true;textStyle { color: Color.White;fontSize: FontSize.Medium } }
+                            MessageImages {
+                                imagesJson: ListItemData.imagesJson||"[]"
+                                imageWidth: Math.max(ui.du(12),messageRow.rowWidth*0.72-ui.du(3))
+                                onRetryRequested: messageRow.ListItem.view.loadImages(ListItemData.id)
+                            }
                             Label { text: ListItemData.time?Teams.displayTime(ListItemData.time):"";textStyle { color: Color.create("#8fb4c8");fontSize: FontSize.XSmall }horizontalAlignment: HorizontalAlignment.Right }
                             attachedObjects: [
                                 ImagePaintDefinition { id: incoming;imageSource: "asset:///images/bubble.png";repeatPattern: RepeatPattern.Fill },

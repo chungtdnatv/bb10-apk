@@ -54,6 +54,7 @@ NavigationPane {
     }
     function refreshMessages(more) { if (Teams.controller()) Teams.controller().refreshMessages(more); }
     function sendMessage(text) { if (Teams.controller()) Teams.controller().sendMessage(text); }
+    function loadMessageImages(id) { if (Teams.controller()) Teams.controller().loadMessageImages(id); }
     function initializeService() {
         if (Teams.controller()) return true;
         try {
@@ -68,6 +69,8 @@ NavigationPane {
             clearSession:function(){return teamsNet.clearSession();},
             startBackground:function(){teamsNet.startBackground();},
             cachedAvatar:function(url){return teamsNet.cachedAvatar(url);},
+            cachedChatImage:function(account,url){return teamsNet.cachedChatImage(account,url);},
+            sendImage:function(id,url,account,token){teamsNet.requestChatImage(id,url,account,token);},
             avatar:function(name,id){return teamsNet.avatar(name,id);},
             isForeground:function(){return root.foreground;},
             observeChat:function(account,chat,visible){teamsNet.observeChat(account,chat,visible);},

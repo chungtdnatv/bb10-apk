@@ -52,6 +52,7 @@ var ROOT="https://teams.microsoft.com";
 var SCOPES={spaces:"https://api.spaces.skype.com/.default",csa:"https://chatsvcagg.teams.microsoft.com/.default",chat:"https://ic3.teams.office.com/.default",profile:"https://graph.microsoft.com/.default"};
 function isGuid(value) {return typeof value==="string"&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);}
 function serviceFor(url) {
+    if(url===ROOT+"/api/authsvc/v1.0/authz")return "spaces";
     if(/^https:\/\/graph\.microsoft\.com\/v1\.0\/me(?:\?[^\s#]*)?$/.test(url))return "profile";
     if(/^https:\/\/teams\.microsoft\.com\/api\/mt\/(emea|amer|apac)\/beta\/users\/(?:fetchShortProfile|fetchFederated|fetchTflConsumers|[^/?#\s]+\/profilepicturev2\/[^/?#\s]+)(?:\?[^\s#]*)?$/.test(url))return "spaces";
     if(/^https:\/\/teams\.microsoft\.com\/api\/csa\/(?:(?:emea|amer|apac)\/)?api\/v2\/teams\/users\/me(?:\?[^\s#]*)?$/.test(url))return "csa";
@@ -65,12 +66,46 @@ function regionFromLocation(location) {
 function validChatId(id) { return typeof id==="string" && id.length<=2048 && /^(19:|8:|48:notes$)/.test(id) && !/[\u0000-\u0020\u007f]/.test(id); }
 function escapeHtml(text) {return String(text).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/\r?\n/g,"<br>");}
 function messageTime(m) {return m.composetime||m.composeTime||m.originalarrivaltime||m.originalArrivalTime||"";}
+function chatImageUrl(value) {
+    var url=trim(decodeEntities(value));
+    if(url.length>4096)return "";
+    var m=/^https:\/\/([a-z0-9-]+(?:\.[a-z0-9-]+)*)(\/v1\/objects\/[A-Za-z0-9_-]{1,512}\/views\/(?:imgo|imgt1|imgpsh_fullsize))(?:\?[^\s#<>"'\\]*)?$/.exec(url);
+    if(!m)return "";
+    if(m[1]!=="api.asm.skype.com"&&!/^[a-z0-9-]+-api\.asm\.skype\.com$/.test(m[1])&&!/^[a-z0-9-]+\.asyncgw\.teams\.microsoft\.com$/.test(m[1]))return "";
+    return url;
+}
+function tagAttributes(tag) {
+    var out={},re=/\s([a-z][a-z0-9:-]*)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi,m;
+    while((m=re.exec(tag)))out[m[1].toLowerCase()]=decodeEntities(m[2]!==undefined?m[2]:m[3]!==undefined?m[3]:m[4]);
+    return out;
+}
+function messageImages(m) {
+    var kind=m.messagetype||m.messageType||"";
+    if(m.deletedDateTime||kind==="Control/MessageDelete"||kind.indexOf("RichText")!==0)return [];
+    var images=[],seen={},raw=String(m.content||"").replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1\s*>/gi,""),match;
+    var tags=/<(?:img|a|URIObject)\b(?:[^>"']|"[^"]*"|'[^']*')*>/gi;
+    while(images.length<4&&(match=tags.exec(raw))) {
+        var a=tagAttributes(match[0]);
+        if(/emoji/i.test(a.itemtype||""))continue;
+        var url=chatImageUrl(a.src)||chatImageUrl(a["original-src"])||chatImageUrl(a["target-src"])||chatImageUrl(a.href);
+        if(!url&&/^<URIObject\b/i.test(match[0])&&/^Picture\./i.test(a.type||""))url=chatImageUrl(String(a.uri||"").replace(/\/$/,"")+"/views/imgpsh_fullsize");
+        if(!url||seen["$"+url])continue;
+        seen["$"+url]=true;images.push({url:url,alt:trim(a.alt)||"Ảnh trong tin nhắn",source:"",status:"pending",width:0,height:0});
+    }
+    return images;
+}
 function messageText(m) {
     var kind=m.messagetype||m.messageType||"",raw=String(m.content||"");
     if(m.deletedDateTime || kind==="Control/MessageDelete")return "[Tin nhắn đã xóa]";
     if(kind==="Text")return plainHtml(raw.replace(/</g,"&lt;").replace(/>/g,"&gt;"));
+    var images=messageImages(m);
+    if(images.length) {
+        if(kind.indexOf("RichText/Media_")===0)return "";
+        raw=raw.replace(/<img\b(?:[^>"']|"[^"]*"|'[^']*')*>/gi,function(tag){var a=tagAttributes(tag);if(/emoji/i.test(a.itemtype||""))return tag;return chatImageUrl(a.src)||chatImageUrl(a["original-src"])||chatImageUrl(a["target-src"])?"":tag;});
+        return trim(plainHtml(raw));
+    }
     if(kind==="RichText/Html" || kind==="RichText")return trim(plainHtml(raw)) || "[Nội dung không phải văn bản]";
-    if(kind.indexOf("RichText/Media_")===0)return "[Tệp/ảnh — chưa hỗ trợ trong bản này]";
+    if(kind.indexOf("RichText/Media_")===0)return "[Tệp/ảnh chưa được hỗ trợ]";
     return trim(plainHtml(raw));
 }
 function normalizedMessage(m) {
@@ -78,7 +113,8 @@ function normalizedMessage(m) {
     if(sender.indexOf("/contacts/")!==-1)sender=sender.slice(sender.lastIndexOf("/contacts/")+10);
     if(/^8%3a/i.test(sender)){try{sender=decodeURIComponent(sender);}catch(e){}}
     if(/^8:orgid:/i.test(sender))sender="8:orgid:"+sender.slice(8).toLowerCase();
-    return {id:String(m.id),text:messageText(m),sender:m.imdisplayname||m.imDisplayName||sender||"Hệ thống",senderId:sender,time:messageTime(m),clientMessageId:String(m.clientmessageid||m.clientMessageId||"")};
+    var images=messageImages(m);
+    return {id:String(m.id),text:messageText(m),images:images,imagesJson:JSON.stringify(images),sender:m.imdisplayname||m.imDisplayName||sender||"Hệ thống",senderId:sender,time:messageTime(m),clientMessageId:String(m.clientmessageid||m.clientMessageId||"")};
 }
 function utcString(ms) {
     var d=new Date(ms);function p(n){return n<10?"0"+n:String(n);}
@@ -93,6 +129,7 @@ function create(io) {
     var api={},generation=0,serial=0,requests={},tenant="organizations",account="",refresh="",tokens={},tokenJobs=[],pendingTokens={},tokenBusy=false;
     var device="",deadline=0,pollInterval=5000,region="emea",profile=null,chatEpoch=0,hasMessagePage=false,lastClientId=0,knownNames={},lastRawChats=[];
     var people={},peoplePending={},photos={},photoPending={},resolving=false;
+    var mediaToken="",mediaExpires=0,mediaWaiters=[],mediaBusy=false,mediaFailure="",imageResults={},imageQueue=[],imageActive=0;
     var state={persistenceError:false,phase:"signedOut",status:"Đăng nhập qua mã Microsoft; không cần App Registration riêng.",profile:null,code:"",chats:[],messages:[],chatId:"",chatTitle:"",chatsMore:"",messagesMore:"",loadingChats:false,loadingMessages:false,sending:false};
     function notify(){io.changed(state);}
     function status(text){state.status=text;notify();}
@@ -152,7 +189,7 @@ function create(io) {
         if(!scope){cb(0,null,"Đích API không hợp lệ",{});return;}
         tokenFor(scope,false,function(access,error,code,tokenHeaders){
             if(!access){cb(code||401,null,error,tokenHeaders||{});return;}
-            request(method,url,body,{Authorization:"Bearer "+access,"Content-Type":"application/json",Accept:"application/json"},function(c,data,e,h){
+            request(method,url,body,{Authorization:"Bearer "+access,"Content-Type":"application/json",Accept:url===ROOT+"/api/authsvc/v1.0/authz"?"application/json; ver=1.0":"application/json"},function(c,data,e,h){
                 if(c===401&&!retried){tokenFor(scope,true,function(renewed,why,statusCode,renewHeaders){if(renewed)authenticated(method,url,body,cb,true,moved);else cb(statusCode||401,null,why,renewHeaders||{});});}
                 else if(c>=300&&c<400&&method==="GET"&&scope==="chat"&&!moved) {
                     var next=String(h.location||""),original=url.split("?")[0];
@@ -167,6 +204,7 @@ function create(io) {
     }
     function reset() {
         generation++;chatEpoch++;requests={};refresh="";tokens={};tokenJobs=[];pendingTokens={};tokenBusy=false;device="";profile=null;account="";region="emea";hasMessagePage=false;knownNames={};lastRawChats=[];people={};peoplePending={};photos={};photoPending={};resolving=false;
+        mediaToken="";mediaExpires=0;mediaWaiters=[];mediaBusy=false;mediaFailure="";imageResults={};imageQueue=[];imageActive=0;
         io.cancelPoll();io.abortAll();
         state.phase="signedOut";state.profile=null;state.code="";state.chats=[];state.messages=[];state.chatId="";state.messagesMore="";state.chatsMore="";state.loadingChats=false;state.loadingMessages=false;state.sending=false;
     }
@@ -299,8 +337,75 @@ function create(io) {
         for(var i=0;i<state.messages.length;i++){
             var m=state.messages[i],p=people["$"+m.senderId];if(p)m.sender=p.displayName;
             m.avatar=imageFor(m.senderId,m.sender);m.mine=String(m.senderId).toLowerCase()===("8:orgid:"+profile.id).toLowerCase();
+            var images=m.images instanceof Array?m.images:[];
+            for(var j=0;j<images.length;j++) {
+                var image=images[j],result=imageResults["$"+image.url],cached=io.cachedChatImage?io.cachedChatImage(account,image.url):"";
+                if(io.cachedChatImage&&result&&result.source&&!cached){delete imageResults["$"+image.url];result=null;}
+                image.source=cached||result&&result.source||"";
+                image.status=image.source?"ready":result?result.status:"pending";
+                image.width=result&&result.width||image.width||0;image.height=result&&result.height||image.height||0;
+            }
+            m.images=images;m.imagesJson=JSON.stringify(images);
         }
     }
+    function imageToken(cb) {
+        if(mediaToken&&mediaExpires>io.now()){cb(mediaToken,"");return;}
+        if(mediaFailure){cb("",mediaFailure);return;}
+        mediaWaiters.push(cb);if(mediaBusy)return;mediaBusy=true;
+        authenticated("POST",ROOT+"/api/authsvc/v1.0/authz","",function(code,data,error,headers){
+            var value=data&&(data.tokens||data.skypeToken),token=value&&(value.skypeToken||value.skypetoken),ttl=Number(value&&value.expiresIn||3600);
+            if(code===200&&typeof token==="string"&&/^[A-Za-z0-9._~-]{1,16384}$/.test(token)){
+                mediaToken=token;mediaExpires=io.now()+Math.max(1,Math.min(isFinite(ttl)?ttl:3600,86400)-60)*1000;
+            }else {mediaToken="";mediaFailure="Không xác thực được ảnh Teams";}
+            var callbacks=mediaWaiters;mediaWaiters=[];mediaBusy=false;
+            for(var i=0;i<callbacks.length;i++)callbacks[i](mediaToken,mediaFailure);
+        });
+    }
+    function pumpImages() {
+        if(state.phase!=="ready"||!state.chatId)return;
+        while(imageActive<2&&imageQueue.length)startImage(imageQueue.shift());
+    }
+    function startImage(job) {
+        var epoch=chatEpoch;imageActive++;imageResults["$"+job.url]={status:"loading"};
+        decorateMessages();notify();
+        imageToken(function(token,error){
+            if(epoch!==chatEpoch)return;
+            if(!token||!io.sendImage){finish(null);return;}
+            var id=++serial,session=generation;
+            requests[id]=function(code,text,error,headers){
+                if(session!==generation||epoch!==chatEpoch)return;
+                if(code===401&&!job.retried){
+                    mediaToken="";mediaExpires=0;job.retried=true;imageActive--;imageQueue.unshift(job);pumpImages();return;
+                }
+                var data=parse(text);finish(code===200&&data&&/^file:\/\//.test(data.image||"")?data:null);
+            };
+            io.sendImage(id,job.url,account,token);
+        });
+        function finish(data) {
+            imageResults["$"+job.url]=data?{status:"ready",source:data.image,width:data.width||0,height:data.height||0}:{status:"error"};
+            imageActive--;decorateMessages();notify();pumpImages();
+        }
+    }
+    function queueMessageImages(message,retry) {
+        var images=message.images||[];
+        for(var j=0;j<images.length;j++) {
+            var image=images[j],url=chatImageUrl(image.url),result=imageResults["$"+url];
+            if(!url||image.source&&(!io.cachedChatImage||io.cachedChatImage(account,url)))continue;
+            if(result&&!(retry&&result.status==="error"))continue;
+            if(imageQueue.length>=40)break;
+            imageResults["$"+url]={status:"queued"};imageQueue.push({url:url,retried:false});
+        }
+    }
+    function loadRecentImages() {
+        for(var i=state.messages.length-1;i>=Math.max(0,state.messages.length-20);i--)queueMessageImages(state.messages[i],false);
+        decorateMessages();notify();pumpImages();
+    }
+    api.loadMessageImages=function(id) {
+        if(state.phase!=="ready"||!state.chatId)return;
+        mediaFailure="";
+        for(var i=0;i<state.messages.length;i++)if(state.messages[i].id===id)queueMessageImages(state.messages[i],true);
+        decorateMessages();notify();pumpImages();
+    };
     function setChats(raw) {
         if(io.trace)io.trace("chat-list-start");
         lastRawChats=raw;var rows=[];
@@ -310,7 +415,7 @@ function create(io) {
             var other="";
             for(var j=0;j<members.length;++j)if(mri(members[j])!=="8:orgid:"+profile.id) {var name=personName(members[j]);if(name)names.push(name);if(!other)other=mri(members[j]);}
             if(!title||title==="Direct Chat"||title==="Group Chat"||title.indexOf("Group (")===0)title=names.join(", ")||(!c.isLastMessageFromMe&&(last.imDisplayName||last.imdisplayname))||(c.isOneOnOne?"Chat riêng":"Chat nhóm");
-            var row={id:c.id,title:title,preview:messageText(last),time:messageTime(last),type:c.isOneOnOne?"oneOnOne":"group",avatar:imageFor(other||c.id,title),person:other};
+            var row={id:c.id,title:title,preview:messageText(last)||(messageImages(last).length?"[Ảnh]":""),time:messageTime(last),type:c.isOneOnOne?"oneOnOne":"group",avatar:imageFor(other||c.id,title),person:other};
             rows.push(row);if(state.chatId===c.id)state.chatTitle=title;
             if(io.observeChat)io.observeChat(account,{id:c.id,title:title,preview:row.preview,timestamp:timestamp(row.time),stamp:String(last.id||row.time||""),own:!!c.isLastMessageFromMe||String(last.from||"").toLowerCase().indexOf("8:orgid:"+profile.id.toLowerCase())!==-1},state.chatId===c.id&&(!io.isForeground||io.isForeground()));
         }
@@ -333,13 +438,14 @@ function create(io) {
     api.openChat=function(item) {
         if(state.phase!=="ready"||!validChatId(item.id))return;
         chatEpoch++;hasMessagePage=false;state.chatId=item.id;state.chatTitle=item.title;state.messages=[];state.messagesMore="";state.loadingMessages=false;
+        imageQueue=[];imageActive=0;imageResults={};
         var cached=parse(io.loadCache(account,"messages:"+item.id));if(cached instanceof Array)state.messages=cached;
         for(var n=Math.max(0,state.messages.length-20);n<state.messages.length;n++)loadPhoto(state.messages[n].senderId,state.messages[n].sender);
         decorateMessages();
         if(io.enrichProfiles&&item.person)loadPhoto(item.person,item.title);
-        notify();api.refreshMessages(false);
+        notify();api.refreshMessages(false);loadRecentImages();
     };
-    api.closeChat=function(){chatEpoch++;hasMessagePage=false;state.chatId="";state.messages=[];state.messagesMore="";state.loadingMessages=false;notify();};
+    api.closeChat=function(){chatEpoch++;imageQueue=[];imageActive=0;imageResults={};hasMessagePage=false;state.chatId="";state.messages=[];state.messagesMore="";state.loadingMessages=false;notify();};
     api.refreshMessages=function(more) {
         if(state.phase!=="ready"||!state.chatId||state.loadingMessages)return;
         var id=state.chatId,epoch=chatEpoch,url=more?state.messagesMore:messagesUrl(id,0),oldEnd=0;
@@ -370,6 +476,7 @@ function create(io) {
                 if(through>0)io.markChatRead(account,id,through);
             }
             io.saveCache(account,"messages:"+id,JSON.stringify(state.messages));if(lastRawChats.length)setChats(lastRawChats);status("Đã tải "+state.messages.length+" tin.");
+            loadRecentImages();notify();
         });
     };
     api.sendMessage=function(text) {

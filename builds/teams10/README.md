@@ -1,5 +1,16 @@
 # Teams10 test BARs
 
+## Latest release: 1.1.2.15
+
+[Teams10 1.1.2.15 — chat images](Teams10-1.1.2.15-chat-images-unsigned.bar)
+adds authenticated inline Teams image previews, private account-scoped caching,
+loading/error states and explicit retry. Both native entry points were rebuilt.
+See [device checks and limits](../../docs/teams10-chat-images-vi.md).
+The OTA feed points to this BAR. No authenticated image or Passport rendering
+check has been performed.
+
+## Historical builds
+
 [Current: Teams10 1.1.2.7 UI + OTA](https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/teams10/Teams10-1.1.2.7-ui-ota-unsigned.bar).
 Code-login-only landing page; fixed numeric timestamps instead of %#c; viewport-wide
 left/right message rows; larger shared rounded bottom bar; Profile OTA updater.

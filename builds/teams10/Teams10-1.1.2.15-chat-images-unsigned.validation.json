@@ -1,0 +1,32 @@
+{
+  "version": "1.1.2.15",
+  "bar": {
+    "assets": 86,
+    "entry_points": [
+      "Teams10",
+      "Teams10Service"
+    ],
+    "arm_binaries": 2,
+    "signature_files_present": false
+  },
+  "native": [
+    {
+      "binary": "build/native/arm/Teams10.so",
+      "sdk_libraries": 101,
+      "strong_imports_resolved": 343,
+      "orphan_unwind_sections": 0
+    },
+    {
+      "binary": "build/native/arm/Teams10Service",
+      "sdk_libraries": 52,
+      "strong_imports_resolved": 326,
+      "orphan_unwind_sections": 0
+    }
+  ],
+  "host_checks": {
+    "passed": 131,
+    "failed": 0
+  },
+  "qml_syntax": "passed",
+  "device_testing": "not performed"
+}

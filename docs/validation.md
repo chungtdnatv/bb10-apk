@@ -1,5 +1,19 @@
 # Validation of the toolkit integration
 
+## Teams10 1.1.2.15 — inline chat images
+
+Restored the pinned SDK into a flattened Docker image after vfs layer expansion
+exhausted disk; both native entry points were rebuilt. SDK dependency closure,
+Cascades entry/unwind checks and BAR digests passed (86 assets, two ARM binaries).
+QML syntax lint passed for ChatPage, MessageImages and main. All 131 toolkit/Teams
+checks passed, including seven new controller scenarios for parsing/captions,
+destination restrictions, media auth, cache reuse, retries, bounded concurrency
+and late replies across chat changes/logout; the native route policy is compiled
+and exercised. Host SQLite headers/runtime are from signed Debian package metadata.
+Image requests in controller tests are modeled; authenticated Microsoft image
+downloads, Passport rendering, install/relaunch and Hub regressions require device
+testing. OTA files are generated locally; this does not publish or install them.
+
 ## Teams10 1.1.2.14 / Zalo10 1.5.0.19
 
 Zalo Profile adopts the Teams dark action rows, centered account identity,

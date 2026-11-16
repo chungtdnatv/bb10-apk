@@ -38,6 +38,71 @@ function message(id='1700000000001',text='hello',time='2026-11-14T10:00:00.12345
  return {id,content:text,messagetype:'Text',composetime:time,from:'https://teams.microsoft.com/api/chatsvc/apac/v1/users/ME/contacts/8:orgid:'+OTHER,imdisplayname:'Other User',clientmessageid:'700'};
 }
 function chat(id=CHAT) {return {id,title:'Direct Chat',isOneOnOne:true,members:[{objectId:USER,displayName:'Test User'},{objectId:OTHER,displayName:'Other User'}],lastMessage:message()};}
+const IMAGE='https://as-api.asm.skype.com/v1/objects/0-ea-d8-example/views/imgo';
+function imageMessage(id='image-1',url=IMAGE) {return {...message(id),messagetype:'RichText/Html',content:'<p>Ảnh mới</p><img itemtype="http://schema.skype.com/AMSImage" src="'+url+'" alt="image">'};}
+
+test('chat image parser preserves captions and emoji, deduplicates and bounds supported images',()=>{
+ const h=harness(),m=imageMessage();
+ m.content+='<img src="'+IMAGE+'"><img itemtype="http://schema.skype.com/Emoji" src="'+IMAGE+'" alt="🙂">';
+ const row=h.context.normalizedMessage(m);
+ assert.equal(row.images.length,1);assert.equal(row.text,'Ảnh mới\n🙂');assert.equal(row.images[0].url,IMAGE);
+ assert.equal(JSON.parse(row.imagesJson).length,1);
+ assert.equal(h.context.messageImages({...m,deletedDateTime:'now'}).length,0);
+ assert.equal(h.context.messageImages({...m,messagetype:'Text'}).length,0);
+ assert.equal(h.context.messageImages({...m,content:Array.from({length:9},(_,i)=>'<img src="'+IMAGE.replace('example','example'+i)+'">').join('')}).length,4);
+ assert.equal(h.context.messageImages({...m,content:'<URIObject type="Picture.1" uri="https://as-prod.asyncgw.teams.microsoft.com/v1/objects/abc-123"></URIObject>'})[0].url,'https://as-prod.asyncgw.teams.microsoft.com/v1/objects/abc-123/views/imgpsh_fullsize');
+});
+test('image destinations reject external hosts, credentials, unsafe paths, ports and schemes',()=>{
+ const h=harness();
+ for(const url of [IMAGE.replace('https:','http:'),IMAGE.replace('as-api.asm.skype.com','evil.invalid'),IMAGE.replace('as-api.asm.skype.com','as-api.asm.skype.com.evil.invalid'),IMAGE.replace('https://','https://user@'),IMAGE.replace('.com/','.com:443/'),IMAGE.replace('/imgo','/../imgo'),IMAGE.replace('/0-ea-d8-example/','/%2e%2e/'),IMAGE+'#fragment','file:///accounts/1000/shared/x.png','data:image/png;base64,AA']) {
+  assert.equal(h.context.chatImageUrl(url),'',url);assert.equal(h.context.messageImages(imageMessage('x',url)).length,0,url);
+ }
+ assert.equal(h.context.chatImageUrl(IMAGE+'?a=1&amp;b=2'),IMAGE+'?a=1&b=2');
+});
+test('chat image uses a separate memory-only Skype token and native binary transport',()=>{
+ const downloads=[],h=harness({sendImage:(...args)=>downloads.push(args)});h.auth();h.open([imageMessage()]);
+ const auth=h.take('/api/authsvc/v1.0/authz');assert.equal(auth.method,'POST');assert.equal(auth.headers.Authorization,'Bearer '+jwt());
+ assert.equal(downloads.length,0);h.reply(auth,200,{tokens:{skypeToken:'MEDIA_TOKEN',expiresIn:3600}});
+ assert.equal(downloads.length,1);assert.equal(downloads[0][1],IMAGE);assert(downloads[0][2].includes(USER));assert.equal(downloads[0][3],'MEDIA_TOKEN');
+ assert.equal(h.api.state.messages[0].images[0].status,'loading');
+ h.api.receive(downloads[0][0],200,JSON.stringify({image:'file:///private/chat-images/test.png',width:640,height:480}),'',{});
+ assert.equal(h.api.state.messages[0].images[0].status,'ready');assert.match(h.api.state.messages[0].imagesJson,/test.png/);
+ assert([...h.cache.values()].every(x=>!x.includes('MEDIA_TOKEN')));
+});
+test('image denial has an explicit retry and never resends a message',()=>{
+ const downloads=[],h=harness({sendImage:(...args)=>downloads.push(args)});h.auth();h.open([imageMessage()]);
+ h.reply(h.take('/api/authsvc/'),403,{message:'denied'});assert.equal(h.api.state.messages[0].images[0].status,'error');
+ assert.equal(downloads.length,0);h.api.loadMessageImages('image-1');
+ h.reply(h.take('/api/authsvc/'),200,{skypeToken:{skypetoken:'MEDIA_TOKEN',expiresIn:3600}});assert.equal(downloads.length,1);
+ h.api.receive(downloads[0][0],403,'','',{});assert.equal(h.api.state.messages[0].images[0].status,'error');
+ h.api.loadMessageImages('image-1');assert.equal(downloads.length,2);assert(!h.sent.some(x=>x.method==='POST'&&x.url.includes('/messages')));
+});
+test('media 401 refreshes only once; late image completion cannot change another chat',()=>{
+ const downloads=[],h=harness({sendImage:(...args)=>downloads.push(args)});h.auth();h.open([imageMessage()]);
+ h.reply(h.take('/api/authsvc/'),200,{tokens:{skypeToken:'MEDIA_1'}});
+ h.api.receive(downloads[0][0],401,'','',{});h.reply(h.take('/api/authsvc/'),200,{tokens:{skypeToken:'MEDIA_2'}});
+ assert.equal(downloads.length,2);h.api.receive(downloads[1][0],401,'','',{});assert.equal(h.api.state.messages[0].images[0].status,'error');assert(!h.sent.some(x=>x.url.includes('/authsvc/')));
+ h.api.loadMessageImages('image-1');const late=downloads[2];h.api.closeChat();h.open([message('another')],'19:another@thread.v2');
+ h.api.receive(late[0],200,JSON.stringify({image:'file:///private/late.png'}),'',{});assert.equal(h.api.state.messages[0].id,'another');assert.equal(h.api.state.messages[0].images.length,0);
+});
+test('cached images avoid network auth; chat previews identify image-only messages',()=>{
+ const h=harness({cachedChatImage:(account,url)=>'file:///private/cached.png'});const m={...imageMessage(),content:'<img src="'+IMAGE+'">'};
+ h.auth([{...chat(),lastMessage:m}]);assert.equal(h.api.state.chats[0].preview,'[Ảnh]');h.open([m]);
+ assert.equal(h.api.state.messages[0].images[0].status,'ready');assert(!h.sent.some(x=>x.url.includes('/authsvc/')));
+});
+test('image loading bounds concurrency, deduplicates shared URLs and ignores logout completions',()=>{
+ const downloads=[],h=harness({sendImage:(...args)=>downloads.push(args)});h.auth();
+ h.open([imageMessage('a'),imageMessage('same'),imageMessage('b',IMAGE.replace('example','second')),imageMessage('c',IMAGE.replace('example','third'))]);
+ h.reply(h.take('/api/authsvc/'),200,{tokens:{skypeToken:'MEDIA_TOKEN'}});
+ assert.equal(downloads.length,2);
+ h.api.receive(downloads[0][0],200,JSON.stringify({image:'file:///private/one.png'}),'',{});assert.equal(downloads.length,3);
+ assert(h.api.state.messages.some(x=>x.images[0].status==='ready'));
+ const shared=downloads.find(x=>x[1]===IMAGE);
+ if(shared[0]!==downloads[0][0])h.api.receive(shared[0],200,JSON.stringify({image:'file:///private/shared.png'}),'',{});
+ assert.equal(h.api.state.messages.filter(x=>x.images[0].url===IMAGE&&x.images[0].status==='ready').length,2);
+ const late=downloads[downloads.length-1];h.api.signOut();h.api.receive(late[0],200,JSON.stringify({image:'file:///private/late.png'}),'',{});
+ assert.equal(h.api.state.phase,'signedOut');assert.equal(h.api.state.messages.length,0);
+});
 
 test('native login has a fixed public identifier, v1 resource and no App Registration/secret input',()=>{
  const h=harness();h.api.startLogin('');const r=h.take('/oauth2/devicecode'),p=new URLSearchParams(r.body);
