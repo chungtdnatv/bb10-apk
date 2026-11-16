@@ -22,7 +22,7 @@ NavigationPane {
     function confirmDelete(row) {
         deletingId=row.id;deleteDialog.body="Xóa cấu hình và tài khoản đã lưu của “"+row.name+"”?";deleteDialog.show();
     }
-    onPopTransitionStarted: { if(page&&page===root.livePage)page.halt(); }
+    onTopChanged: { if(root.livePage&&top!==root.livePage)root.livePage.halt(); }
     onPopTransitionEnded: { if(page&&page===root.livePage){root.livePage=null;page.destroy();} }
     onCreationCompleted: rebuild()
     Page {
@@ -66,13 +66,15 @@ NavigationPane {
         }
         actions: [
             ActionItem { title: "Thêm camera";enabled: cameraApp.storageReady;ActionBar.placement: ActionBarPlacement.OnBar;onTriggered: editor.edit("") },
-            ActionItem { title: "Hướng dẫn kết nối";ActionBar.placement: ActionBarPlacement.OnBar;onTriggered: help.open() }
+            ActionItem { title: "Hướng dẫn kết nối";ActionBar.placement: ActionBarPlacement.OnBar;onTriggered: help.open() },
+            ActionItem { title: "Cập nhật phần mềm";onTriggered: { cameraApp.stop();updates.open(); } }
         ]
     }
     attachedObjects: [
         ComponentDefinition { id: liveDefinition;source: "LivePage.qml" },
         CameraEditor { id: editor },
         HelpSheet { id: help },
+        UpdateSheet { id: updates },
         Connections { target: cameraApp;onCamerasChanged: root.rebuild() },
         Connections {
             target: Application

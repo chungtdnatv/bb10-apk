@@ -16,7 +16,7 @@ Sheet {
                 Label { text: "Kết nối VPN về nhà trên Passport trước, sau đó mở camera với cùng IP nội bộ. VPN cần truy cập được mạng LAN và lưu lượng RTSP/RTP. Tapo10 dùng VPN của hệ điều hành; không tự tạo VPN hay mở cổng router.";multiline: true;textStyle.color: Color.White }
                 Label { text: "NVR và NAS";textStyle { color: Color.create("#66d5bb");fontSize: FontSize.Large } }
                 Label { text: "Chọn NVR/NAS có RTSP, nhập tài khoản và đường dẫn luồng do thiết bị cung cấp. Chọn codec H.264. Đây là quản lý các kết nối đã thêm; chưa có tự tìm camera hoặc điều khiển cài đặt thiết bị.";multiline: true;textStyle.color: Color.White }
-                Label { text: "Tapo10 1.0.0.1 • Chung";textStyle { color: Color.create("#97b6c5");fontSize: FontSize.Small } }
+                Label { text: "Tapo10 1.0.0.2 • Chung";textStyle { color: Color.create("#97b6c5");fontSize: FontSize.Small } }
             }
         }
     }

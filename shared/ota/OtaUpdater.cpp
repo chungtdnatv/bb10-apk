@@ -98,8 +98,8 @@ void OtaUpdater::finished(){
  else if(m_download){m_local=done->resultPath;m_progress=100;m_status=QString::fromUtf8("Đã tải và xác minh SHA-256. Có thể cài bản đã tải.");}
  else {
   bb::data::JsonDataAccess json;QVariantMap data=json.loadFromBuffer(done->response).toMap();QString version=data.value("version").toString(),url=data.value("barUrl").toString(),hash=data.value("sha256").toString();qint64 bytes=data.value("bytes").toLongLong();
-  QString id=m_app=="Teams10"?"com.bb10toolkit.Teams10":"com.BerryLife.Zalo10";
-  if(data.value("schema").toInt()!=1||data.value("app").toString()!=m_app||data.value("appId").toString()!=id||data.value("packageId").toString()!=(m_app=="Teams10"?"testRel_kit_Teams105d440259":"testRel_Life_Zalo108ff545d2")||!OtaPolicy::artifact(m_app.toStdString(),version.toStdString(),url.toStdString())||!OtaPolicy::digest(hash.toStdString())||bytes<1024||bytes>64*1024*1024)m_status=QString::fromUtf8("Thông tin cập nhật không hợp lệ. Không tải bản này.");
+  QString id=QString::fromStdString(OtaPolicy::appId(m_app.toStdString()));
+  if(data.value("schema").toInt()!=1||data.value("app").toString()!=m_app||data.value("appId").toString()!=id||data.value("packageId").toString().toStdString()!=OtaPolicy::packageId(m_app.toStdString())||!OtaPolicy::artifact(m_app.toStdString(),version.toStdString(),url.toStdString())||!OtaPolicy::digest(hash.toStdString())||bytes<1024||bytes>64*1024*1024)m_status=QString::fromUtf8("Thông tin cập nhật không hợp lệ. Không tải bản này.");
   else {m_latest=version;m_url=url;m_hash=hash;m_bytes=bytes;m_notes=data.value("notes").toString();m_status=available()?QString::fromUtf8("Có bản mới để tải."):QString::fromUtf8("Bạn đang dùng bản mới nhất.");}
  }
  done->deleteLater();emit changed();if(install)installOnDevice();
@@ -134,7 +134,7 @@ void OtaUpdater::installOnDevice(){
  if(!QFileInfo(script).isFile()){m_status=QString::fromUtf8("Thiếu thành phần cài OTA.");emit changed();return;}
  rememberInstall();m_busy=true;m_status=QString::fromUtf8("Đang gửi yêu cầu cài. Hệ thống có thể đóng app để cập nhật; sau đó mở lại app.");emit changed();
  m_installer=new QProcess(this);connect(m_installer,SIGNAL(finished(int,QProcess::ExitStatus)),this,SLOT(installFinished(int)));connect(m_installer,SIGNAL(error(QProcess::ProcessError)),this,SLOT(installFailed()));
- m_installer->start("/bin/sh",QStringList()<<script<<m_local<<(m_app=="Teams10"?"com.bb10toolkit.Teams10":"com.BerryLife.Zalo10")<<m_latest);
+ m_installer->start("/bin/sh",QStringList()<<script<<m_local<<QString::fromStdString(OtaPolicy::appId(m_app.toStdString()))<<m_latest);
 }
 void OtaUpdater::installFinished(int exitCode){
  QProcess *process=qobject_cast<QProcess*>(sender());if(!process)return;if(process!=m_installer){process->deleteLater();return;}

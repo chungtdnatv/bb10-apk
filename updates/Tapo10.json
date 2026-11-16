@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "app": "Tapo10",
+  "appId": "com.bb10toolkit.Tapo10",
+  "packageId": "testRel_lkit_Tapo10345d07c7",
+  "version": "1.0.0.2",
+  "barUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/tapo10/Tapo10-1.0.0.2-c100-vpn-ota-unsigned.bar",
+  "sha256": "1dff93d807f817efefc99540608a816f839562cf38ffbb0311b74fce4f3e6efa",
+  "bytes": 203647,
+  "minimumOs": "10.3.1",
+  "notes": "Sửa lỗi interface could not load do sự kiện NavigationPane không có trên BB10.\nThêm Cập nhật phần mềm: kiểm tra phiên bản, tải BAR, xác minh kích thước/SHA-256 và cài OTA.\nNếu QML còn lỗi, hiển thị tên file/dòng lỗi và lưu chẩn đoán trong sandbox.",
+  "latestVersion": "1.0.0.2",
+  "downloadUrl": "https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/tapo10/Tapo10-1.0.0.2-c100-vpn-ota-unsigned.bar",
+  "changelog": [
+    {
+      "version": "1.0.0.2",
+      "items": [
+        "Sửa lỗi interface could not load do sự kiện NavigationPane không có trên BB10.",
+        "Thêm Cập nhật phần mềm: kiểm tra phiên bản, tải BAR, xác minh kích thước/SHA-256 và cài OTA.",
+        "Nếu QML còn lỗi, hiển thị tên file/dòng lỗi và lưu chẩn đoán trong sandbox."
+      ]
+    }
+  ]
+}

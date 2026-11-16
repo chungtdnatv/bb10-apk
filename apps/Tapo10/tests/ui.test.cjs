@@ -36,5 +36,21 @@ test('live connect uses selected quality and window group; halt cancels delayed 
  state.quality.selectedIndex=1;context.connectCamera();assert.deepEqual(calls[1],['one',true,'main-group']);
  context.halt();assert.equal(context.opened,false);assert.deepEqual(calls.slice(-2),['cancel-timer','stop']);
  assert.match(read('main.qml'),/onThumbnail: \{ if\(root.livePage\)root.livePage.halt\(\)/);
- assert.match(read('main.qml'),/onPopTransitionStarted:.*page.halt\(\)/);
+ assert.match(read('main.qml'),/onTopChanged:.*root.livePage.halt\(\)/);
+});
+test('NavigationPane handlers exist in the BB10 SDK and top changes stop only a departed live page',()=>{
+ const qml=read('main.qml'),root=qml.slice(0,qml.indexOf('    Page {'));
+ const allowed=new Set(['onTopChanged','onPopTransitionEnded','onCreationCompleted']);
+ for(const match of root.matchAll(/^    (on[A-Z]\w+):/gm))assert(allowed.has(match[1]),'Unknown NavigationPane handler: '+match[1]);
+ assert(!qml.includes('onPopTransitionStarted'));
+ const match=/onTopChanged: \{([^\n]+)\}/.exec(qml);let stops=0;const live={halt:()=>stops++};
+ const context=vm.createContext({root:{livePage:live},top:live});vm.runInContext(match[1],context);assert.equal(stops,0);
+ context.top={};vm.runInContext(match[1],context);assert.equal(stops,1);
+ context.root.livePage=null;vm.runInContext(match[1],context);assert.equal(stops,1);
+});
+test('OTA entry stops video before opening the updater and shared actions call the correct backend',()=>{
+ const root=read('main.qml');assert.match(root,/title: "Cập nhật phần mềm";onTriggered: \{ cameraApp.stop\(\);updates.open\(\); \}/);
+ const updater=read('UpdateSheet.qml');
+ for(const method of ['check','update','download','installOnDevice','openInstaller','cancel'])assert(updater.includes('updates.backend.'+method+'()'));
+ assert.match(updater,/onOpened:.*backend.check\(\)/);
 });

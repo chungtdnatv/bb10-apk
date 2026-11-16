@@ -16,6 +16,13 @@ int main(){
  const std::string root="https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/";
  assert(artifact("Teams10","1.1.2.7",root+"teams10/Teams10-1.1.2.7-ui-ota-unsigned.bar"));
  assert(artifact("Zalo10","1.5.0.13",root+"zalo10/Zalo10-1.5.0.13-native-ota-unsigned.bar"));
+ assert(artifact("Tapo10","1.0.0.2",root+"tapo10/Tapo10-1.0.0.2-c100-vpn-ota-unsigned.bar"));
+ assert(appId("Tapo10")=="com.bb10toolkit.Tapo10");assert(packageId("Tapo10")=="testRel_lkit_Tapo10345d07c7");
+ assert(appId("Teams10")=="com.bb10toolkit.Teams10");assert(packageId("Zalo10")=="testRel_Life_Zalo108ff545d2");
+ assert(appId("Unknown").empty()&&packageId("Unknown").empty());
+ assert(!artifact("Tapo10","1.0.0.2",root+"teams10/Teams10-1.0.0.2-unsigned.bar"));
+ assert(!artifact("Tapo10","1.0.0.2",root+"tapo10/Tapo10-1.0.0.1-unsigned.bar"));
+ assert(!artifact("Unknown","1.0.0.2",root+"tapo10/Tapo10-1.0.0.2-unsigned.bar"));
  assert(!artifact("Teams10","1.1.2.7",root+"zalo10/Zalo10-1.5.0.13-native-ota-unsigned.bar"));
  assert(!artifact("Teams10","1.1.2.7",root+"teams10/Teams10-1.1.2.7-../../evil.bar"));
  assert(!artifact("Teams10","1.1.2.7",root+"teams10/Teams10-1.1.2.7-x.bar?token=x"));
@@ -63,7 +70,7 @@ class OtaPublication(unittest.TestCase):
         import json
         import importlib.util
         spec=importlib.util.spec_from_file_location('publisher_feed',ROOT/'scripts/publish_ota.py');module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
-        for app in ('Teams10','Zalo10'):
+        for app in ('Teams10','Zalo10','Tapo10'):
             feed=json.loads((ROOT/'updates'/(app+'.json')).read_text())
             bar=ROOT/'builds'/module.APPS[app][0]/feed['barUrl'].rsplit('/',1)[1]
             self.assertEqual(feed,module.release(app,bar,feed['notes']))

@@ -3,6 +3,18 @@
 #define BB10_OTA_POLICY_HPP
 #include <string>
 namespace OtaPolicy {
+inline std::string appId(const std::string &app){
+ if(app=="Teams10")return "com.bb10toolkit.Teams10";
+ if(app=="Zalo10")return "com.BerryLife.Zalo10";
+ if(app=="Tapo10")return "com.bb10toolkit.Tapo10";
+ return "";
+}
+inline std::string packageId(const std::string &app){
+ if(app=="Teams10")return "testRel_kit_Teams105d440259";
+ if(app=="Zalo10")return "testRel_Life_Zalo108ff545d2";
+ if(app=="Tapo10")return "testRel_lkit_Tapo10345d07c7";
+ return "";
+}
 inline bool version(const std::string &s,unsigned parts[4]){
  for(int i=0;i<4;i++){parts[i]=0;}
  int n=0;bool digit=false;
@@ -15,9 +27,9 @@ inline bool version(const std::string &s,unsigned parts[4]){
 inline bool newer(const std::string &a,const std::string &b){unsigned x[4],y[4];if(!version(a,x)||!version(b,y))return false;for(int i=0;i<4;i++)if(x[i]!=y[i])return x[i]>y[i];return false;}
 inline bool digest(const std::string &s){if(s.size()!=64)return false;for(size_t i=0;i<s.size();i++)if(!((s[i]>='0'&&s[i]<='9')||(s[i]>='a'&&s[i]<='f')))return false;return true;}
 inline bool artifact(const std::string &app,const std::string &ver,const std::string &url){
- if(app!="Teams10"&&app!="Zalo10")return false;
+ if(appId(app).empty())return false;
  unsigned numbers[4];if(!version(ver,numbers))return false;
- std::string folder=app=="Teams10"?"teams10":"zalo10";
+ std::string folder=app=="Teams10"?"teams10":app=="Zalo10"?"zalo10":"tapo10";
  std::string prefix="https://raw.githubusercontent.com/chungtdnatv/bb10-apk/refs/heads/bb10-bar-toolkit/builds/"+folder+"/"+app+"-"+ver+"-";
  if(url.compare(0,prefix.size(),prefix)!=0||url.size()<prefix.size()+5||url.substr(url.size()-4)!=".bar")return false;
  std::string tail=url.substr(prefix.size());if(tail.find("..")!=std::string::npos)return false;

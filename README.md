@@ -31,17 +31,18 @@ hoặc cache build; `toolchains/` chứa source và revision để tái tạo/m�
 
 ## Tapo10 cho Tapo C100 / Passport
 
-App native mới **Tapo10 1.0.0.1** quản lý cấu hình camera và xem live bằng
+App native mới **Tapo10 1.0.0.2** quản lý cấu hình camera và xem live bằng
 Camera Account, RTSP/H.264, trong Wi-Fi hoặc qua VPN về nhà đã kết nối trên
 Passport. Có Mượt/HD, dừng/kết nối lại, bật/tắt tiếng, lưu tài khoản mã hóa và
-cấu hình đường dẫn RTSP cho NVR/NAS. Không đăng nhập TP-Link ID/cloud P2P.
+cấu hình đường dẫn RTSP cho NVR/NAS. Không đăng nhập TP-Link ID/cloud P2P. Bản 1.0.0.2 sửa lỗi tải giao diện và thêm
+menu Cập nhật phần mềm; cần cài đè thủ công một lần từ bản 1.0.0.1.
 
 ```sh
 python3 bb10.py build Tapo10
 python3 bb10.py test Tapo10
 ```
 
-[Bản BAR](builds/tapo10/Tapo10-1.0.0.1-c100-vpn-unsigned.bar),
+[Bản BAR](builds/tapo10/Tapo10-1.0.0.2-c100-vpn-ota-unsigned.bar),
 [cài đặt và VPN](docs/tapo10-c100-vi.md), [source/giới hạn/test](apps/Tapo10/README.md).
 Build native và test host đã qua; cần kiểm tra phát live trên C100/Passport thật.
 

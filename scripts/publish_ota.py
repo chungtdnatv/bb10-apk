@@ -13,6 +13,7 @@ from bb10kit.bar import verify,logical_lines
 APPS={
     'Teams10':('teams10','com.bb10toolkit.Teams10','testRel_kit_Teams105d440259'),
     'Zalo10':('zalo10','com.BerryLife.Zalo10','testRel_Life_Zalo108ff545d2'),
+    'Tapo10':('tapo10','com.bb10toolkit.Tapo10','testRel_lkit_Tapo10345d07c7'),
 }
 def release(app,bar,notes=''):
     slug,app_id,package_id=APPS[app];bar=Path(bar);verify(bar)

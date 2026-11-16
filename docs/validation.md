@@ -1,5 +1,26 @@
 # Validation of the toolkit integration
 
+## Tapo10 1.0.0.2 — QML startup repair and OTA
+
+After 1.0.0.1 was installed, the user reported its native "interface could not
+load" fallback. SDK `navigationpane.h` confirms there is no popTransitionStarted
+signal; syntax-only lint had not detected that invalid QML handler. It is replaced
+with topChanged; the existing popTransitionEnded still handles destruction. The
+native fallback now reports file/line/column/QML descriptions if another creation
+error remains, with a bounded sandbox log. No successful device launch is claimed
+until the user retries this build.
+
+Tapo10 is registered in the shared OTA app/package policy and publisher. Its
+app-only installer whitelist, bundled trust roots, shared update UI, explicit
+quit after submission and access_shared permission are packaged. The existing
+Teams/Zalo identities, feeds and installer assets are preserved. The same Tapo10
+package identity is retained to support install-over and existing encrypted data.
+The native SDK build passed (14 assets, 237 resolved imports, one ARM entry).
+Five QML files passed syntax lint. All 66 toolkit/Tapo checks passed, including
+the NavigationPane regression, updater UI wiring, Tapo route/package isolation,
+installer negative cases, trust roots and feed/BAR consistency. Live playback,
+actual device startup and firmware installation still need hardware verification.
+
 ## Tapo10 1.0.0.1 — C100 / home VPN viewer
 
 Built the new native Cascades app against the pinned BB10 SDK. BAR verification

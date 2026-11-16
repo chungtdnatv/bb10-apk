@@ -1,7 +1,22 @@
 # Tapo10 cho Tapo C100 và BlackBerry Passport
 
-Bản đầu: **1.0.0.1**, native BB10 10.3.1+. App độc lập với Teams10, Zalo10 và
+Bản hiện tại: **1.0.0.2**, native BB10 10.3.1+. App độc lập với Teams10, Zalo10 và
 ứng dụng Tapo chính hãng, dùng package `com.bb10toolkit.Tapo10`.
+
+## Sửa lỗi giao diện và cập nhật OTA
+
+Bản 1.0.0.1 đã được báo lỗi "interface could not load". Bản 1.0.0.2 bỏ sự kiện
+NavigationPane không được BB10 hỗ trợ và thêm màn hình chi tiết lỗi QML nếu
+giao diện vẫn không tải được. Khi đó báo lại tên file, số dòng và thông báo hiện
+trên màn hình; bản ghi cũng nằm trong `data/tapo10_startup.log` của sandbox.
+
+Cài đè bản **1.0.0.2** một lần bằng cách cài BAR đang dùng; bản 1.0.0.1 chưa có
+OTA. Không cần gỡ app hoặc xóa dữ liệu. Sau đó mở menu **Cập nhật phần mềm** trên
+trang danh sách camera để kiểm tra, tải và cài bản tiếp theo. Cho phép quyền tệp
+dùng chung để lưu BAR vào Downloads. App kiểm tra phiên bản, định danh, kích
+thước và SHA-256 trước khi cài. Nếu firmware không hỗ trợ cài trực tiếp, mở BAR
+đã tải bằng BAR Installer. Chỉ sau khi mở lại đúng phiên bản mới mới xác nhận
+cài thành công; gửi yêu cầu cài chưa đồng nghĩa đã cài xong.
 
 ## Chuẩn bị camera
 
@@ -16,7 +31,7 @@ Bản đầu: **1.0.0.1**, native BB10 10.3.1+. App độc lập với Teams10, 
 
 ## Cài và thêm camera
 
-Cài `Tapo10-1.0.0.1-c100-vpn-unsigned.bar` bằng phương thức cài BAR hiện có trên
+Cài `Tapo10-1.0.0.2-c100-vpn-ota-unsigned.bar` bằng phương thức cài BAR hiện có trên
 Passport. Đây là gói unsigned; quyền cài tùy thiết bị/cách cài đang dùng.
 
 Mở Tapo10 → **Thêm camera**, nhập tên, IP, cổng, Camera Account và mật khẩu.

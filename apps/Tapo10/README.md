@@ -1,4 +1,25 @@
-# Tapo10 1.0.0.1
+# Tapo10 1.0.0.2
+
+## Startup fix and OTA
+
+The user reported the 1.0.0.1 native fallback, "interface could not load".
+NavigationPane has no `popTransitionStarted` signal in the BB10 SDK; assigning
+that handler rejects the root QML. The app now uses the supported `topChanged`
+notification to stop a departing live page, retaining `popTransitionEnded` only
+for destruction. Syntax lint alone did not catch this API error; the regression
+test checks the supported root handlers and executes the top-change logic.
+If creation still fails on hardware, the native fallback displays QML filenames,
+line/column and descriptions and writes `data/tapo10_startup.log`.
+
+The main page menu now includes **Cập nhật phần mềm** using the shared native OTA
+backend: HTTPS with bundled CA roots, a Tapo-specific GitHub feed/package identity,
+bounded download, byte-count/SHA-256 verification, cancellation and explicit
+installation. Firmware that supports the existing installer context can submit
+the update and exit; otherwise the app hands the verified BAR to an installer.
+Submission is not reported as completed installation; reopening checks the running
+version. The installer script accepts only Tapo10's package identity. Version
+1.0.0.1 has no updater, so this first fix must be installed manually over it.
+Camera profile format, encryption key and package identity are retained.
 
 Independent native Cascades viewer for Tapo C100 on BlackBerry Passport / BB10
 10.3.1+. The selected remote connection method is the user's existing home VPN.
